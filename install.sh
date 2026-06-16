@@ -14,10 +14,10 @@
 #
 # It never reads or prints your Claude token. Read this whole file before piping
 # it to bash — that's the point of pinning it to a tag:
-#   https://raw.githubusercontent.com/vitorsalomao05/tally/v0.1.0/install.sh
+#   https://raw.githubusercontent.com/vitorsalomao05/tally/v0.1.1/install.sh
 #
 # Interactive run:
-#   curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/tally/v0.1.0/install.sh | bash
+#   curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/tally/v0.1.1/install.sh | bash
 # Unattended (also accept the optional login item + widget):
 #   curl -fsSL .../install.sh | TALLY_YES=1 bash
 #
@@ -25,7 +25,7 @@ set -euo pipefail
 
 # ── Pinned source of truth ───────────────────────────────────────────────────
 REPO="vitorsalomao05/tally"
-TAG="v0.1.0"
+TAG="v0.1.1"
 REL="https://github.com/$REPO/releases/download/$TAG"
 
 APP_NAME="Tally.app"

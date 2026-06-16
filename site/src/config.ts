@@ -24,11 +24,11 @@ export const links = {
 };
 
 // The fastest path that WORKS TODAY for the menu bar app: a one-liner that
-// downloads the ad-hoc-signed Tally.app + tally-cli from the pinned v0.1.0
+// downloads the ad-hoc-signed Tally.app + tally-cli from the pinned v0.1.1
 // Release, verifies their SHA-256 against SHASUMS256.txt, then installs them
 // (no sudo). Pinned to the tag, so the bytes you run are the bytes we shipped.
 export const installOneLiner =
-  "curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/tally/v0.1.0/install.sh | bash";
+  "curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/tally/v0.1.1/install.sh | bash";
 
 // The install path that WORKS TODAY for the Übersicht desktop widget: clone the
 // repo and run its idempotent installer (builds tally-cli + deploys the widget).
