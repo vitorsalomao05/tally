@@ -1,0 +1,97 @@
+name: Release Tally
+
+# Push a semver tag (e.g. `git tag v0.1.2 && git push origin v0.1.2`) and this
+# builds the same artifacts `apps/menubar/build.sh` produces locally, checksums
+# them exactly like the manual flow, and publishes the GitHub Release.
+#
+# It needs only a Swift 6 toolchain — `build.sh` wraps `swift build` (no Xcode
+# project / xcodebuild) and signs ad-hoc (`codesign --sign -`, no Apple cert).
+# The runner MUST be Apple Silicon so the binaries are arm64 (install.sh refuses
+# Intel): macos-14 runners are arm64 and ship Xcode 16 / Swift 6.
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write # create the GitHub Release + upload assets
+
+jobs:
+  release:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select a Swift 6 toolchain (Xcode 16+)
+        run: |
+          set -euo pipefail
+          # Package.swift declares swift-tools-version 6.0, so we need Xcode 16+.
+          XC="$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1 || true)"
+          [ -n "$XC" ] || XC="$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          echo "Using $XC"
+          sudo xcode-select -s "$XC"
+          swift --version
+          sw_vers
+
+      - name: Build menu bar app (ad-hoc, hardened runtime)
+        working-directory: apps/menubar
+        run: ./build.sh release
+
+      - name: Build tally-cli
+        working-directory: core
+        run: swift build -c release --product tally-cli
+
+      - name: Stage assets + generate SHASUMS256.txt
+        run: |
+          set -euo pipefail
+          STAGE="$RUNNER_TEMP/stage"
+          mkdir -p "$STAGE"
+          # Zip the .app exactly as the manual release does (keepParent so the
+          # archive extracts to "Tally.app", preserving the ad-hoc signature).
+          ditto -c -k --keepParent apps/menubar/build/Tally.app "$STAGE/Tally.app.zip"
+          cp "$(cd core && swift build -c release --show-bin-path)/tally-cli" "$STAGE/tally-cli"
+          chmod +x "$STAGE/tally-cli"
+          cp apps/ubersicht/tally.jsx      "$STAGE/tally.jsx"
+          cp apps/ubersicht/tally-usage.sh "$STAGE/tally-usage.sh"
+          chmod +x "$STAGE/tally-usage.sh"
+          # Bare filenames (no paths) so install.sh's `shasum -c` matches.
+          ( cd "$STAGE" && shasum -a 256 Tally.app.zip tally-cli tally.jsx tally-usage.sh > SHASUMS256.txt )
+          echo "----- SHASUMS256.txt -----"; cat "$STAGE/SHASUMS256.txt"
+          echo "STAGE=$STAGE" >> "$GITHUB_ENV"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          NOTES="$RUNNER_TEMP/notes.md"
+          cat > "$NOTES" <<EOF
+          **Tally $TAG** — your Claude Pro/Max usage, always in the menu bar.
+
+          ### Install (macOS 14+, Apple Silicon)
+
+          \`\`\`sh
+          curl -fsSL https://raw.githubusercontent.com/$REPO/$TAG/install.sh | bash
+          \`\`\`
+
+          The installer downloads the assets below and **verifies their SHA-256
+          against \`SHASUMS256.txt\`** before installing (no \`sudo\`). Verify by
+          hand with \`shasum -a 256 -c SHASUMS256.txt\`.
+
+          ### What's in this release
+          - \`Tally.app.zip\` — the menu bar app (ad-hoc signed, hardened runtime).
+          - \`tally-cli\` — the data-layer CLI (\`tally-cli --json\`).
+          - \`tally.jsx\`, \`tally-usage.sh\` — the optional Übersicht widget.
+          - \`SHASUMS256.txt\` — SHA-256 of every asset above.
+          EOF
+          gh release create "$TAG" \
+            --title "Tally $TAG" \
+            --notes-file "$NOTES" \
+            "$STAGE/Tally.app.zip" \
+            "$STAGE/tally-cli" \
+            "$STAGE/SHASUMS256.txt" \
+            "$STAGE/tally.jsx" \
+            "$STAGE/tally-usage.sh"
