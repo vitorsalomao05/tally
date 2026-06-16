@@ -10,12 +10,14 @@ struct MenuBarLabelContent: View {
 
     var body: some View {
         if let primary = model.metrics.primary(for: settings.primaryMetric) {
+            // Glyph tints with the bar (template, adaptive); only the number
+            // carries the threshold color.
             HStack(spacing: 4) {
-                Image(systemName: "gauge.with.dots.needle.67percent")
+                ProviderGlyph()
                 Text(Format.compactPrimary(primary))
+                    .foregroundStyle(Thresholds.menuBarColor(primary.pct))
             }
             .font(.system(size: 13, weight: .medium))
-            .foregroundStyle(Thresholds.menuBarColor(primary.pct))
         } else if model.state.isSignedOut {
             // No Claude credential → invite sign-in from the menu bar.
             HStack(spacing: 4) {

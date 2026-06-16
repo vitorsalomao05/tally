@@ -18,13 +18,17 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BINDIR/Tally" "$APP/Contents/MacOS/Tally"
 cp "$HERE/Info.plist" "$APP/Contents/Info.plist"
 
-# App icon (regenerate with design/icon/render-icon.sh). Info.plist points at it
-# via CFBundleIconFile=AppIcon, so the bundle shows it in Finder / Login Items.
-if [[ -f "$HERE/Resources/AppIcon.icns" ]]; then
-	cp "$HERE/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
-else
-	echo "warning: Resources/AppIcon.icns missing — run design/icon/render-icon.sh" >&2
+# Bundle assets (app icon + menu bar glyph). Source artwork lives under design/;
+# regenerate with design/icon/render-icon.sh and design/glyph/render-glyph.swift.
+# AppIcon.icns is referenced by Info.plist (CFBundleIconFile); ClaudeGlyph.pdf is
+# loaded at runtime as a template image (Bundle.main).
+if [[ -d "$HERE/Resources" ]]; then
+	cp -R "$HERE/Resources/." "$APP/Contents/Resources/"
 fi
+[[ -f "$APP/Contents/Resources/AppIcon.icns" ]] || \
+	echo "warning: AppIcon.icns missing — run design/icon/render-icon.sh" >&2
+[[ -f "$APP/Contents/Resources/ClaudeGlyph.pdf" ]] || \
+	echo "warning: ClaudeGlyph.pdf missing — run design/glyph/render-glyph.swift" >&2
 
 # Ad-hoc sign with hardened runtime + entitlements. App Sandbox stays OFF (see
 # Tally.entitlements) so we can read the Claude Code Keychain item.
