@@ -14,7 +14,7 @@ struct MenuBarLabelContent: View {
             // carries the threshold color.
             HStack(spacing: 4) {
                 ProviderGlyph()
-                Text(Format.compactPrimary(primary))
+                Text(Format.barLabel(primary))
                     .foregroundStyle(Thresholds.menuBarColor(primary.pct))
             }
             .font(.system(size: 13, weight: .medium))

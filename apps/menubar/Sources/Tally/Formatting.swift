@@ -91,6 +91,20 @@ enum Format {
         return "\(shortLabel(m.label)) \(pct)%"
     }
 
+    /// Menu bar text: percent-only for "%" windows ("6%"), used/limit for the
+    /// dollar overage ("$93/100"). The metric name is intentionally dropped — the
+    /// bar shows just the number; the popover keeps the full labels.
+    static func barLabel(_ m: UsageMetric) -> String {
+        if let dollars = m.dollars {
+            let used = Int((m.used ?? dollars).rounded())
+            if let limit = m.limit {
+                return "$\(used)/\(Int(limit.rounded()))"
+            }
+            return "$\(used)"
+        }
+        return "\(Int((m.pct ?? 0).rounded()))%"
+    }
+
     static func pctText(_ pct: Double?) -> String {
         guard let p = pct else { return "—" }
         return p == p.rounded() ? "\(Int(p))%" : String(format: "%.1f%%", p)

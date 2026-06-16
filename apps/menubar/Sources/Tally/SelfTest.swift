@@ -64,7 +64,7 @@ enum SelfTest {
         let metrics = PreviewData.sampleMetrics()
         err("=== metrictest: menu-bar text per primary-metric choice ===")
         for choice in PrimaryMetricChoice.allCases {
-            let text = metrics.primary(for: choice).map(Format.compactPrimary) ?? "—"
+            let text = metrics.primary(for: choice).map(Format.barLabel) ?? "—"
             let name = choice.displayName.padding(toLength: 22, withPad: " ", startingAt: 0)
             err("  \(name) → menu bar: \"\(text)\"")
         }
@@ -79,7 +79,7 @@ enum SelfTest {
             let clean = UserDefaults(suiteName: cleanName)!
             clean.removePersistentDomain(forName: cleanName)
             let freshChoice = AppSettings(defaults: clean).primaryMetric
-            let freshText = metrics.primary(for: freshChoice).map(Format.compactPrimary) ?? "—"
+            let freshText = metrics.primary(for: freshChoice).map(Format.barLabel) ?? "—"
             err("  clean install     → choice=\(freshChoice.rawValue), menu bar: \"\(freshText)\"")
 
             let savedName = "tally.metrictest.saved"
@@ -88,7 +88,7 @@ enum SelfTest {
             // Simulate a user who explicitly picked Extra usage, then relaunched.
             AppSettings(defaults: saved).primaryMetric = .extraUsage
             let keptChoice = AppSettings(defaults: saved).primaryMetric
-            let keptText = metrics.primary(for: keptChoice).map(Format.compactPrimary) ?? "—"
+            let keptText = metrics.primary(for: keptChoice).map(Format.barLabel) ?? "—"
             err("  saved=extra usage → choice=\(keptChoice.rawValue), menu bar: \"\(keptText)\" (user choice preserved)")
             saved.removePersistentDomain(forName: savedName)
         }
@@ -97,7 +97,7 @@ enum SelfTest {
         // land on the next % window — never the dollar overage unless it's alone.
         err("--- fallback when the 5-hour window is absent ---")
         let no5h = metrics.filter { $0.label != "5-hour" }
-        let fbText = no5h.primary(for: .fiveHour).map(Format.compactPrimary) ?? "—"
+        let fbText = no5h.primary(for: .fiveHour).map(Format.barLabel) ?? "—"
         err("  5-hour pinned but missing → menu bar: \"\(fbText)\" (next % window, not Extra usage)")
 
         exit(0)
