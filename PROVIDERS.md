@@ -42,7 +42,7 @@ Cross-cutting services in `FetcherCore`: `CredentialStore` (Keychain), `Schedule
 - **Capabilities:** `usagePct`, `resetTimer` (+ `dollarBalance` if "Claude Extra" overage).
 - **Primary auth:** `.keychainOAuth` — reuse the **Claude Code OAuth token** from Keychain (item commonly named `Claude Code`; CLI also writes `~/.claude`). The user already runs Claude Code, so this needs zero new login.
 - **Primary endpoint:** `GET https://api.anthropic.com/api/oauth/usage`
-  - Headers: `Authorization: Bearer <token>` **and** `User-Agent: claude-code/<version>` (MANDATORY — missing UA ⇒ 429s).
+  - Headers: `Authorization: Bearer <token>` **and** `User-Agent: claude-code/<version>` (always send it — a missing UA **may cause throttling under sustained use**; the code keeps it for safety).
   - Returns 5-hour / 7-day / Opus-7-day utilization.
 - **Fallback auth:** `.sessionCookie` — `sessionKey` cookie (`sk-ant-sid01-…`) from an embedded WebView login. Then:
   - `GET https://claude.ai/api/organizations` → read `org_id`.

@@ -44,6 +44,14 @@ public struct CredentialStore: Sendable {
 
     /// Default read path: the `security` CLI (empirically silent for the Claude
     /// Code credential). Returns the raw secret bytes.
+    ///
+    /// TODO(phase ≥2, signed app): migrate this default to
+    /// ``nativeReadGenericPassword(service:account:)`` once Tally ships as a
+    /// **code-signed** app that has been **added to the Keychain item's ACL**.
+    /// The native path avoids spawning `/usr/bin/security` on every poll (the
+    /// menu bar refreshes every 60s), which is wasteful and ~10ms slower per call.
+    /// Until then the CLI path is the only one that reads silently from an
+    /// unsigned/ad-hoc binary (see the type doc above).
     public func readGenericPassword(service: String, account: String? = nil) throws -> Data {
         try cliReadGenericPassword(service: service, account: account)
     }

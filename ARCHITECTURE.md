@@ -69,6 +69,6 @@ The single source of truth for data. No UI. Exposes:
 3. **Bundled headless Chromium / background Chrome reload** (LAST RESORT — heavy, signing pain, brittle DOM).
 
 ## Key constraints to honor
-- `User-Agent` header is **mandatory** on the Anthropic OAuth usage endpoint (`claude-code/<version>`), else you hit an aggressively rate-limited bucket (persistent 429s).
+- Always send the `User-Agent` header on the Anthropic OAuth usage endpoint (`claude-code/<version>`). Omitting it **may cause throttling under sustained use**; keep it for safety. (Phase 1 note: a single call without the UA still returned 200, so the "persistent 429" behavior is load-dependent, not absolute.)
 - Poll politely (30–120s), cache, fail gracefully on auth expiry, re-prompt before cookies die (~24h warning for session cookies).
 - Never log tokens. Keychain only.
