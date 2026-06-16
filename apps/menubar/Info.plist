@@ -18,9 +18,9 @@
 	<key>CFBundleIconName</key>
 	<string>AppIcon</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>2</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.0</string>
+	<string>0.1.1</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
 	<!-- Agent app: no Dock icon, no main window. -->
