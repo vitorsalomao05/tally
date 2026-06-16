@@ -52,7 +52,7 @@ enum Snapshotter {
 
         // Isolated defaults so a snapshot run never clobbers the user's real prefs.
         let settings = AppSettings(defaults: UserDefaults(suiteName: "tally.snapshot") ?? .standard)
-        settings.primaryMetric = .auto
+        settings.primaryMetric = .fiveHour // mirror the shipped default (out-of-the-box bar)
         settings.refreshInterval = 60
         let launch = LaunchAtLogin()
         let session = ClaudeSession(settings: settings)

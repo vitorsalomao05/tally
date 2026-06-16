@@ -12,12 +12,24 @@ enum Thresholds {
         }
     }
 
-    /// Menu bar text color — "normal" stays adaptive (primary) so it doesn't
-    /// shout when usage is low; amber/red kick in as the limit tightens.
+    /// Numeric-label color (popover rows) — "normal" stays adaptive (primary) so
+    /// it doesn't shout when usage is low; amber/red kick in as the limit tightens.
     static func labelColor(_ pct: Double?) -> Color {
         guard let p = pct else { return .primary }
         switch p {
         case ..<60: return .primary
+        case ..<85: return .orange
+        default:    return .red
+        }
+    }
+
+    /// Menu bar label color — full green/amber/red threshold scale (matches the
+    /// popover gauges) so the at-a-glance number reads "comfortable" when low.
+    /// Stays adaptive (primary) only when there's no percentage to color.
+    static func menuBarColor(_ pct: Double?) -> Color {
+        guard let p = pct else { return .primary }
+        switch p {
+        case ..<60: return .green
         case ..<85: return .orange
         default:    return .red
         }
@@ -30,15 +42,25 @@ extension Array where Element == UsageMetric {
         self.max { ($0.pct ?? -1) < ($1.pct ?? -1) }
     }
 
+    /// The tightest *percentage* window — excludes the dollar overage so a missing
+    /// pinned window falls back to a real "%" limit rather than the "$" figure.
+    var tightestPercentage: UsageMetric? {
+        filter { $0.dollars == nil }.tightest
+    }
+
     /// Back-compat alias for the auto/tightest pick.
     var primary: UsageMetric? { tightest }
 
-    /// The metric to surface in the menu bar for the user's chosen mode. A pinned
-    /// choice falls back to `tightest` if that window isn't present on the account
-    /// (e.g. no Opus/extra-usage), so the bar never goes blank.
+    /// The metric to surface in the menu bar for the user's chosen mode.
+    /// • `auto` → the tightest limit (may be the dollar overage — that's its job).
+    /// • a pinned window → that exact window; if it isn't on the account (rare,
+    ///   e.g. no 5-hour reading yet) fall back to the tightest *percentage* window
+    ///   so the bar stays a clean "<window> N%", only resorting to the dollar
+    ///   overage when there's no percentage window at all.
     func primary(for choice: PrimaryMetricChoice) -> UsageMetric? {
         guard let label = choice.metricLabel else { return tightest }
-        return first { $0.label == label } ?? tightest
+        if let exact = first(where: { $0.label == label }) { return exact }
+        return tightestPercentage ?? tightest
     }
 }
 

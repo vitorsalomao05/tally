@@ -15,7 +15,7 @@ struct MenuBarLabelContent: View {
                 Text(Format.compactPrimary(primary))
             }
             .font(.system(size: 13, weight: .medium))
-            .foregroundStyle(Thresholds.labelColor(primary.pct))
+            .foregroundStyle(Thresholds.menuBarColor(primary.pct))
         } else if model.state.isSignedOut {
             // No Claude credential → invite sign-in from the menu bar.
             HStack(spacing: 4) {

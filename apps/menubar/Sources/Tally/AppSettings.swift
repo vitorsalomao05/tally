@@ -70,8 +70,11 @@ final class AppSettings: ObservableObject {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
 
+        // New installs default to the 5-hour session window (the figure users
+        // glance at most). A previously saved choice is loaded verbatim, so only
+        // people who never opened the picker move to the new default.
         let rawMetric = defaults.string(forKey: Keys.primaryMetric)
-        primaryMetric = rawMetric.flatMap(PrimaryMetricChoice.init(rawValue:)) ?? .auto
+        primaryMetric = rawMetric.flatMap(PrimaryMetricChoice.init(rawValue:)) ?? .fiveHour
 
         // `double(forKey:)` returns 0 when unset → fall back to the default; also
         // clamp to a supported value so a stale/hand-edited key can't strand us.
