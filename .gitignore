@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+# Xcode / SwiftPM
+.build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+.swiftpm/
+# Node / site
+node_modules/
+dist/
+.astro/
+# Secrets — never commit
+*.p12
+*.cer
+*.mobileprovision
+.env
+.env.*
+secrets/
