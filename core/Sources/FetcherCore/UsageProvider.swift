@@ -35,8 +35,21 @@ public struct ProviderRegistry: Sendable {
 
     public func provider(id: String) -> (any UsageProvider)? { providers[id] }
 
-    /// Phase 1 registry: just the flagship Claude adapter.
+    /// Default registry. `claude` is the OAuth (Claude Code) adapter — unchanged,
+    /// so `tally-cli` (and `tally-cli claude`) keeps printing the real numbers.
+    /// `claude-cookie` is the claude.ai session-cookie adapter, registered so it
+    /// can be exercised live via `tally-cli claude-cookie` after a WebView login.
     public static func makeDefault() -> ProviderRegistry {
-        ProviderRegistry([ClaudeOAuthProvider()])
+        ProviderRegistry([ClaudeOAuthProvider(), ClaudeCookieProvider()])
+    }
+
+    /// Auth-resolved registry for the app: a single `claude` provider chosen by
+    /// `ClaudeAuthResolver` (OAuth → cookie → none). Empty when signed out.
+    public static func makeResolved(preferCookie: Bool = false,
+                                    resolver: ClaudeAuthResolver = ClaudeAuthResolver()) -> ProviderRegistry {
+        guard let provider = resolver.makeProvider(preferCookie: preferCookie) else {
+            return ProviderRegistry([])
+        }
+        return ProviderRegistry([provider])
     }
 }

@@ -1,0 +1,25 @@
+{
+  "five_hour": {
+    "utilization_pct": 3,
+    "reset_at": "2026-06-16T11:39:59+00:00"
+  },
+  "seven_day": {
+    "utilization_pct": 15,
+    "reset_at": "2026-06-22T05:59:59+00:00"
+  },
+  "seven_day_opus": {
+    "utilization_pct": 42,
+    "reset_at": "2026-06-22T05:59:59+00:00"
+  },
+  "seven_day_sonnet": {
+    "utilization_pct": 0,
+    "reset_at": "2026-06-22T05:59:59+00:00"
+  },
+  "extra_usage": {
+    "is_enabled": true,
+    "current_spending": 93.07,
+    "budget_limit": 100,
+    "utilization_pct": 93.07,
+    "currency": "USD"
+  }
+}

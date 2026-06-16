@@ -55,13 +55,14 @@ enum Snapshotter {
         settings.primaryMetric = .auto
         settings.refreshInterval = 60
         let launch = LaunchAtLogin()
+        let session = ClaudeSession(settings: settings)
 
         for scheme in [ColorScheme.light, .dark] {
             let suffix = scheme == .dark ? "dark" : "light"
             let model = UsageModel(previewResult: .success(metrics))
 
-            writePNG(panel(UsagePopover(model: model)), to: "\(dir)/popover-\(suffix).png", scheme: scheme)
-            writePNG(SettingsView(settings: settings, launch: launch),
+            writePNG(panel(UsagePopover(model: model, session: session)), to: "\(dir)/popover-\(suffix).png", scheme: scheme)
+            writePNG(SettingsView(settings: settings, launch: launch, session: session),
                      to: "\(dir)/settings-\(suffix).png", scheme: scheme)
             writePNG(MenuBarPreview(model: model, settings: settings, scheme: scheme),
                      to: "\(dir)/menubar-\(suffix).png", scheme: scheme)

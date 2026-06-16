@@ -1,0 +1,12 @@
+[
+  {
+    "uuid": "org-first-9001",
+    "name": "First Free",
+    "capabilities": ["chat"]
+  },
+  {
+    "uuid": "org-second-9002",
+    "name": "Second Free",
+    "capabilities": ["chat"]
+  }
+]

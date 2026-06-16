@@ -1,0 +1,14 @@
+[
+  {
+    "uuid": "org-free-0001",
+    "name": "Personal (free)",
+    "capabilities": ["chat"],
+    "billing_type": null
+  },
+  {
+    "uuid": "org-paid-0002",
+    "name": "Pro Workspace",
+    "capabilities": ["chat", "claude_pro", "raven"],
+    "billing_type": "stripe"
+  }
+]

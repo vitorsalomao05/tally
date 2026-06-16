@@ -2,7 +2,8 @@ import Foundation
 
 /// Errors surfaced by a `UsageProvider.fetch()`.
 public enum ProviderError: Error, CustomStringConvertible, Sendable {
-    case authExpired                       // 401 / 403, or empty access token
+    case authExpired                       // 401 / 403 on the OAuth path, or empty access token
+    case needsLogin                        // 401 / 403 on the cookie path → re-run the WebView login
     case rateLimited                       // 429
     case http(status: Int, body: String)   // any other non-2xx
     case network(String)
@@ -13,6 +14,8 @@ public enum ProviderError: Error, CustomStringConvertible, Sendable {
         switch self {
         case .authExpired:
             return "Claude OAuth token expired or unauthorized (401/403). Re-authenticate Claude Code (`claude`) and retry."
+        case .needsLogin:
+            return "Claude.ai session expired or signed out (401/403). Sign in to Claude.ai again to refresh the cookie."
         case .rateLimited:
             return "Rate limited (429). The usage endpoint throttles requests that omit the `claude-code/<version>` User-Agent; back off and retry."
         case .http(let status, let body):
@@ -67,7 +70,10 @@ public struct ClaudeOAuthProvider: UsageProvider {
         let data: Data
         let response: URLResponse
         do {
-            (data, response) = try await URLSession.shared.data(for: request)
+            // Redirect guard: never let the bearer token follow a cross-host redirect.
+            (data, response) = try await URLSession.shared.data(
+                for: request, delegate: CredentialRedirectGuard.shared
+            )
         } catch {
             throw ProviderError.network(error.localizedDescription)
         }
@@ -146,76 +152,11 @@ public struct ClaudeOAuthProvider: UsageProvider {
 
     // MARK: - Parsing
 
-    /// Map the raw OAuth usage JSON to normalized metrics. `internal` for testing.
+    /// Map the raw OAuth usage JSON to normalized metrics. Delegates to the shared
+    /// `ClaudeUsageParser`, which is tolerant of both the OAuth and cookie dialects
+    /// (`FetcherCoreTests` proves the two map identically). `internal` for testing.
     static func parse(_ data: Data, providerId: String) throws -> [UsageMetric] {
-        let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
-        let dto: OAuthUsageDTO
-        do {
-            dto = try decoder.decode(OAuthUsageDTO.self, from: data)
-        } catch {
-            throw ProviderError.parse("\(error)")
-        }
-
-        var metrics: [UsageMetric] = []
-
-        // Utilization windows. `utilization` is already a 0–100 percentage; only
-        // emit windows the account actually has (e.g. `seven_day_opus` is null
-        // for non-Opus accounts).
-        func addWindow(_ bucket: OAuthUsageDTO.Bucket?, label: String) {
-            guard let bucket, let pct = bucket.utilization else { return }
-            metrics.append(UsageMetric(
-                label: label,
-                pct: pct,
-                resetAt: parseResetDate(bucket.resetsAt),
-                providerId: providerId
-            ))
-        }
-        addWindow(dto.fiveHour, label: "5-hour")
-        addWindow(dto.sevenDay, label: "Weekly")
-        addWindow(dto.sevenDayOpus, label: "Opus weekly")
-        addWindow(dto.sevenDaySonnet, label: "Sonnet weekly")
-
-        // "Claude Extra" overage → dollar balance. `used_credits`/`monthly_limit`
-        // are minor units; divide by 10^decimal_places to get currency amounts.
-        if let extra = dto.extraUsage, extra.isEnabled == true, let usedRaw = extra.usedCredits {
-            let divisor = pow(10.0, Double(extra.decimalPlaces ?? 0))
-            let used = usedRaw / divisor
-            let limit = extra.monthlyLimit.map { $0 / divisor }
-            metrics.append(UsageMetric(
-                label: "Extra usage ($)",
-                pct: extra.utilization,
-                used: used,
-                limit: limit,
-                dollars: used,
-                providerId: providerId
-            ))
-        }
-
-        return metrics
-    }
-
-    /// Parse an Anthropic reset timestamp, tolerating microsecond precision
-    /// (e.g. "2026-06-16T06:40:00.602994+00:00") which `ISO8601DateFormatter`
-    /// rejects unless the fractional part is normalized to milliseconds.
-    static func parseResetDate(_ raw: String?) -> Date? {
-        guard let raw, !raw.isEmpty else { return nil }
-
-        // Trim fractional seconds to 3 digits for the fractional formatter.
-        let normalized = raw.replacingOccurrences(
-            of: #"\.(\d{3})\d+"#, with: ".$1", options: .regularExpression
-        )
-        let withFractional = ISO8601DateFormatter()
-        withFractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        if let date = withFractional.date(from: normalized) { return date }
-
-        // Fall back: strip fractional seconds entirely.
-        let stripped = raw.replacingOccurrences(
-            of: #"\.\d+"#, with: "", options: .regularExpression
-        )
-        let plain = ISO8601DateFormatter()
-        plain.formatOptions = [.withInternetDateTime]
-        return plain.date(from: stripped)
+        try ClaudeUsageParser.parse(data, providerId: providerId)
     }
 }
 
@@ -226,30 +167,5 @@ private struct KeychainBlob: Decodable {
     let claudeAiOauth: OAuth
     struct OAuth: Decodable {
         let accessToken: String
-    }
-}
-
-/// Decoded with `.convertFromSnakeCase`, so JSON `five_hour` → `fiveHour`, etc.
-/// Every field is optional because the endpoint returns many `null` buckets that
-/// vary per account/plan.
-private struct OAuthUsageDTO: Decodable {
-    let fiveHour: Bucket?
-    let sevenDay: Bucket?
-    let sevenDayOpus: Bucket?
-    let sevenDaySonnet: Bucket?
-    let extraUsage: ExtraUsage?
-
-    struct Bucket: Decodable {
-        let utilization: Double?
-        let resetsAt: String?
-    }
-
-    struct ExtraUsage: Decodable {
-        let isEnabled: Bool?
-        let monthlyLimit: Double?
-        let usedCredits: Double?
-        let utilization: Double?
-        let currency: String?
-        let decimalPlaces: Int?
     }
 }

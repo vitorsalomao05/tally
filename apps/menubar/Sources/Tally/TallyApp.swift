@@ -14,14 +14,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let settings = AppSettings()
     /// Launch-at-login state via SMAppService.
     let launch = LaunchAtLogin()
-    /// The model reads its interval from `settings` and re-mirrors live changes.
-    lazy var model = UsageModel(settings: settings)
+    /// Claude auth state (Claude Code token → claude.ai cookie → signed out).
+    lazy var session = ClaudeSession(settings: settings)
+    /// The model reads its interval from `settings` and resolves its provider from
+    /// `session` on every fetch, so auth changes apply without a restart.
+    lazy var model = UsageModel(
+        settings: settings,
+        resolveProvider: { [weak self] in self?.session.currentProvider }
+    )
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Agent app — no Dock icon. Also set via LSUIElement in Info.plist; this
         // covers running the bare binary outside the bundle.
         NSApp.setActivationPolicy(.accessory)
         launch.refresh()
+        // Re-fetch immediately whenever the active Claude credential changes.
+        session.onAuthChange = { [weak self] in self?.model.reloadAuth() }
         model.start()
     }
 }
@@ -31,7 +39,7 @@ struct TallyMenuBarApp: App {
 
     var body: some Scene {
         MenuBarExtra {
-            UsagePopover(model: appDelegate.model)
+            UsagePopover(model: appDelegate.model, session: appDelegate.session)
         } label: {
             MenuBarLabelContent(model: appDelegate.model, settings: appDelegate.settings)
         }
@@ -40,7 +48,9 @@ struct TallyMenuBarApp: App {
 
         // Standard Settings scene → ⌘, and the popover's gear (SettingsLink).
         Settings {
-            SettingsView(settings: appDelegate.settings, launch: appDelegate.launch)
+            SettingsView(settings: appDelegate.settings,
+                         launch: appDelegate.launch,
+                         session: appDelegate.session)
         }
     }
 }

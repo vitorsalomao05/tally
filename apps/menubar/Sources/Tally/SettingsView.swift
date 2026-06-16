@@ -15,12 +15,25 @@ import AppKit
 struct SettingsView: View {
     @ObservedObject var settings: AppSettings
     @ObservedObject var launch: LaunchAtLogin
+    @ObservedObject var session: ClaudeSession
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(spacing: 8) {
                 Image(systemName: "gauge.with.dots.needle.67percent").foregroundStyle(.tint)
                 Text("Tally Settings").font(.system(size: 15, weight: .semibold))
+            }
+
+            section("Claude account") {
+                accountStatus
+                accountButtons
+                preferCookieToggle
+                if let error = session.lastError {
+                    Label(error, systemImage: "exclamationmark.triangle.fill")
+                        .font(.system(size: 11))
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
 
             section("Menu bar") {
@@ -46,6 +59,74 @@ struct SettingsView: View {
         .padding(22)
         .frame(width: 360)
         .background(Color(nsColor: .windowBackgroundColor))
+    }
+
+    // MARK: - Claude account
+
+    /// Active auth indicator: "Claude Code token" | "Claude.ai login" | "Not signed in".
+    private var accountStatus: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 6) {
+                Image(systemName: authIcon).foregroundStyle(authColor)
+                Text("Active: ").font(.system(size: 13))
+                    + Text(session.activeAuthLabel).font(.system(size: 13, weight: .semibold))
+            }
+            caption(accountContext)
+        }
+    }
+
+    private var authIcon: String {
+        switch session.activeAuth {
+        case .oauth:  return "key.fill"
+        case .cookie: return "globe"
+        case .none:   return "person.crop.circle.badge.questionmark"
+        }
+    }
+
+    private var authColor: Color {
+        switch session.activeAuth {
+        case .oauth, .cookie: return .green
+        case .none:           return .orange
+        }
+    }
+
+    /// One line of context about what's available and why.
+    private var accountContext: String {
+        switch session.activeAuth {
+        case .oauth:
+            return session.hasCookie
+                ? "Using your Claude Code token. A claude.ai login is also saved."
+                : "Reusing the Claude Code OAuth token — no separate login needed."
+        case .cookie:
+            return session.hasOAuthToken
+                ? "Using your claude.ai login (preferred over the Claude Code token)."
+                : "Using your claude.ai login."
+        case .none:
+            return "Sign in to claude.ai, or run Claude Code, to show your usage."
+        }
+    }
+
+    private var accountButtons: some View {
+        HStack(spacing: 8) {
+            Button(session.hasCookie ? "Re-sign in to Claude.ai…" : "Sign in to Claude.ai…") {
+                session.signIn()
+            }
+            if session.hasCookie {
+                Button("Sign out") { session.signOut() }
+            }
+        }
+    }
+
+    /// Escape hatch (requirement C): force the cookie path for testing.
+    private var preferCookieToggle: some View {
+        Toggle(isOn: $settings.preferCookieAuth) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Prefer Claude.ai login").font(.system(size: 13))
+                Text("Use the cookie even when a Claude Code token exists.")
+                    .font(.system(size: 11)).foregroundStyle(.secondary)
+            }
+        }
+        .toggleStyle(.switch)
     }
 
     // MARK: - Primary metric (native radio group)

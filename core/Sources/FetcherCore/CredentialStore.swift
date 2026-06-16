@@ -121,4 +121,47 @@ public struct CredentialStore: Sendable {
             throw CredentialError.keychain(status: status)
         }
     }
+
+    // MARK: - native write / delete (for Tally's own secrets, e.g. the cookie)
+
+    /// Upsert a generic-password item Tally owns (e.g. the captured `sessionKey`).
+    /// Stored `AfterFirstUnlock` so the menu bar agent can read it when launched at
+    /// login. Tally creates the item, so it reads it back later without a prompt.
+    public func nativeWriteGenericPassword(service: String, account: String, data: Data) throws {
+        let base: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account,
+        ]
+        let addQuery = base.merging([
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
+        ]) { _, new in new }
+
+        let status = SecItemAdd(addQuery as CFDictionary, nil)
+        switch status {
+        case errSecSuccess:
+            return
+        case errSecDuplicateItem:
+            let update = SecItemUpdate(base as CFDictionary,
+                                       [kSecValueData as String: data] as CFDictionary)
+            guard update == errSecSuccess else { throw CredentialError.keychain(status: update) }
+        default:
+            throw CredentialError.keychain(status: status)
+        }
+    }
+
+    /// Remove a generic-password item Tally owns. A missing item is not an error.
+    public func nativeDeleteGenericPassword(service: String, account: String? = nil) throws {
+        var query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+        ]
+        if let account { query[kSecAttrAccount as String] = account }
+
+        let status = SecItemDelete(query as CFDictionary)
+        guard status == errSecSuccess || status == errSecItemNotFound else {
+            throw CredentialError.keychain(status: status)
+        }
+    }
 }

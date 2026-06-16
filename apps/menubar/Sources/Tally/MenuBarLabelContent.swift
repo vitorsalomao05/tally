@@ -16,6 +16,14 @@ struct MenuBarLabelContent: View {
             }
             .font(.system(size: 13, weight: .medium))
             .foregroundStyle(Thresholds.labelColor(primary.pct))
+        } else if model.state.isSignedOut {
+            // No Claude credential → invite sign-in from the menu bar.
+            HStack(spacing: 4) {
+                Image(systemName: "person.crop.circle.badge.questionmark")
+                Text("Sign in")
+            }
+            .font(.system(size: 13, weight: .medium))
+            .foregroundStyle(.secondary)
         } else {
             // No data yet, or an error before any good reading.
             HStack(spacing: 4) {

@@ -43,6 +43,7 @@ final class AppSettings: ObservableObject {
     private enum Keys {
         static let primaryMetric = "tally.primaryMetric"
         static let refreshInterval = "tally.refreshIntervalSeconds"
+        static let preferCookieAuth = "tally.preferCookieAuth"
     }
 
     /// Refresh cadences offered in Settings. 60s is the ADR-002 default.
@@ -59,6 +60,13 @@ final class AppSettings: ObservableObject {
         didSet { defaults.set(refreshInterval, forKey: Keys.refreshInterval) }
     }
 
+    /// Force the claude.ai cookie auth over the Claude Code OAuth token. A testing
+    /// escape hatch (PROVIDERS.md fallback); defaults off. When on but no cookie is
+    /// present yet, the resolver still falls back to OAuth so data never disappears.
+    @Published var preferCookieAuth: Bool {
+        didSet { defaults.set(preferCookieAuth, forKey: Keys.preferCookieAuth) }
+    }
+
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
 
@@ -69,5 +77,7 @@ final class AppSettings: ObservableObject {
         // clamp to a supported value so a stale/hand-edited key can't strand us.
         let stored = defaults.double(forKey: Keys.refreshInterval)
         refreshInterval = Self.allowedIntervals.contains(stored) ? stored : Self.defaultInterval
+
+        preferCookieAuth = defaults.bool(forKey: Keys.preferCookieAuth)
     }
 }

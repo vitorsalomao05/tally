@@ -6,6 +6,9 @@ import FetcherCore
 /// a footer (last-updated, manual refresh, quit).
 struct UsagePopover: View {
     @ObservedObject var model: UsageModel
+    /// Optional so headless renders (`--snapshot`) can build the popover without
+    /// an auth session; the sign-in CTA only appears when a session is present.
+    var session: ClaudeSession?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -41,6 +44,9 @@ struct UsagePopover: View {
         case .error:
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 11)).foregroundStyle(.orange)
+        case .signedOut:
+            Image(systemName: "person.crop.circle.badge.questionmark")
+                .font(.system(size: 11)).foregroundStyle(.secondary)
         }
     }
 
@@ -65,7 +71,10 @@ struct UsagePopover: View {
                         .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
+                    if model.needsLogin { signInButton }
                 }
+            case .signedOut:
+                signedOutPrompt
             case .ok:
                 Text("No usage metrics available.").foregroundStyle(.secondary)
             }
@@ -78,6 +87,31 @@ struct UsagePopover: View {
                     metricRow(metric)
                 }
             }
+        }
+    }
+
+    private var signedOutPrompt: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label("Not signed in", systemImage: "person.crop.circle.badge.questionmark")
+                .font(.system(size: 13, weight: .medium))
+            Text("Sign in to your Claude.ai account to see your usage — or run Claude Code to reuse its token.")
+                .font(.system(size: 12)).foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+            signInButton
+        }
+    }
+
+    /// Present only when a session is available (i.e. not in a headless render).
+    @ViewBuilder
+    private var signInButton: some View {
+        if let session {
+            Button {
+                session.signIn()
+            } label: {
+                Label("Sign in to Claude", systemImage: "globe")
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.small)
         }
     }
 
