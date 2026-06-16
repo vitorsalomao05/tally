@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Tally — Übersicht widget preview</title>
+<!--
+  Standalone calibration preview for the Tally Übersicht widget. Open in a
+  browser to tune the look without installing Übersicht.
+
+  The `.tally` CSS below is the CARD_CSS block from tally.jsx, pasted VERBATIM
+  (only wrapped in a `.tally {}` selector + a position override for layout). The
+  JS render logic mirrors tally.jsx's render(). KEEP BOTH IN SYNC with tally.jsx.
+-->
+<style>
+  html, body { height: 100%; margin: 0; }
+  /* A deliberately busy "wallpaper" — both bright and dark regions — to prove the
+     card stays legible over anything. */
+  body {
+    min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    background:
+      radial-gradient(circle at 18% 22%, #ffd479 0, rgba(255,212,121,0) 38%),
+      radial-gradient(circle at 82% 30%, #5e9eff 0, rgba(94,158,255,0) 42%),
+      linear-gradient(135deg, #0b1020 0%, #3a1c52 48%, #b5651d 100%);
+    background-attachment: fixed;
+  }
+  .stage {
+    min-height: 100%;
+    box-sizing: border-box;
+    padding: 56px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 48px;
+    align-items: flex-start;
+  }
+  .case { display: flex; flex-direction: column; gap: 12px; }
+  .caption {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.92);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    letter-spacing: 0.3px;
+  }
+
+  /* ── CARD_CSS (verbatim from tally.jsx) ────────────────────────────────── */
+  .tally {
+    position: relative;            /* preview layout; the widget uses top/right */
+    box-sizing: border-box;
+    width: 280px;
+    padding: 14px 16px;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    color: #e5e5ea;
+    background: rgba(28, 28, 30, 0.72);
+    -webkit-backdrop-filter: blur(20px) saturate(170%);
+    backdrop-filter: blur(20px) saturate(170%);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 16px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+
+    .head { display: flex; align-items: center; gap: 7px; }
+    .brand { font-size: 14px; font-weight: 600; letter-spacing: 0.2px; }
+    .gauge { display: block; }
+    .spacer { flex: 1; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .divider { height: 1px; background: rgba(255, 255, 255, 0.10); margin: 11px 0; border: 0; }
+
+    .metric { margin: 10px 0; }
+    .metric:first-of-type { margin-top: 0; }
+    .metric:last-of-type { margin-bottom: 0; }
+    .metric-top { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 5px; }
+    .label { font-size: 13px; font-weight: 500; }
+    .value { font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    .bar { position: relative; height: 6px; border-radius: 3px; background: rgba(255, 255, 255, 0.14); overflow: hidden; }
+    .bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+    .reset { margin-top: 5px; font-size: 11px; color: rgba(235, 235, 245, 0.6); }
+
+    .foot { margin-top: 11px; font-size: 11px; color: rgba(235, 235, 245, 0.6); }
+
+    .error-title { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: #ff9f0a; }
+    .error-msg { margin-top: 6px; font-size: 12px; line-height: 1.35; color: rgba(235, 235, 245, 0.6); }
+  }
+</style>
+</head>
+<body>
+<div class="stage" id="stage"></div>
+
+<script>
+  // ── Shared formatting/threshold logic (mirrors tally.jsx) ────────────────
+  const GREEN = "#30d158", ORANGE = "#ff9f0a", RED = "#ff453a", TEXT = "#e5e5ea";
+
+  function barColor(pct) {
+    if (pct == null) return "rgba(235,235,245,0.3)";
+    if (pct < 60) return GREEN;
+    if (pct < 85) return ORANGE;
+    return RED;
+  }
+  function valueColor(pct) {
+    if (pct == null) return TEXT;
+    if (pct < 60) return TEXT;
+    if (pct < 85) return ORANGE;
+    return RED;
+  }
+  function fmtPct(pct) {
+    if (pct == null) return "—";
+    return pct === Math.round(pct) ? `${Math.round(pct)}%` : `${pct.toFixed(1)}%`;
+  }
+  function fmtDollars(v) { return v == null ? "—" : `$${v.toFixed(2)}`; }
+  function fmtReset(iso) {
+    if (!iso) return null;
+    const total = Math.floor((new Date(iso).getTime() - Date.now()) / 1000);
+    if (Number.isNaN(total)) return null;
+    if (total <= 0) return "resets now";
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    if (hours >= 24) return `resets in ${Math.floor(hours / 24)}d ${hours % 24}h`;
+    if (hours > 0) return `resets in ${hours}h ${minutes}m`;
+    return `resets in ${minutes}m`;
+  }
+  function fmtUpdated(iso) {
+    if (!iso) return "updated —";
+    const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+    if (Number.isNaN(secs) || secs < 0 || secs < 45) return "updated just now";
+    const mins = Math.round(secs / 60);
+    return mins < 60 ? `updated ${mins}m ago` : `updated ${Math.round(mins / 60)}h ago`;
+  }
+  function metricValue(m) {
+    if (m.dollars != null) {
+      const used = m.used != null ? m.used : m.dollars;
+      return m.limit != null ? `${fmtDollars(used)} / ${fmtDollars(m.limit)}` : fmtDollars(used);
+    }
+    return fmtPct(m.pct);
+  }
+
+  const GAUGE = `
+    <svg class="gauge" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
+      <path d="M2.6 12 A6 6 0 1 1 13.4 12" fill="none" stroke="#5e9eff" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="8" y1="9" x2="11" y2="5.4" stroke="#5e9eff" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="8" cy="9" r="1.35" fill="#5e9eff"/>
+    </svg>`;
+
+  function metricHTML(m) {
+    const pct = m.pct;
+    const width = Math.max(0, Math.min(100, pct == null ? 0 : pct));
+    const reset = fmtReset(m.resetAt);
+    return `
+      <div class="metric">
+        <div class="metric-top">
+          <span class="label">${m.label}</span>
+          <span class="value" style="color:${valueColor(pct)}">${metricValue(m)}</span>
+        </div>
+        <div class="bar"><div class="bar-fill" style="width:${width}%;background:${barColor(pct)}"></div></div>
+        ${reset ? `<div class="reset">${reset}</div>` : ""}
+      </div>`;
+  }
+
+  function cardHTML(snap) {
+    if (snap.error) {
+      return `<div class="tally">
+        <div class="head">${GAUGE}<span class="brand">Tally</span></div>
+        <hr class="divider"/>
+        <div class="error-title"><span>⚠</span><span>Can't read usage</span></div>
+        <div class="error-msg">${snap.error}</div>
+      </div>`;
+    }
+    const rows = (snap.metrics || []).map(metricHTML).join("");
+    return `<div class="tally">
+      <div class="head">${GAUGE}<span class="brand">Tally</span><span class="spacer"></span><span class="dot" style="background:${GREEN}"></span></div>
+      <hr class="divider"/>
+      ${rows}
+      <div class="foot">${fmtUpdated(snap.capturedAt)}</div>
+    </div>`;
+  }
+
+  // ── Sample data (resets computed from now so the preview never goes stale) ──
+  const now = Date.now();
+  const inSecs = (s) => new Date(now + s * 1000).toISOString();
+
+  const SAMPLE_HEAVY = {
+    providerId: "claude",
+    displayName: "Claude (Pro/Max)",
+    capturedAt: new Date(now - 12000).toISOString(),
+    metrics: [
+      { label: "5-hour", pct: 32, resetAt: inSecs(2 * 3600 + 14 * 60), providerId: "claude" },
+      { label: "Weekly", pct: 71, resetAt: inSecs(5 * 86400 + 3 * 3600), providerId: "claude" },
+      { label: "Sonnet weekly", pct: 0, providerId: "claude" },
+      { label: "Extra usage ($)", pct: 93.07, used: 93.07, limit: 100, dollars: 93.07, providerId: "claude" },
+    ],
+  };
+
+  const SAMPLE_HEALTHY = {
+    providerId: "claude",
+    displayName: "Claude (Pro/Max)",
+    capturedAt: new Date(now - 8000).toISOString(),
+    metrics: [
+      { label: "5-hour", pct: 8, resetAt: inSecs(4 * 3600 + 2 * 60), providerId: "claude" },
+      { label: "Weekly", pct: 22, resetAt: inSecs(6 * 86400 + 1 * 3600), providerId: "claude" },
+      { label: "Sonnet weekly", pct: 3, resetAt: inSecs(6 * 86400 + 1 * 3600), providerId: "claude" },
+    ],
+  };
+
+  const cases = [
+    ["Extra usage 93% — red threshold + amber weekly", SAMPLE_HEAVY],
+    ["Healthy account — all green", SAMPLE_HEALTHY],
+  ];
+
+  document.getElementById("stage").innerHTML = cases
+    .map(([caption, snap]) => `<div class="case"><div class="caption">${caption}</div>${cardHTML(snap)}</div>`)
+    .join("");
+</script>
+</body>
+</html>

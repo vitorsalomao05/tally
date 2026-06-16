@@ -6,14 +6,20 @@ import FetcherCore
 // No UI, no colors. NEVER prints the OAuth token.
 //
 // Usage:
-//   tally-cli            → fetch provider "claude"
-//   tally-cli <id>       → fetch a specific provider id
+//   tally-cli                 → fetch provider "claude"
+//   tally-cli <id>            → fetch a specific provider id
+//   tally-cli --json [<id>]   → same output; explicit flag so consumers (the
+//                               Übersicht wrapper) can pin a stable contract.
+//
+// JSON is the only output mode, so `--json` is accepted and ignored. Any
+// non-flag argument is taken as the provider id; unknown flags are ignored.
 
 func emitError(_ message: String) {
     FileHandle.standardError.write(Data((message + "\n").utf8))
 }
 
-let providerId = CommandLine.arguments.dropFirst().first ?? "claude"
+let arguments = Array(CommandLine.arguments.dropFirst())
+let providerId = arguments.first { !$0.hasPrefix("-") } ?? "claude"
 let registry = ProviderRegistry.makeDefault()
 
 guard let provider = registry.provider(id: providerId) else {
