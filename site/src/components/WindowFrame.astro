@@ -1,0 +1,32 @@
+---
+interface Props {
+  title?: string;
+  glow?: boolean;
+  class?: string;
+}
+const { title, glow = false, class: cls = "" } = Astro.props;
+---
+
+<div class={`relative ${cls}`}>
+  {
+    glow && (
+      <div
+        class="glow pointer-events-none absolute -inset-10 -z-10 opacity-70"
+        aria-hidden="true"
+      />
+    )
+  }
+  <div class="ring-grad overflow-hidden rounded-frame shadow-soft">
+    <div
+      class="flex items-center gap-2 border-b border-border/70 bg-surface-2/80 px-4 py-3"
+    >
+      <span class="h-3 w-3 rounded-full bg-[#ff5f57]" aria-hidden="true"></span>
+      <span class="h-3 w-3 rounded-full bg-[#febc2e]" aria-hidden="true"></span>
+      <span class="h-3 w-3 rounded-full bg-[#28c840]" aria-hidden="true"></span>
+      {title && <span class="ml-2 font-mono text-xs text-muted">{title}</span>}
+    </div>
+    <div class="bg-surface">
+      <slot />
+    </div>
+  </div>
+</div>

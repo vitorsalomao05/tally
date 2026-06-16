@@ -1,0 +1,12 @@
+# Astro / build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# Playwright MCP scratch
+.playwright-mcp/
+
+# os
+.DS_Store

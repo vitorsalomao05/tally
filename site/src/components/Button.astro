@@ -1,0 +1,41 @@
+---
+interface Props {
+  href: string;
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "md" | "lg";
+  external?: boolean;
+  class?: string;
+}
+const {
+  href,
+  variant = "primary",
+  size = "md",
+  external = false,
+  class: cls = "",
+} = Astro.props;
+
+const base =
+  "group inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-colors duration-200 disabled:opacity-50";
+const sizes = {
+  md: "px-4 py-2.5 text-sm",
+  lg: "px-5 py-3 text-[15px]",
+};
+const variants = {
+  primary:
+    "bg-accent-strong text-white hover:bg-accent-strong-hover shadow-lg shadow-accent/25",
+  secondary:
+    "border border-border bg-surface/60 text-text hover:border-accent/60 hover:text-white",
+  ghost: "text-muted hover:text-text",
+};
+const rel = external ? "noopener noreferrer" : undefined;
+const target = external ? "_blank" : undefined;
+---
+
+<a
+  href={href}
+  class={`${base} ${sizes[size]} ${variants[variant]} ${cls}`}
+  rel={rel}
+  target={target}
+>
+  <slot />
+</a>

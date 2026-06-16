@@ -1,0 +1,80 @@
+---
+import SectionHeader from "./SectionHeader.astro";
+
+const providers = [
+  {
+    name: "Claude",
+    sub: "Pro / Max",
+    status: "Live",
+    tone: "ok",
+    note: "5-hour & weekly windows, Opus/Sonnet caps, and extra-usage spend.",
+  },
+  {
+    name: "Anthropic Console",
+    sub: "API usage & cost",
+    status: "Soon",
+    tone: "muted",
+    note: "Admin-API adapter for organization accounts.",
+  },
+  {
+    name: "OpenAI Platform",
+    sub: "API usage & cost",
+    status: "Soon",
+    tone: "muted",
+    note: "Usage and cost reports via the admin API.",
+  },
+  {
+    name: "ChatGPT Plus",
+    sub: "Consumer quota",
+    status: "Experimental",
+    tone: "warn",
+    note: "Best-effort — OpenAI exposes no clean quota number, so this stays a “limited / OK” signal.",
+  },
+];
+
+const dot: Record<string, string> = {
+  ok: "bg-ok",
+  warn: "bg-warn",
+  muted: "bg-muted",
+};
+const text: Record<string, string> = {
+  ok: "text-ok",
+  warn: "text-warn",
+  muted: "text-muted",
+};
+---
+
+<section class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+  <div class="reveal">
+    <SectionHeader
+      eyebrow="Providers"
+      title="Claude today. Built to grow."
+      subtitle="Every provider plugs into one capability-driven core, so new ones show up without reshaping the UI. We won't promise a gauge we can't honestly fill."
+    />
+  </div>
+
+  <div class="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    {
+      providers.map((p, i) => (
+        <article
+          class="reveal flex flex-col rounded-card border border-border bg-surface/50 p-5"
+          style={`--reveal-delay: ${i * 70}ms`}
+        >
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <h3 class="font-semibold leading-tight">{p.name}</h3>
+              <p class="font-mono text-xs text-muted">{p.sub}</p>
+            </div>
+            <span
+              class={`inline-flex shrink-0 items-center gap-1.5 font-mono text-[11px] ${text[p.tone]}`}
+            >
+              <span class={`h-1.5 w-1.5 rounded-full ${dot[p.tone]}`} aria-hidden="true" />
+              {p.status}
+            </span>
+          </div>
+          <p class="mt-4 text-sm leading-relaxed text-muted">{p.note}</p>
+        </article>
+      ))
+    }
+  </div>
+</section>

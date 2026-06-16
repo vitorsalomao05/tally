@@ -1,0 +1,92 @@
+---
+import SectionHeader from "./SectionHeader.astro";
+
+const points = [
+  {
+    title: "Everything runs on your Mac",
+    body: "There is no Tally server — none exists to receive your data. The app polls usage locally and renders it. Nothing about your account leaves the device.",
+    path: "M12 2 4 5v6c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V5l-8-3Z",
+  },
+  {
+    title: "Credentials stay in your Keychain",
+    body: "Tally reuses the Claude Code OAuth token already in your Keychain, or — if you sign in to Claude.ai — stores that session there too. Read locally, never copied out, never logged.",
+    path: "M7 11V8a5 5 0 0 1 10 0v3m-11 0h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z",
+  },
+  {
+    title: "It talks only to Anthropic",
+    body: "Requests go straight from your Mac to Claude's own endpoints, signed with your own credential. No proxy, no middleman, no telemetry on your numbers.",
+    path: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 0c2.5 2.5 4 6 4 10s-1.5 7.5-4 10m0-20c-2.5 2.5-4 6-4 10s1.5 7.5 4 10M2.5 9h19M2.5 15h19",
+  },
+  {
+    title: "Open source, end to end",
+    body: "The data layer, the app, and this page are all readable. Verify exactly what Tally does — don't take our word for it.",
+    path: "m9 18-6-6 6-6m6 0 6 6-6 6",
+  },
+];
+---
+
+<section
+  id="privacy"
+  class="scroll-mt-24 border-y border-border/60 bg-surface/30"
+>
+  <div class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
+    <div class="reveal">
+      <SectionHeader
+        eyebrow="Privacy & trust"
+        title="An app that touches your logins should earn it."
+        subtitle="Tally only works if you trust it with a credential. So the design rule is simple: your secrets never leave your Mac."
+      />
+    </div>
+
+    <div class="mt-14 grid gap-4 sm:grid-cols-2">
+      {
+        points.map((p, i) => (
+          <div
+            class="reveal flex gap-4 rounded-card border border-border bg-surface/60 p-5"
+            style={`--reveal-delay: ${i * 70}ms`}
+          >
+            <span class="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent/12 text-accent">
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d={p.path} />
+              </svg>
+            </span>
+            <div>
+              <h3 class="font-semibold">{p.title}</h3>
+              <p class="mt-1.5 text-sm leading-relaxed text-muted">{p.body}</p>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+
+    <div
+      class="reveal mt-6 flex flex-col items-start gap-3 rounded-card border border-dashed border-border bg-surface/40 p-5 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div class="flex items-center gap-3">
+        <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-surface-2 text-muted">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 12l2 2 4-4m6 2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+          </svg>
+        </span>
+        <p class="text-sm text-muted">
+          <span class="font-medium text-text">Apple notarization</span> — so the
+          DMG opens without Gatekeeper friction.
+        </p>
+      </div>
+      <span
+        class="rounded-full border border-border bg-surface px-3 py-1 font-mono text-xs text-muted"
+        >Coming soon · next milestone</span
+      >
+    </div>
+  </div>
+</section>

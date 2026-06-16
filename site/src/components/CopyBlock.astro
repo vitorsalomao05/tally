@@ -1,0 +1,83 @@
+---
+interface Props {
+  code: string;
+  label?: string;
+}
+const { code, label = "terminal" } = Astro.props;
+---
+
+<div
+  class="overflow-hidden rounded-card border border-border bg-surface-2/60"
+  data-copyblock
+>
+  <div
+    class="flex items-center justify-between border-b border-border/60 bg-surface-2/80 px-4 py-2.5"
+  >
+    <span class="font-mono text-xs text-muted">{label}</span>
+    <button
+      type="button"
+      aria-label="Copy command"
+      class="copy-btn inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 font-mono text-xs text-muted transition-colors hover:border-accent/60 hover:text-text"
+    >
+      <svg
+        class="copy-icon"
+        width="14"
+        height="14"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <rect x="9" y="9" width="11" height="11" rx="2"></rect>
+        <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+      </svg>
+      <span class="copy-label">Copy</span>
+    </button>
+  </div>
+  <pre
+    class="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed text-text"><code>{code}</code></pre>
+  <span class="copy-status sr-only" role="status" aria-live="polite"></span>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-copyblock]").forEach((block) => {
+    const btn = block.querySelector<HTMLButtonElement>(".copy-btn");
+    const code = block.querySelector("code")?.textContent ?? "";
+    const label = block.querySelector<HTMLElement>(".copy-label");
+    const status = block.querySelector<HTMLElement>(".copy-status");
+    if (!btn) return;
+
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    btn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch {
+        // Fallback for older / non-secure contexts.
+        const ta = document.createElement("textarea");
+        ta.value = code;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+        } catch {
+          /* give up silently */
+        }
+        ta.remove();
+      }
+      if (label) label.textContent = "Copied!";
+      btn.classList.add("text-ok", "border-ok/50");
+      if (status) status.textContent = "Copied to clipboard";
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (label) label.textContent = "Copy";
+        btn.classList.remove("text-ok", "border-ok/50");
+        if (status) status.textContent = "";
+      }, 2000);
+    });
+  });
+</script>

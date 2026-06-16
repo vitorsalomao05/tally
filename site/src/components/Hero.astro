@@ -1,0 +1,74 @@
+---
+import { Image } from "astro:assets";
+import Button from "./Button.astro";
+import WindowFrame from "./WindowFrame.astro";
+import { links } from "../config";
+import popoverDark from "../assets/popover-dark.png";
+---
+
+<section id="top" class="relative overflow-hidden pt-28 sm:pt-36">
+  <!-- ambient electric glow -->
+  <div
+    class="glow pointer-events-none absolute -top-40 right-[-10%] -z-10 h-[520px] w-[520px] opacity-60"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div
+    class="mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:pb-28"
+  >
+    <div class="reveal flex flex-col items-start gap-6">
+      <span
+        class="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 font-mono text-xs text-muted"
+      >
+        <span class="relative flex h-2 w-2" aria-hidden="true">
+          <span
+            class="absolute inline-flex h-full w-full animate-ping rounded-full bg-ok opacity-60"
+          ></span>
+          <span class="relative inline-flex h-2 w-2 rounded-full bg-ok"></span>
+        </span>
+        Now live for Claude Pro/Max
+      </span>
+
+      <h1 class="text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
+        Know your Claude limits <br class="hidden sm:block" />before you hit them.
+      </h1>
+
+      <p class="max-w-xl text-lg leading-relaxed text-muted">
+        Tally sits in your Mac menu bar and shows your Claude usage at a glance —
+        the 5-hour window, weekly caps, and any extra-usage spend — refreshed
+        every 60 seconds.
+      </p>
+
+      <div class="flex flex-wrap items-center gap-3 pt-1">
+        <Button href="#install" variant="primary" size="lg">Get Tally — free</Button>
+        <Button href={links.github} variant="secondary" size="lg" external>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path
+              d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.4-1.27.73-1.56-2.56-.29-5.26-1.28-5.26-5.7 0-1.26.45-2.29 1.2-3.1-.12-.3-.52-1.47.11-3.05 0 0 .98-.31 3.2 1.18a11.1 11.1 0 0 1 5.83 0c2.22-1.5 3.2-1.18 3.2-1.18.63 1.58.23 2.75.11 3.05.75.81 1.2 1.84 1.2 3.1 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5Z"
+            ></path>
+          </svg>
+          View on GitHub
+        </Button>
+      </div>
+
+      <div class="space-y-1 font-mono text-xs text-muted/80">
+        <p>Übersicht widget installs today · signed menu bar app coming soon</p>
+        <p>macOS 14+ · Apple Silicon · Focused on Claude today — OpenAI &amp; more soon</p>
+      </div>
+    </div>
+
+    <div class="reveal" style="--reveal-delay: 120ms">
+      <WindowFrame title="Tally" glow class="mx-auto max-w-[360px]">
+        <Image
+          src={popoverDark}
+          alt="Tally's menu bar popover showing Claude usage: a 5-hour window, weekly and Sonnet-weekly caps, and extra-usage spend, each with a color-coded gauge and reset time."
+          widths={[320, 360, 720]}
+          sizes="(max-width: 1024px) 80vw, 360px"
+          class="block w-full"
+          loading="eager"
+        />
+      </WindowFrame>
+    </div>
+  </div>
+</section>

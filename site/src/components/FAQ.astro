@@ -1,0 +1,70 @@
+---
+import SectionHeader from "./SectionHeader.astro";
+
+const faqs = [
+  {
+    q: "Is Tally safe to use?",
+    a: "Yes. It runs entirely on your Mac, keeps credentials only in the macOS Keychain, and talks directly to Anthropic with your own token. There's no Tally server to send anything to, and the source is open for you to read.",
+  },
+  {
+    q: "Why does it need my Claude login?",
+    a: "To read your usage, Tally needs the same credential your tools already use. If you run Claude Code, it reuses that token automatically. If not, you sign in to Claude.ai once in a secure window and the session is stored in your Keychain — used only to call Claude's own usage endpoint, never sent anywhere else.",
+  },
+  {
+    q: "Is it Apple Silicon only?",
+    a: "For now, yes — macOS 14+ on Apple Silicon, which is where Tally is built and tested. Native Swift, around 6 MB, no Electron.",
+  },
+  {
+    q: "Does it really refresh every minute?",
+    a: "The menu bar app and the Übersicht desktop widget refresh every 60 seconds. The upcoming Notification Center widget can't — Apple budgets widget refreshes to roughly every 15 minutes — so it'll show honest “updated a few minutes ago” copy instead of faking a live gauge.",
+  },
+  {
+    q: "How do I uninstall it?",
+    a: "Menu bar app: quit Tally and drag <code class='font-mono text-text'>Tally.app</code> to the Trash. Übersicht widget: delete the <code class='font-mono text-text'>tally</code> folder from your Übersicht widgets directory (and <code class='font-mono text-text'>~/.local/bin/tally-cli</code> if you like). Any stored session can be removed in Keychain Access.",
+  },
+];
+---
+
+<section id="faq" class="mx-auto max-w-6xl scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28">
+  <div class="reveal">
+    <SectionHeader eyebrow="FAQ" title="Questions, answered." />
+  </div>
+
+  <div
+    class="reveal mx-auto mt-12 max-w-3xl divide-y divide-border overflow-hidden rounded-card border border-border bg-surface/40"
+  >
+    {
+      faqs.map((f) => (
+        <details class="group faq">
+          <summary
+            class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-medium text-text"
+          >
+            <span>{f.q}</span>
+            <svg
+              class="shrink-0 text-muted transition-transform duration-200 group-open:rotate-180"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </summary>
+          <p class="px-5 pb-5 text-sm leading-relaxed text-muted" set:html={f.a} />
+        </details>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  /* Hide the native disclosure marker; we draw our own chevron. */
+  .faq > summary::-webkit-details-marker {
+    display: none;
+  }
+</style>
