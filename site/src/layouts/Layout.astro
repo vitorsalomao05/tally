@@ -12,7 +12,7 @@ const {
   description = site.description,
 } = Astro.props;
 
-// Normalise the base so links work whether BASE_URL is "/tally" or "/tally/".
+// Normalise the base (now "/") so internal links/assets resolve off the root.
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const withBase = (p: string) => `${base}/${p.replace(/^\//, "")}`;
 const canonical = Astro.site

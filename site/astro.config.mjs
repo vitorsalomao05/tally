@@ -2,14 +2,11 @@
 import { defineConfig } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 
-// Static build → dist/, published to GitHub Project Pages.
-// A project site lives under a sub-path, so `base` must be set and every internal
-// link/asset has to respect it (use import.meta.env.BASE_URL — never a bare "/...").
+// Static build → dist/, deployed to Vercel at the apex of its own subdomain.
+// The site lives at the domain root, so `base` is "/" (Astro's default) and every
+// internal link/asset resolves straight off the root via import.meta.env.BASE_URL.
 export default defineConfig({
-  site: "https://vitorsalomao05.github.io",
-  base: "/tally",
-  // Keep the canonical/OG URL coherent with how Pages serves the directory ("/tally/").
-  trailingSlash: "always",
+  site: "https://tally.salomao.org",
   vite: {
     plugins: [tailwindcss()],
   },

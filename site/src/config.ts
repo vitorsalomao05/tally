@@ -7,9 +7,9 @@ export const site = {
   // The product is focused on Claude today; copy stays honest about that.
   description:
     "A native macOS menu bar app that shows your Claude Pro/Max usage at a glance — refreshed every 60 seconds. Runs locally, credentials stay in your Keychain.",
-  // GitHub Project Pages URL (canonical + Open Graph). A custom domain is a future phase.
-  domain: "https://vitorsalomao05.github.io/tally",
-  // TODO(future): generate and host a real social/OG image (1200×630).
+  // Canonical origin (canonical + Open Graph): the Tally subdomain on Vercel.
+  domain: "https://tally.salomao.org",
+  // Real 1200×630 social card in public/og.png (see scripts/og/).
   // Path is relative to the site base — Layout.astro resolves it to an absolute URL.
   ogImage: "og.png",
 };

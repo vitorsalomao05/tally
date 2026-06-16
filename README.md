@@ -1,6 +1,7 @@
 # Tally — your AI usage, always in sight
 
 > Working codename: **Tally** (changeable). Repo: [`vitorsalomao05/tally`](https://github.com/vitorsalomao05/tally).
+> Site: **[tally.salomao.org](https://tally.salomao.org)**.
 > Target: **macOS 14+ / Apple Silicon only**. June 2026.
 
 ## Install (macOS 14+, Apple Silicon)

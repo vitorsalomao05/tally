@@ -1,7 +1,8 @@
 # Tally — landing site
 
 Static landing page for Tally. **Astro + Tailwind CSS v4**, dark Linear-style with
-an electric-blue accent. Builds to `dist/`, ready for **Cloudflare Pages**.
+an electric-blue accent. Builds to `dist/`, deployed to **Vercel** at
+**[tally.salomao.org](https://tally.salomao.org)**.
 
 ## Develop
 
@@ -29,4 +30,8 @@ npm run preview  # serve the built dist/ locally
   respected, on-scroll reveals gated behind `html.js` so the page is fully visible without JS.
 - Honest copy: no fabricated social proof; "coming soon" states for the signed DMG, Apple
   notarization, the Notification Center widget, and non-Claude providers.
-- Deploy: build command `npm run build`, output directory `dist` (Cloudflare Pages).
+- Deploy: **Vercel** — root directory `site`, framework Astro, build `npm run build`,
+  output `dist`. Live at https://tally.salomao.org. Production deploys with
+  `vercel --prod` from `site/`.
+- OG card: `node scripts/og/build.mjs` regenerates `public/og.png` (1200×630, rendered
+  with headless Chrome from an inlined HTML template).
