@@ -7,6 +7,11 @@ import FetcherCore
 /// appearances. Deterministic — no clicking/timing — and uses the same views the
 /// running app does. Tries live usage first; if that fails (e.g. no Claude token
 /// on this machine) it falls back to `PreviewData` so the populated UI is shown.
+///
+/// Note: `SettingsView` now uses native `Picker`/`Toggle` controls, which
+/// `ImageRenderer` cannot draw — `settings-*.png` are therefore placeholders. The
+/// popover (pure shapes) still renders faithfully. See `SettingsView` for why we
+/// chose native controls over render fidelity.
 enum Snapshotter {
     static func run(outputDir: String) {
         _ = NSApplication.shared // initialise AppKit so text/graphics render
