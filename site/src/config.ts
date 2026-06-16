@@ -1,6 +1,6 @@
 // Central configuration — every external URL the site links to lives here so
-// Phase 6 (signed distribution) can plug in real artifacts without touching a
-// single component. Search this file for "TODO(phase 6)".
+// distribution can plug in real artifacts without touching a single component.
+// Search this file for "TODO(phase 6)" for the links a future milestone fills in.
 
 export const site = {
   name: "Tally",
@@ -14,30 +14,34 @@ export const site = {
 };
 
 export const links = {
-  // TODO(phase 6): replace OWNER with the real GitHub org/user once public.
-  github: "https://github.com/OWNER/claude-credits-widget",
-  // TODO(phase 6): signed + notarized DMG (Apple Silicon) on GitHub Releases.
+  github: "https://github.com/vitorsalomao05/tally",
+  // TODO(future): signed + notarized DMG (Apple Silicon) on GitHub Releases.
   //   null → the UI renders the honest "Signed DMG — coming soon" state.
   downloadDmg: null as string | null,
-  // TODO(phase 6): releases / changelog page.
-  changelog: "https://github.com/OWNER/claude-credits-widget/releases",
+  // Releases / changelog page.
+  changelog: "https://github.com/vitorsalomao05/tally/releases",
 };
+
+// The fastest path that WORKS TODAY for the menu bar app: a one-liner that
+// downloads the ad-hoc-signed Tally.app + tally-cli from the pinned v0.1.0
+// Release, verifies their SHA-256 against SHASUMS256.txt, then installs them
+// (no sudo). Pinned to the tag, so the bytes you run are the bytes we shipped.
+export const installOneLiner =
+  "curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/tally/v0.1.0/install.sh | bash";
 
 // The install path that WORKS TODAY for the Übersicht desktop widget: clone the
 // repo and run its idempotent installer (builds tally-cli + deploys the widget).
 export const installUbersicht = [
-  // TODO(phase 6): real clone URL.
-  "git clone https://github.com/OWNER/claude-credits-widget",
-  "cd claude-credits-widget/apps/ubersicht",
+  "git clone https://github.com/vitorsalomao05/tally",
+  "cd tally/apps/ubersicht",
   "./install.sh",
 ].join("\n");
 
 // Build-from-source path for the menu bar app — works today once the repo is
 // cloned (an honest, copyable recipe rather than a deep link to a private blob).
 export const installMenubar = [
-  // TODO(phase 6): real clone URL.
-  "git clone https://github.com/OWNER/claude-credits-widget",
-  "cd claude-credits-widget/apps/menubar",
+  "git clone https://github.com/vitorsalomao05/tally",
+  "cd tally/apps/menubar",
   "./build.sh",
 ].join("\n");
 

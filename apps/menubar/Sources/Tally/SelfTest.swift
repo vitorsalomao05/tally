@@ -71,6 +71,26 @@ enum SelfTest {
         exit(0)
     }
 
+    // MARK: Login-item registration (used by install.sh)
+
+    /// Register or unregister the *installed* app as a login item via the same
+    /// `SMAppService.mainApp` path the Settings toggle uses — so the installer's
+    /// "start at login" offer stays consistent with what the UI shows. Prints the
+    /// resulting status (an ad-hoc build can land in `.requiresApproval`, which the
+    /// user then approves in System Settings ▸ General ▸ Login Items). Idempotent:
+    /// `register()` is guarded on the current status. Exits non-zero only on a
+    /// thrown error so callers (install.sh) can react.
+    static func setLoginItem(_ enable: Bool) {
+        MainActor.assumeIsolated {
+            let launch = LaunchAtLogin()
+            let ok = launch.setEnabled(enable)
+            let verb = enable ? "register" : "unregister"
+            err("login-item \(verb): \(launch.statusText)")
+            if let e = launch.lastError { err("login-item \(verb) error: \(e)") }
+            exit(ok ? 0 : 1)
+        }
+    }
+
     // MARK: Launch-at-login
 
     /// Exercises SMAppService for real and reports what an ad-hoc signed build

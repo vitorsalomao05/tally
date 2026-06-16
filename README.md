@@ -1,7 +1,20 @@
 # Tally — your AI usage, always in sight
 
-> Working codename: **Tally** (changeable). Repo: `claude-credits-widget`.
+> Working codename: **Tally** (changeable). Repo: [`vitorsalomao05/tally`](https://github.com/vitorsalomao05/tally).
 > Target: **macOS 14+ / Apple Silicon only**. June 2026.
+
+## Install (macOS 14+, Apple Silicon)
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/tally/v0.1.0/install.sh | bash
+```
+
+Downloads the ad-hoc-signed `Tally.app` + `tally-cli` from the pinned
+[`v0.1.0` release](https://github.com/vitorsalomao05/tally/releases/tag/v0.1.0),
+**verifies their SHA-256** against `SHASUMS256.txt`, then installs without `sudo`
+(app → `~/Applications`, CLI → `~/.local/bin`). It offers (never forces) launch
+at login and the Übersicht widget, and is safe to re-run. Read it first — it's at
+[`install.sh`](install.sh). A signed, notarized DMG is the next milestone.
 
 Tally is a lightweight macOS app that keeps your **AI subscription usage / remaining credits** visible at a glance and refreshes about **every 60 seconds**. It ships in three surfaces, all installable from the landing site:
 
@@ -29,7 +42,7 @@ See `PROVIDERS.md` for the adapter contract and `ARCHITECTURE.md` for the system
 ## Repo layout
 
 ```
-claude-credits-widget/
+tally/
 ├── README.md            ← this file
 ├── ARCHITECTURE.md      ← system design + diagram
 ├── DECISIONS.md         ← ADRs (why menu bar, why no 60s widget, distribution…)
@@ -42,7 +55,8 @@ claude-credits-widget/
 │   ├── widget/          ← WidgetKit extension (glanceable)
 │   └── ubersicht/       ← single .jsx desktop widget
 ├── site/                ← Astro + Tailwind landing page
-└── scripts/             ← sign/notarize, install.sh, release automation
+├── install.sh           ← one-liner installer (verified download from Releases)
+└── scripts/             ← sign/notarize, release automation
 ```
 
 ## Privacy posture

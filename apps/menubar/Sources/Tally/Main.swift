@@ -24,6 +24,16 @@ enum Main {
             SelfTest.launchTest()
             return
         }
+        // Headless login-item toggles used by install.sh (offer at install,
+        // cleanup at uninstall) — same SMAppService path as the Settings toggle.
+        if args.contains("--register-login-item") {
+            SelfTest.setLoginItem(true)
+            return
+        }
+        if args.contains("--unregister-login-item") {
+            SelfTest.setLoginItem(false)
+            return
+        }
         TallyMenuBarApp.main()
     }
 }
