@@ -7,10 +7,11 @@ export const site = {
   // The product is focused on Claude today; copy stays honest about that.
   description:
     "A native macOS menu bar app that shows your Claude Pro/Max usage at a glance — refreshed every 60 seconds. Runs locally, credentials stay in your Keychain.",
-  // TODO(phase 6): real production domain (canonical + Open Graph URLs).
-  domain: "https://tally.app",
-  // TODO(phase 6): generate and host a real social/OG image (1200×630).
-  ogImage: "/og.png",
+  // GitHub Project Pages URL (canonical + Open Graph). A custom domain is a future phase.
+  domain: "https://vitorsalomao05.github.io/tally",
+  // TODO(future): generate and host a real social/OG image (1200×630).
+  // Path is relative to the site base — Layout.astro resolves it to an absolute URL.
+  ogImage: "og.png",
 };
 
 export const links = {
