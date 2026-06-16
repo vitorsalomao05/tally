@@ -17,3 +17,5 @@ dist/
 .env
 .env.*
 secrets/
+# Built app bundles
+build/

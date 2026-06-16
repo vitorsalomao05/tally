@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Outbound HTTPS to api.anthropic.com. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
+	<!--
+	  NOTE: App Sandbox is intentionally NOT enabled. Tally must read the Claude
+	  Code OAuth item from the login Keychain (created by another app) and, for
+	  now, spawn /usr/bin/security. App Sandbox would block both. Revisit if we
+	  ever ship through the Mac App Store.
+	-->
+</dict>
+</plist>

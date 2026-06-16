@@ -1,0 +1,21 @@
+import Foundation
+
+// Custom entry point so we can support a headless `--snapshot <dir>` mode (renders
+// the real SwiftUI views to PNGs with live data) in addition to the GUI app.
+@main
+enum Main {
+    static func main() {
+        let args = CommandLine.arguments
+        if let i = args.firstIndex(of: "--snapshot"), args.count > i + 1 {
+            Snapshotter.run(outputDir: args[i + 1])
+            return
+        }
+        if let i = args.firstIndex(of: "--selftest") {
+            let interval = (args.count > i + 1 ? Double(args[i + 1]) : nil) ?? 3
+            let duration = (args.count > i + 2 ? Double(args[i + 2]) : nil) ?? 8
+            SelfTest.run(interval: interval, duration: duration)
+            return
+        }
+        TallyMenuBarApp.main()
+    }
+}
