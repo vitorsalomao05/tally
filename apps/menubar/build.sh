@@ -18,6 +18,14 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BINDIR/Tally" "$APP/Contents/MacOS/Tally"
 cp "$HERE/Info.plist" "$APP/Contents/Info.plist"
 
+# App icon (regenerate with design/icon/render-icon.sh). Info.plist points at it
+# via CFBundleIconFile=AppIcon, so the bundle shows it in Finder / Login Items.
+if [[ -f "$HERE/Resources/AppIcon.icns" ]]; then
+	cp "$HERE/Resources/AppIcon.icns" "$APP/Contents/Resources/AppIcon.icns"
+else
+	echo "warning: Resources/AppIcon.icns missing — run design/icon/render-icon.sh" >&2
+fi
+
 # Ad-hoc sign with hardened runtime + entitlements. App Sandbox stays OFF (see
 # Tally.entitlements) so we can read the Claude Code Keychain item.
 echo "==> codesign (ad-hoc, hardened runtime)"

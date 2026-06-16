@@ -1,0 +1,4 @@
+# Intermediate artifacts — regenerate with ./render-icon.sh.
+# The source SVG and the 1024 master PNG stay versioned.
+Tally.iconset/
+AppIcon.svg.png

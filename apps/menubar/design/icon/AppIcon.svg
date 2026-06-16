@@ -1,0 +1,60 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+  <!--
+    Tally app icon. macOS Big Sur+ grid: 824×824 squircle body centered in a
+    1024 canvas (100 px margin on every side; system adds the drop shadow).
+    The mark derives from site/src/components/Logo.astro: three stacked usage
+    "gauge" bars (dark track + filled meter), here unified under the brand's
+    electric-blue→violet gradient for a clean, monochrome read at 16 px.
+    This SVG is the source of truth — render-icon.sh rasterizes it to the icns.
+  -->
+  <defs>
+    <!-- Dark, faintly blue-tinted body gradient. -->
+    <linearGradient id="body" x1="512" y1="100" x2="512" y2="924" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1A1E28"/>
+      <stop offset="1" stop-color="#0B0D12"/>
+    </linearGradient>
+    <!-- Brand accent, shared across all three bars (continuous left→right field). -->
+    <linearGradient id="accent" x1="232" y1="288" x2="792" y2="736" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#7C5CFF"/>
+    </linearGradient>
+    <!-- Soft accent glow sitting behind the meter. -->
+    <radialGradient id="glow" cx="512" cy="476" r="384" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#3B82F6" stop-opacity="0"/>
+    </radialGradient>
+    <!-- Top sheen for a subtle glassy depth. -->
+    <linearGradient id="sheen" x1="512" y1="100" x2="512" y2="430" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="squircle">
+      <rect x="100" y="100" width="824" height="824" rx="184"/>
+    </clipPath>
+  </defs>
+
+  <!-- Body + everything painted on it, clipped to the squircle. -->
+  <g clip-path="url(#squircle)">
+    <rect x="100" y="100" width="824" height="824" fill="url(#body)"/>
+    <rect x="100" y="100" width="824" height="824" fill="url(#glow)"/>
+    <rect x="100" y="100" width="824" height="330" fill="url(#sheen)"/>
+
+    <!-- Meter: three stacked pills — dark track + brand-gradient fill. -->
+    <g>
+      <!-- row 1 -->
+      <rect x="232" y="288" width="560" height="104" rx="52" fill="#242A37"/>
+      <rect x="232" y="288" width="370" height="104" rx="52" fill="url(#accent)"/>
+      <!-- row 2 -->
+      <rect x="232" y="460" width="560" height="104" rx="52" fill="#242A37"/>
+      <rect x="232" y="460" width="235" height="104" rx="52" fill="url(#accent)"/>
+      <!-- row 3 -->
+      <rect x="232" y="632" width="560" height="104" rx="52" fill="#242A37"/>
+      <rect x="232" y="632" width="493" height="104" rx="52" fill="url(#accent)"/>
+    </g>
+  </g>
+
+  <!-- Hairline inner border echoing the Logo card stroke. -->
+  <rect x="101.5" y="101.5" width="821" height="821" rx="182.5"
+        fill="none" stroke="#2B3242" stroke-width="3"/>
+</svg>

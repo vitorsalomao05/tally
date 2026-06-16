@@ -12,6 +12,11 @@
 	<string>com.tally.menubar</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<!-- App icon: Resources/AppIcon.icns (generated from design/icon/AppIcon.svg). -->
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>CFBundleIconName</key>
+	<string>AppIcon</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>CFBundleShortVersionString</key>
