@@ -131,6 +131,17 @@ struct UsagePopover: View {
             .buttonStyle(.plain)
             .help("Refresh now")
 
+            // Opens the standard Settings scene (also reachable via ⌘,). Bring
+            // the app forward since we're an .accessory (no Dock) agent.
+            SettingsLink {
+                Image(systemName: "gearshape").foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help("Settings…")
+            .simultaneousGesture(TapGesture().onEnded {
+                NSApp.activate(ignoringOtherApps: true)
+            })
+
             Button { NSApplication.shared.terminate(nil) } label: {
                 Image(systemName: "power").foregroundStyle(.secondary)
             }

@@ -1,0 +1,73 @@
+import Foundation
+import Combine
+
+/// Which usage figure the menu bar shows. `auto` tracks the tightest limit; the
+/// rest pin to a specific provider window. Persisted by raw value (UserDefaults).
+enum PrimaryMetricChoice: String, CaseIterable, Identifiable, Sendable {
+    case auto
+    case fiveHour
+    case weekly
+    case sonnetWeekly
+    case extraUsage
+
+    var id: String { rawValue }
+
+    /// User-facing name in the Settings picker.
+    var displayName: String {
+        switch self {
+        case .auto:         return "Auto (tightest limit)"
+        case .fiveHour:     return "5-hour"
+        case .weekly:       return "Weekly"
+        case .sonnetWeekly: return "Sonnet weekly"
+        case .extraUsage:   return "Extra usage"
+        }
+    }
+
+    /// The provider `UsageMetric.label` this choice pins to, or `nil` for `auto`.
+    var metricLabel: String? {
+        switch self {
+        case .auto:         return nil
+        case .fiveHour:     return "5-hour"
+        case .weekly:       return "Weekly"
+        case .sonnetWeekly: return "Sonnet weekly"
+        case .extraUsage:   return "Extra usage ($)"
+        }
+    }
+}
+
+/// App-wide preferences, persisted to `UserDefaults` and published so the menu
+/// bar label and the running `UsageModel` re-mirror them live (ADR-002 scope).
+/// Loaded once at launch; every mutation writes through immediately.
+@MainActor
+final class AppSettings: ObservableObject {
+    private enum Keys {
+        static let primaryMetric = "tally.primaryMetric"
+        static let refreshInterval = "tally.refreshIntervalSeconds"
+    }
+
+    /// Refresh cadences offered in Settings. 60s is the ADR-002 default.
+    static let allowedIntervals: [TimeInterval] = [30, 60, 120]
+    static let defaultInterval: TimeInterval = 60
+
+    private let defaults: UserDefaults
+
+    @Published var primaryMetric: PrimaryMetricChoice {
+        didSet { defaults.set(primaryMetric.rawValue, forKey: Keys.primaryMetric) }
+    }
+
+    @Published var refreshInterval: TimeInterval {
+        didSet { defaults.set(refreshInterval, forKey: Keys.refreshInterval) }
+    }
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+
+        let rawMetric = defaults.string(forKey: Keys.primaryMetric)
+        primaryMetric = rawMetric.flatMap(PrimaryMetricChoice.init(rawValue:)) ?? .auto
+
+        // `double(forKey:)` returns 0 when unset → fall back to the default; also
+        // clamp to a supported value so a stale/hand-edited key can't strand us.
+        let stored = defaults.double(forKey: Keys.refreshInterval)
+        refreshInterval = Self.allowedIntervals.contains(stored) ? stored : Self.defaultInterval
+    }
+}

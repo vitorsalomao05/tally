@@ -2,18 +2,27 @@ import SwiftUI
 import AppKit
 import FetcherCore
 
-/// Headless `--snapshot <dir>` mode: fetch live usage, render the real SwiftUI
-/// views (popover + menu bar label) to PNGs via `ImageRenderer`, then exit.
-/// Deterministic — no clicking/timing needed — and uses the same views/data as
-/// the running app.
+/// Headless `--snapshot <dir>` mode: render the real SwiftUI views (popover,
+/// settings, menu bar label) to PNGs via `ImageRenderer`, in BOTH light and dark
+/// appearances. Deterministic — no clicking/timing — and uses the same views the
+/// running app does. Tries live usage first; if that fails (e.g. no Claude token
+/// on this machine) it falls back to `PreviewData` so the populated UI is shown.
 enum Snapshotter {
     static func run(outputDir: String) {
         _ = NSApplication.shared // initialise AppKit so text/graphics render
 
-        let result = fetchSync()
+        let live = fetchSync()
+        let metrics: [UsageMetric]
+        switch live {
+        case .success(let m) where !m.isEmpty:
+            metrics = m
+        default:
+            FileHandle.standardError.write(Data("live fetch unavailable — using sample data\n".utf8))
+            metrics = PreviewData.sampleMetrics()
+        }
+
         MainActor.assumeIsolated {
-            let model = UsageModel(previewResult: result)
-            render(model: model, dir: outputDir)
+            render(metrics: metrics, dir: outputDir)
         }
         exit(0)
     }
@@ -33,16 +42,40 @@ enum Snapshotter {
     }
 
     @MainActor
-    private static func render(model: UsageModel, dir: String) {
+    private static func render(metrics: [UsageMetric], dir: String) {
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
-        writePNG(UsagePopover(model: model), to: "\(dir)/popover.png")
-        writePNG(MenuBarPreview(model: model), to: "\(dir)/menubar.png")
-        FileHandle.standardError.write(Data("snapshots written to \(dir)\n".utf8))
+
+        // Isolated defaults so a snapshot run never clobbers the user's real prefs.
+        let settings = AppSettings(defaults: UserDefaults(suiteName: "tally.snapshot") ?? .standard)
+        settings.primaryMetric = .auto
+        settings.refreshInterval = 60
+        let launch = LaunchAtLogin()
+
+        for scheme in [ColorScheme.light, .dark] {
+            let suffix = scheme == .dark ? "dark" : "light"
+            let model = UsageModel(previewResult: .success(metrics))
+
+            writePNG(panel(UsagePopover(model: model)), to: "\(dir)/popover-\(suffix).png", scheme: scheme)
+            writePNG(SettingsView(settings: settings, launch: launch),
+                     to: "\(dir)/settings-\(suffix).png", scheme: scheme)
+            writePNG(MenuBarPreview(model: model, settings: settings, scheme: scheme),
+                     to: "\(dir)/menubar-\(suffix).png", scheme: scheme)
+        }
+        FileHandle.standardError.write(Data("snapshots (light+dark) written to \(dir)\n".utf8))
+    }
+
+    /// Wrap a view in an opaque, appearance-adaptive panel so the PNG isn't
+    /// transparent (the live popover gets this from the system window material).
+    private static func panel(_ view: some View) -> some View {
+        view.background(Color(nsColor: .windowBackgroundColor))
     }
 
     @MainActor
-    private static func writePNG(_ view: some View, to path: String) {
-        let renderer = ImageRenderer(content: view)
+    private static func writePNG(_ view: some View, to path: String, scheme: ColorScheme) {
+        // Drive both layers: NSAppearance so dynamic NSColors resolve correctly,
+        // and the SwiftUI colorScheme environment so semantic colors flip.
+        NSApp.appearance = NSAppearance(named: scheme == .dark ? .darkAqua : .aqua)
+        let renderer = ImageRenderer(content: view.environment(\.colorScheme, scheme))
         renderer.scale = 2
         guard let nsImage = renderer.nsImage,
               let tiff = nsImage.tiffRepresentation,
@@ -55,17 +88,21 @@ enum Snapshotter {
     }
 }
 
-/// A representative dark menu bar strip, just for the snapshot image (the live
-/// app uses `MenuBarLabelContent` directly inside the system menu bar).
+/// A representative menu bar strip for the snapshot image (the live app uses
+/// `MenuBarLabelContent` directly inside the system menu bar). The strip tone
+/// follows the appearance so the colored label reads correctly in both modes.
 private struct MenuBarPreview: View {
     @ObservedObject var model: UsageModel
+    @ObservedObject var settings: AppSettings
+    let scheme: ColorScheme
+
     var body: some View {
         HStack(spacing: 0) {
             Spacer()
-            MenuBarLabelContent(model: model).padding(.horizontal, 10)
+            MenuBarLabelContent(model: model, settings: settings).padding(.horizontal, 10)
         }
         .frame(width: 240, height: 24, alignment: .trailing)
         .padding(.vertical, 3)
-        .background(Color(white: 0.13))
+        .background(scheme == .dark ? Color(white: 0.13) : Color(white: 0.92))
     }
 }

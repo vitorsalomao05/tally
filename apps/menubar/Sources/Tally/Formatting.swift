@@ -26,9 +26,19 @@ enum Thresholds {
 
 extension Array where Element == UsageMetric {
     /// The "tightest limit" — the metric with the highest utilization %.
-    /// (Primary-metric choice will become user-configurable in a later phase.)
-    var primary: UsageMetric? {
+    var tightest: UsageMetric? {
         self.max { ($0.pct ?? -1) < ($1.pct ?? -1) }
+    }
+
+    /// Back-compat alias for the auto/tightest pick.
+    var primary: UsageMetric? { tightest }
+
+    /// The metric to surface in the menu bar for the user's chosen mode. A pinned
+    /// choice falls back to `tightest` if that window isn't present on the account
+    /// (e.g. no Opus/extra-usage), so the bar never goes blank.
+    func primary(for choice: PrimaryMetricChoice) -> UsageMetric? {
+        guard let label = choice.metricLabel else { return tightest }
+        return first { $0.label == label } ?? tightest
     }
 }
 
@@ -44,11 +54,16 @@ enum Format {
         }
     }
 
-    /// Compact menu bar text: dollars when the primary is the overage balance,
-    /// otherwise "<short> <pct>%", e.g. "Weekly 8%" or "$93".
+    /// Compact menu bar text. For the dollar overage we show used/limit, e.g.
+    /// "$93/100" (or "$93" if no limit is known); percent windows stay
+    /// "<short> <pct>%", e.g. "Weekly 8%".
     static func compactPrimary(_ m: UsageMetric) -> String {
         if let dollars = m.dollars {
-            return "$\(Int(dollars.rounded()))"
+            let used = Int((m.used ?? dollars).rounded())
+            if let limit = m.limit {
+                return "$\(used)/\(Int(limit.rounded()))"
+            }
+            return "$\(used)"
         }
         let pct = Int((m.pct ?? 0).rounded())
         return "\(shortLabel(m.label)) \(pct)%"

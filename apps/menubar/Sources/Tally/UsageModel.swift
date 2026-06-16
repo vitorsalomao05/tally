@@ -19,13 +19,25 @@ final class UsageModel: ObservableObject {
     @Published private(set) var state: State = .loading
 
     private let provider: any UsageProvider
-    let refreshInterval: TimeInterval
+    /// Live, not constant — Settings can change it and the timer reschedules.
+    private(set) var refreshInterval: TimeInterval
     private var timer: Timer?
     private var inFlight = false
+    private var cancellables = Set<AnyCancellable>()
 
-    init(provider: any UsageProvider = ClaudeOAuthProvider(), refreshInterval: TimeInterval = 60) {
+    init(provider: any UsageProvider = ClaudeOAuthProvider(),
+         refreshInterval: TimeInterval = 60,
+         settings: AppSettings? = nil) {
         self.provider = provider
-        self.refreshInterval = refreshInterval
+        self.refreshInterval = settings?.refreshInterval ?? refreshInterval
+
+        // Mirror the user's interval choice live: when Settings publishes a new
+        // value, reschedule the running timer without restarting the app.
+        settings?.$refreshInterval
+            .dropFirst()
+            .removeDuplicates()
+            .sink { [weak self] interval in self?.setRefreshInterval(interval) }
+            .store(in: &cancellables)
     }
 
     /// Build a model from pre-fetched data, for the headless `--snapshot` renderer.
@@ -41,15 +53,32 @@ final class UsageModel: ObservableObject {
         }
     }
 
-    /// Start the immediate fetch + repeating 60s timer. Idempotent.
+    /// Start the immediate fetch + repeating timer. Idempotent.
     func start() {
         guard timer == nil else { return }
         refreshNow()
+        scheduleTimer()
+    }
+
+    /// Change the refresh cadence and reschedule the live timer (if running)
+    /// without restarting the app. No-op when the value is unchanged.
+    func setRefreshInterval(_ interval: TimeInterval) {
+        guard interval != refreshInterval else { return }
+        refreshInterval = interval
+        guard timer != nil else { return } // not started yet → start() will pick it up
+        timer?.invalidate()
+        timer = nil
+        scheduleTimer()
+    }
+
+    private func scheduleTimer() {
         let t = Timer.scheduledTimer(withTimeInterval: refreshInterval, repeats: true) { [weak self] _ in
             // Hop back onto the main actor; the Timer block itself is non-isolated.
             Task { @MainActor in self?.refreshNow() }
         }
-        t.tolerance = 5 // let the OS coalesce wake-ups; we don't need sub-second accuracy
+        // Coalesce wake-ups proportionally (still sub-interval); we don't need
+        // sub-second accuracy, but a 5s tolerance on a 30s timer is fine too.
+        t.tolerance = min(5, refreshInterval * 0.1)
         RunLoop.main.add(t, forMode: .common)
         timer = t
     }

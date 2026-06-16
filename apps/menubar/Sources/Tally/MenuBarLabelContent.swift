@@ -2,11 +2,14 @@ import SwiftUI
 import FetcherCore
 
 /// The content shown in the menu bar itself: primary metric, compact + colored.
+/// The metric shown follows `settings.primaryMetric`; changing it in Settings
+/// updates the bar live (this view observes `settings`).
 struct MenuBarLabelContent: View {
     @ObservedObject var model: UsageModel
+    @ObservedObject var settings: AppSettings
 
     var body: some View {
-        if let primary = model.metrics.primary {
+        if let primary = model.metrics.primary(for: settings.primaryMetric) {
             HStack(spacing: 4) {
                 Image(systemName: "gauge.with.dots.needle.67percent")
                 Text(Format.compactPrimary(primary))

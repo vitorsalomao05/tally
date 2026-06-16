@@ -10,12 +10,18 @@ import FetcherCore
 /// 60s cadence (ADR-002).
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    let model = UsageModel()
+    /// Preferences (primary metric + refresh interval), persisted to UserDefaults.
+    let settings = AppSettings()
+    /// Launch-at-login state via SMAppService.
+    let launch = LaunchAtLogin()
+    /// The model reads its interval from `settings` and re-mirrors live changes.
+    lazy var model = UsageModel(settings: settings)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Agent app — no Dock icon. Also set via LSUIElement in Info.plist; this
         // covers running the bare binary outside the bundle.
         NSApp.setActivationPolicy(.accessory)
+        launch.refresh()
         model.start()
     }
 }
@@ -27,9 +33,14 @@ struct TallyMenuBarApp: App {
         MenuBarExtra {
             UsagePopover(model: appDelegate.model)
         } label: {
-            MenuBarLabelContent(model: appDelegate.model)
+            MenuBarLabelContent(model: appDelegate.model, settings: appDelegate.settings)
         }
         // .window gives us a real popover we can lay out freely (ARCHITECTURE.md).
         .menuBarExtraStyle(.window)
+
+        // Standard Settings scene → ⌘, and the popover's gear (SettingsLink).
+        Settings {
+            SettingsView(settings: appDelegate.settings, launch: appDelegate.launch)
+        }
     }
 }

@@ -2,34 +2,94 @@ import Foundation
 import Combine
 import FetcherCore
 
-/// Headless `--selftest [interval] [duration]` mode: drives the *real* `UsageModel`
-/// (same timer/fetch code as the app, only the interval differs) and logs every
-/// time `lastUpdated` advances. Proves the scheduled timer actually fires.
+private func err(_ s: String) { FileHandle.standardError.write(Data((s + "\n").utf8)) }
+
+/// Headless proof modes for the things that are awkward to screenshot:
+/// • `--selftest`   — drives the real `UsageModel` timer and changes the interval
+///                    live, proving the timer reschedules without a restart.
+/// • `--metrictest` — prints the menu-bar text for every primary-metric choice,
+///                    proving the Settings picker changes what the bar shows.
+/// • `--launchtest` — calls SMAppService.register()/unregister() and reports the
+///                    real result (ad-hoc signing usually can't fully register).
 enum SelfTest {
+    // MARK: Interval reschedule
+
+    /// Starts at `interval`, logs every refresh, then halfway through switches to
+    /// a faster cadence live. The gap between logged refreshes proves the change
+    /// took effect without restarting. Uses a stub provider so timing is clean.
     static func run(interval: TimeInterval, duration: TimeInterval) {
         MainActor.assumeIsolated {
-            let model = UsageModel(refreshInterval: interval)
+            let model = UsageModel(provider: StubProvider(), refreshInterval: interval)
             var cancellables = Set<AnyCancellable>()
             let start = Date()
+            var lastTick = start
 
             model.$lastUpdated
                 .compactMap { $0 }
                 .removeDuplicates()
-                .sink { date in
-                    let elapsed = String(format: "%.1f", Date().timeIntervalSince(start))
+                .sink { _ in
+                    let now = Date()
+                    let elapsed = String(format: "%.1f", now.timeIntervalSince(start))
+                    let delta = String(format: "%.1f", now.timeIntervalSince(lastTick))
+                    lastTick = now
                     let primary = model.metrics.primary.map(Format.compactPrimary) ?? "—"
-                    FileHandle.standardError.write(
-                        Data("[t+\(elapsed)s] refresh → lastUpdated=\(date) primary=\(primary)\n".utf8)
-                    )
+                    err("[t+\(elapsed)s] refresh (Δ\(delta)s) activeInterval=\(model.refreshInterval)s primary=\(primary)")
                 }
                 .store(in: &cancellables)
 
             model.start()
-            // Run the main run loop so the Timer fires and @MainActor fetch
-            // continuations are serviced.
+            err("=== selftest: starting at interval=\(interval)s for \(duration)s ===")
+
+            // Halfway through, switch to a faster cadence — live, no restart.
+            let faster = max(0.5, interval / 3)
+            Timer.scheduledTimer(withTimeInterval: duration / 2, repeats: false) { _ in
+                Task { @MainActor in
+                    err(">>> live change: setRefreshInterval(\(interval)s → \(faster)s) — no restart")
+                    model.setRefreshInterval(faster)
+                }
+            }
+
             RunLoop.main.run(until: Date().addingTimeInterval(duration))
-            FileHandle.standardError.write(Data("selftest done\n".utf8))
+            err("=== selftest done (ended at activeInterval=\(model.refreshInterval)s) ===")
             _ = cancellables
+            exit(0)
+        }
+    }
+
+    // MARK: Primary-metric switch
+
+    /// For each `PrimaryMetricChoice`, print the exact menu-bar text. Deterministic
+    /// (fixed `PreviewData`), so it doubles as the before/after switch proof.
+    static func metricTest() {
+        let metrics = PreviewData.sampleMetrics()
+        err("=== metrictest: menu-bar text per primary-metric choice ===")
+        for choice in PrimaryMetricChoice.allCases {
+            let text = metrics.primary(for: choice).map(Format.compactPrimary) ?? "—"
+            let name = choice.displayName.padding(toLength: 22, withPad: " ", startingAt: 0)
+            err("  \(name) → menu bar: \"\(text)\"")
+        }
+        exit(0)
+    }
+
+    // MARK: Launch-at-login
+
+    /// Exercises SMAppService for real and reports what an ad-hoc signed build
+    /// actually does. Registers, prints status + any error, then unregisters.
+    static func launchTest() {
+        MainActor.assumeIsolated {
+            let launch = LaunchAtLogin()
+            err("=== launchtest: SMAppService.mainApp ===")
+            err("  initial status : \(launch.status.rawValue) (\(launch.statusText))")
+
+            let okOn = launch.setEnabled(true)
+            err("  register()     : returned ok=\(okOn)")
+            err("  status now     : \(launch.status.rawValue) (\(launch.statusText))")
+            if let e = launch.lastError { err("  error          : \(e)") }
+
+            let okOff = launch.setEnabled(false)
+            err("  unregister()   : returned ok=\(okOff)")
+            err("  status now     : \(launch.status.rawValue) (\(launch.statusText))")
+            if let e = launch.lastError { err("  error          : \(e)") }
             exit(0)
         }
     }

@@ -16,6 +16,14 @@ enum Main {
             SelfTest.run(interval: interval, duration: duration)
             return
         }
+        if args.contains("--metrictest") {
+            SelfTest.metricTest()
+            return
+        }
+        if args.contains("--launchtest") {
+            SelfTest.launchTest()
+            return
+        }
         TallyMenuBarApp.main()
     }
 }
