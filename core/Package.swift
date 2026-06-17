@@ -30,7 +30,11 @@ let testLinkerSettings: [LinkerSetting] = needsTestingFrameworkPath
 let package = Package(
     name: "FetcherCore",
     platforms: [
-        .macOS(.v14) // macOS 14+ / Apple Silicon only (README scope).
+        .macOS(.v14), // macOS 14+ / Apple Silicon (menu bar app, Übersicht, CLI).
+        .iOS(.v17),   // iOS 17+ (TallyMobile app + WidgetKit) — see apps/ios/PLAN.md.
+        // NOTE: the FetcherCore *library* is the only product an iOS app consumes.
+        // `tally-cli` / `tally-selftest` are macOS-only host tools (Foundation.Process);
+        // they are never built for, nor linked into, iOS.
     ],
     products: [
         .library(name: "FetcherCore", targets: ["FetcherCore"]),

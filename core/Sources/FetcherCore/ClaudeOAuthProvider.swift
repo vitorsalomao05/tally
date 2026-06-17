@@ -128,7 +128,13 @@ public struct ClaudeOAuthProvider: UsageProvider {
     }
 
     /// Best-effort `claude --version` lookup (output like "2.1.178 (Claude Code)").
+    /// macOS only: Claude Code exists only on the desktop, and the probe needs
+    /// `Foundation.Process` (unavailable on iOS). On other platforms we fall straight
+    /// through to the pinned `fallbackVersion`. (The OAuth provider itself is a
+    /// desktop-only concept — iOS authenticates via the cookie provider — so the
+    /// constant is never actually exercised on iOS.)
     public static func detectedClientVersion() -> String {
+        #if os(macOS)
         let proc = Process()
         proc.executableURL = URL(fileURLWithPath: "/usr/bin/env")
         proc.arguments = ["claude", "--version"]
@@ -147,6 +153,7 @@ public struct ClaudeOAuthProvider: UsageProvider {
         } catch {
             // fall through to the constant
         }
+        #endif // os(macOS)
         return fallbackVersion
     }
 

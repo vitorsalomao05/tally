@@ -53,11 +53,21 @@ public struct CredentialStore: Sendable {
     /// Until then the CLI path is the only one that reads silently from an
     /// unsigned/ad-hoc binary (see the type doc above).
     public func readGenericPassword(service: String, account: String? = nil) throws -> Data {
-        try cliReadGenericPassword(service: service, account: account)
+        #if os(macOS)
+        return try cliReadGenericPassword(service: service, account: account)
+        #else
+        // iOS/iPadOS have neither the `security` CLI nor `Foundation.Process`, so the
+        // CLI path cannot exist there. Read natively via the Security framework. The
+        // only credential the iOS app reads is the `sessionKey` cookie it captured and
+        // wrote itself, so the native path reads it back without a prompt (see the
+        // cookie provider). FetcherCore's cookie path never depends on the CLI.
+        return try nativeReadGenericPassword(service: service, account: account)
+        #endif
     }
 
-    // MARK: - security CLI path (default)
+    // MARK: - security CLI path (macOS only — uses Foundation.Process)
 
+    #if os(macOS)
     public func cliReadGenericPassword(service: String, account: String? = nil) throws -> Data {
         var args = ["find-generic-password", "-s", service, "-w"]
         if let account { args += ["-a", account] }
@@ -93,8 +103,9 @@ public struct CredentialStore: Sendable {
         }
         return data
     }
+    #endif // os(macOS)
 
-    // MARK: - native Security framework path (for signed app builds)
+    // MARK: - native Security framework path (cross-platform — Security.framework)
 
     public func nativeReadGenericPassword(service: String, account: String? = nil) throws -> Data {
         var query: [String: Any] = [
