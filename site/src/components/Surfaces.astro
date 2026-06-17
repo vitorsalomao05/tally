@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import SectionHeader from "./SectionHeader.astro";
 import ubersichtPreview from "../assets/ubersicht-preview.png";
+import { links } from "../config";
 
 // A native render of Tally's gauge language (the product's signature), so it
 // lives in the DOM and not only inside the screenshots. Illustrative sample.
@@ -20,7 +21,7 @@ const gauges = [
     <SectionHeader
       eyebrow="Surfaces"
       title="See your usage wherever you look."
-      subtitle="One shared data core, three places to glance. Pick the surface that fits your workflow."
+      subtitle="One shared data core, wherever you glance — menu bar, desktop, and soon your iPhone. Pick the surface that fits your workflow."
     />
   </div>
 
@@ -114,6 +115,38 @@ const gauges = [
           it with honest "updated a few minutes ago" copy rather than fake a live gauge.
         </p>
       </div>
+    </article>
+
+    {/* iPhone app — "in development", links to the real tracking issue */}
+    <article
+      class="reveal flex flex-col gap-3 rounded-card border border-dashed border-accent/30 bg-surface/30 p-6 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between sm:p-7"
+    >
+      <div>
+        <div class="flex items-center gap-3">
+          <h3 class="text-xl font-semibold">Tally for iPhone</h3>
+          <span
+            class="inline-flex items-center gap-1.5 rounded-full bg-accent/12 px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-accent"
+          >
+            <span class="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden="true"></span>In development
+          </span>
+        </div>
+        <p class="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+          A native iOS app with Home Screen and Lock Screen widgets. You sign in to
+          Claude.ai once; your session stays in the iPhone's Keychain — no server, same
+          privacy promise as the Mac app. It's a real app, not a web page: a browser
+          can't reach your usage without a server seeing your login, so the honest path
+          is native. Widgets refresh on Apple's ~15-minute budget, not 60s.
+        </p>
+      </div>
+      <a
+        href={links.iosTracking}
+        target="_blank"
+        rel="noopener"
+        class="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-text transition-colors hover:border-accent/60 hover:text-white sm:self-center"
+      >
+        Follow on GitHub
+        <span aria-hidden="true">→</span>
+      </a>
     </article>
   </div>
 </section>

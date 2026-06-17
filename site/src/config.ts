@@ -21,6 +21,9 @@ export const links = {
   downloadDmg: null as string | null,
   // Releases / changelog page.
   changelog: "https://github.com/vitorsalomao05/tally/releases",
+  // Public "follow development" thread for the in-progress iPhone app. No fake
+  // App Store button — this links to the real tracking issue (ADR-008).
+  iosTracking: "https://github.com/vitorsalomao05/tally/issues/1",
 };
 
 // The fastest path that WORKS TODAY for the menu bar app: a one-liner that
