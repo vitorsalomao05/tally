@@ -1,0 +1,68 @@
+# XcodeGen spec for Tally for iPhone.
+#
+# This file DOCUMENTS the iOS target layout (app + widget extension, App Group,
+# FetcherCore-by-path) in a form a tool can consume — it does NOT build anything
+# here. You still need Xcode + iOS SDK (`xcodegen generate` then build in Xcode).
+#
+# TODO(xcode): replace DEVELOPMENT_TEAM with a real Team ID once enrolled in the
+# Apple Developer Program ($99/yr). Bundle IDs / App Group are placeholders.
+name: Tally
+options:
+  bundleIdPrefix: org.salomao.tally
+  deploymentTarget:
+    iOS: "17.0"            # Lock Screen widgets need iOS 16; app targets 17.
+
+packages:
+  # The shared, UI-less data layer — reused verbatim (cookie path is iOS-ready).
+  FetcherCore:
+    path: ../../core
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: "TODO_TEAM_ID"   # ← unblocked only after $99 enrollment
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    # Swift 5 language mode for the UI targets, matching the macOS app's choice
+    # (apps/menubar/Package.swift uses .swiftLanguageMode(.v5) for the AppKit/UI
+    # glue): SwiftUI/WebKit delegate callbacks don't need Swift 6 strict-concurrency
+    # checking. FetcherCore itself stays in its own Swift 6 mode (its Package.swift).
+    SWIFT_VERSION: "5.0"
+
+targets:
+  # ── App ───────────────────────────────────────────────────────────────────
+  TallyMobile:
+    type: application
+    platform: iOS
+    sources: [TallyMobile, Shared]
+    dependencies:
+      - package: FetcherCore
+        product: FetcherCore
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.salomao.tally.mobile
+        INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: "YES"
+    entitlements:
+      path: TallyMobile/TallyMobile.entitlements
+      properties:
+        com.apple.security.application-groups: [group.org.salomao.tally]
+        keychain-access-groups: ["$(AppIdentifierPrefix)org.salomao.tally"]
+
+  # ── Widget extension ──────────────────────────────────────────────────────
+  TallyWidget:
+    type: app-extension
+    platform: iOS
+    sources: [TallyWidget, Shared]
+    dependencies:
+      - package: FetcherCore
+        product: FetcherCore
+      - target: TallyMobile     # extension is embedded in the app
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: org.salomao.tally.mobile.widget
+        INFOPLIST_KEY_NSExtension_PointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: TallyWidget/TallyWidget.entitlements
+      properties:
+        com.apple.security.application-groups: [group.org.salomao.tally]
+        keychain-access-groups: ["$(AppIdentifierPrefix)org.salomao.tally"]
