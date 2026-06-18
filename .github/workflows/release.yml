@@ -1,6 +1,6 @@
 name: Release Houdini
 
-# Push a semver tag (e.g. `git tag v0.1.2 && git push origin v0.1.2`) and this
+# Push a semver tag (e.g. `git tag v0.2.1 && git push origin v0.2.1`) and this
 # builds the same artifacts `apps/menubar/build.sh` produces locally, checksums
 # them exactly like the manual flow, and publishes the GitHub Release.
 #

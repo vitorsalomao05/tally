@@ -19,3 +19,6 @@ dist/
 secrets/
 # Built app bundles
 build/
+
+# Playwright MCP scratch
+.playwright-mcp/
