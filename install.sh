@@ -19,7 +19,7 @@
 # Interactive run:
 #   curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/houdini/v0.2.0/install.sh | bash
 # Unattended (also accept the optional login item + widget):
-#   curl -fsSL .../install.sh | TALLY_YES=1 bash
+#   curl -fsSL .../install.sh | HOUDINI_YES=1 bash
 #
 set -euo pipefail
 
@@ -42,12 +42,12 @@ warn() { printf '%s  !%s %s\n'  "$YELLOW" "$RST" "$1"; }
 die()  { printf '%s  ✗ %s%s\n'  "$RED" "$1" "$RST" >&2; exit 1; }
 
 # Ask a yes/no question. Works under `curl | bash` by reading the controlling
-# terminal (/dev/tty), since stdin there is the script itself. TALLY_YES=1 makes
-# it unattended; with no terminal and no TALLY_YES the answer defaults to No, so
+# terminal (/dev/tty), since stdin there is the script itself. HOUDINI_YES=1 makes
+# it unattended; with no terminal and no HOUDINI_YES the answer defaults to No, so
 # the optional extras are never forced on.
 ask() {
   local prompt="$1" ans=""
-  [ "${TALLY_YES:-0}" = "1" ] && return 0
+  [ "${HOUDINI_YES:-0}" = "1" ] && return 0
   # Probe the controlling terminal silently. Under `curl | bash` stdin is the
   # script, so we read the user's answer from /dev/tty. No terminal (piped,
   # CI) → default No, so the optional extras are never forced on.
