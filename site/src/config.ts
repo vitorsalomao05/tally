@@ -10,7 +10,7 @@ export const version = "0.3.0";
 
 // The release tag the installer downloads from. Kept at the last shipped release so
 // the one-liner on the live site keeps working; bumped to `v${version}` at go-live.
-export const installTag = "v0.2.0";
+export const installTag = "v0.3.0";
 
 export const site = {
   name: "Houdini",
