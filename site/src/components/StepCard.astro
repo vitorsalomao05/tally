@@ -1,0 +1,65 @@
+---
+// One card in a Stepper. Renders consistent, accessible card chrome so every
+// step carries the right ARIA and a focus target. The body is slotted by the
+// page. Decision/recap behaviour is data-attribute driven (see Stepper.astro):
+//   choices  → <button data-choice="name" data-value="x" [data-default]>
+//   panels   → <div data-choice-panel="name" data-value="x">
+//   recap    → <div data-recap-when="name:x">
+interface Props {
+  slug: string;
+  index: number;
+  total: number;
+  title: string;
+  badge?: string | number;
+  eyebrow?: string;
+  featured?: boolean;
+}
+const {
+  slug,
+  index,
+  total,
+  title,
+  badge,
+  eyebrow,
+  featured = false,
+} = Astro.props;
+const frame = featured ? "ring-grad" : "border border-border bg-surface/50";
+---
+
+<section
+  id={slug}
+  data-step
+  data-step-slug={slug}
+  data-step-label={title}
+  class={`stepper-card scroll-mt-20 rounded-frame ${frame} p-6 sm:p-8`}
+  role="group"
+  aria-roledescription="step"
+  aria-label={`Step ${index + 1} of ${total}: ${title}`}
+>
+  {
+    eyebrow && (
+      <span class="font-mono text-xs uppercase tracking-[0.18em] text-accent">
+        {eyebrow}
+      </span>
+    )
+  }
+  <div class={`flex items-center gap-3 ${eyebrow ? "mt-2" : ""}`}>
+    {
+      badge !== undefined && (
+        <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-strong font-display text-sm font-semibold text-white">
+          {badge}
+        </span>
+      )
+    }
+    <h2
+      class="stepper-card-title font-display text-xl font-semibold sm:text-2xl"
+      tabindex="-1"
+      data-step-focus
+    >
+      {title}
+    </h2>
+  </div>
+  <div class="mt-4">
+    <slot />
+  </div>
+</section>

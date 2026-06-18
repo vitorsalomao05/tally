@@ -4,25 +4,32 @@ import Nav from "../components/Nav.astro";
 import Footer from "../components/Footer.astro";
 import Button from "../components/Button.astro";
 import CopyBlock from "../components/CopyBlock.astro";
+import Stepper from "../components/Stepper.astro";
+import StepCard from "../components/StepCard.astro";
 import { Image } from "astro:assets";
 import popoverDark from "../assets/popover-dark.png";
 import { installOneLiner, links } from "../config";
 
-const toc = [
-  { id: "what", label: "What it does" },
-  { id: "who", label: "Who it's for" },
-  { id: "tracks", label: "What it tracks" },
-  { id: "connect", label: "Connect a provider" },
-  { id: "read", label: "Reading the gauges" },
-  { id: "kinds", label: "Subscription vs API" },
-  { id: "privacy", label: "What stays local" },
+// One concept per card. The jump menu and progress count read from this; each
+// slug is also a deep link (/guide#tracks, /guide#privacy, …).
+const steps = [
+  { slug: "start", label: "Quick start" },
+  { slug: "what", label: "What it does" },
+  { slug: "who", label: "Who it's for" },
+  { slug: "tracks", label: "What it tracks" },
+  { slug: "connect", label: "Connect a provider" },
+  { slug: "read", label: "Reading the gauges" },
+  { slug: "kinds", label: "Subscription vs API" },
+  { slug: "privacy", label: "What stays local" },
+  { slug: "ready", label: "Install" },
 ];
+const total = steps.length;
 
 // Threshold legend — the product's own gauge language.
 const thresholds = [
-  { tone: "ok", dot: "bg-ok", text: "text-ok", range: "0–74%", meaning: "Plenty of headroom. Carry on." },
-  { tone: "warn", dot: "bg-warn", text: "text-warn", range: "75–89%", meaning: "Getting close — start pacing the heavy work." },
-  { tone: "danger", dot: "bg-danger", text: "text-danger", range: "90–100%", meaning: "About to hit the wall. Check the reset timer." },
+  { dot: "bg-ok", text: "text-ok", range: "0–74%", meaning: "Plenty of headroom. Carry on." },
+  { dot: "bg-warn", text: "text-warn", range: "75–89%", meaning: "Getting close — start pacing the heavy work." },
+  { dot: "bg-danger", text: "text-danger", range: "90–100%", meaning: "About to hit the wall. Check the reset timer." },
 ];
 ---
 
@@ -32,7 +39,7 @@ const thresholds = [
 >
   <Nav />
   <main id="main" tabindex="-1">
-    <!-- Header + quick start -->
+    <!-- Header -->
     <header class="relative overflow-hidden pt-28 sm:pt-36">
       <div
         class="spotlight pointer-events-none absolute -top-40 right-[-10%] -z-10 h-[440px] w-[440px] opacity-60"
@@ -43,54 +50,67 @@ const thresholds = [
         <span
           class="inline-flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.18em] text-accent"
         >
-          <span class="inline-block h-[3px] w-6 rounded-full bg-gradient-to-r from-accent to-magenta" aria-hidden="true"></span>
+          <span
+            class="inline-block h-[3px] w-6 rounded-full bg-gradient-to-r from-accent to-magenta"
+            aria-hidden="true"></span>
           The guide
         </span>
-        <h1 class="mt-4 font-display text-[2.4rem] font-semibold leading-[1.06] sm:text-5xl">
+        <h1
+          class="mt-4 font-display text-[2.4rem] font-semibold leading-[1.06] sm:text-5xl"
+        >
           Get started in minutes.
         </h1>
         <p class="mt-4 text-lg leading-relaxed text-muted">
           Houdini reveals what your AI is really using and costing you — without
           an account, a server, or your secrets ever leaving your Mac. Here's the
-          whole act, start to finish.
+          whole act, one card at a time. Step through it, or jump to any part.
         </p>
-
-        <div class="mt-7">
-          <CopyBlock code={installOneLiner} label="install · macOS 14+ · Apple Silicon" />
-          <p class="mt-2 font-mono text-xs text-muted/80">
-            Installs Houdini today — no Gatekeeper prompt.
-            <a href={links.install} class="text-accent underline-offset-2 hover:underline">Full install guide →</a>
-          </p>
-        </div>
-
-        <!-- On this page -->
-        <nav class="mt-9 flex flex-wrap gap-2" aria-label="On this page">
-          {
-            toc.map((t) => (
-              <a
-                href={`#${t.id}`}
-                class="rounded-full border border-border bg-surface/50 px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent/60 hover:text-text"
-              >
-                {t.label}
-              </a>
-            ))
-          }
-        </nav>
       </div>
     </header>
 
-    <div class="mx-auto mt-16 max-w-3xl space-y-20 px-5 pb-8 sm:px-8 sm:space-y-24">
+    <!-- Card-by-card tour -->
+    <Stepper id="guide" label="The Houdini guide, card by card" steps={steps} menu>
+      <!-- Quick start -->
+      <StepCard
+        slug="start"
+        index={0}
+        total={total}
+        eyebrow="Quick start"
+        title="Install Houdini in one line"
+        featured
+      >
+        <p class="text-sm leading-relaxed text-muted">
+          Paste this into Terminal and Houdini is installed — no Gatekeeper
+          prompt, nothing leaves your Mac. The rest of this guide explains what
+          you'll see.
+        </p>
+        <div class="mt-5">
+          <CopyBlock
+            code={installOneLiner}
+            label="install · macOS 14+ · Apple Silicon"
+          />
+          <p class="mt-2 font-mono text-xs text-muted/80">
+            <a
+              href={links.install}
+              class="text-accent underline-offset-2 hover:underline"
+              >Full install guide →</a
+            >
+          </p>
+        </div>
+      </StepCard>
+
       <!-- 1 · What it does -->
-      <section id="what" class="scroll-mt-24">
-        <h2 class="font-display text-2xl font-semibold sm:text-3xl">1 · What Houdini does</h2>
-        <p class="mt-4 leading-relaxed text-muted">
+      <StepCard slug="what" index={1} total={total} title="1 · What Houdini does">
+        <p class="leading-relaxed text-muted">
           Houdini is a native macOS app that lives in your menu bar and on your
           desktop. It reads the usage numbers your AI provider already keeps for
           you, and puts the tightest one right in your menu bar — refreshed every
           60 seconds. Click it for the full breakdown: each limit, when it resets,
           and any spend beyond your plan.
         </p>
-        <figure class="mt-6 overflow-hidden rounded-card border border-border bg-surface/50 p-4">
+        <figure
+          class="mt-6 overflow-hidden rounded-card border border-border bg-surface/50 p-4"
+        >
           <Image
             src={popoverDark}
             alt="The Houdini popover: a 5-hour session window at 32%, weekly at 95%, Sonnet weekly at 61%, and extra-usage spend at $93 of $100 — each with a color-coded gauge and a reset time."
@@ -103,12 +123,11 @@ const thresholds = [
             The popover — every window, its reset time, and your extra-usage spend.
           </figcaption>
         </figure>
-      </section>
+      </StepCard>
 
       <!-- 2 · Who it's for -->
-      <section id="who" class="scroll-mt-24">
-        <h2 class="font-display text-2xl font-semibold sm:text-3xl">2 · Who it's for</h2>
-        <p class="mt-4 leading-relaxed text-muted">
+      <StepCard slug="who" index={2} total={total} title="2 · Who it's for">
+        <p class="leading-relaxed text-muted">
           Anyone who lives in AI on a Mac and would rather not be surprised.
         </p>
         <div class="mt-6 grid gap-3 sm:grid-cols-2">
@@ -116,7 +135,8 @@ const thresholds = [
             <h3 class="font-semibold">Developers on a subscription</h3>
             <p class="mt-1.5 text-sm leading-relaxed text-muted">
               You run Claude Code or Claude Pro/Max all day and want to know how
-              close you are to the 5-hour or weekly wall before it stops you mid-task.
+              close you are to the 5-hour or weekly wall before it stops you
+              mid-task.
             </p>
           </div>
           <div class="rounded-card border border-border bg-surface/50 p-5">
@@ -127,15 +147,14 @@ const thresholds = [
             </p>
           </div>
         </div>
-      </section>
+      </StepCard>
 
       <!-- 3 · What it tracks -->
-      <section id="tracks" class="scroll-mt-24">
-        <h2 class="font-display text-2xl font-semibold sm:text-3xl">3 · What it tracks</h2>
-        <p class="mt-4 leading-relaxed text-muted">
-          There are two kinds of "usage", and Houdini is built to speak both. Today
-          it reveals your Claude subscription in full — every window, timer, and
-          extra-usage dollar.
+      <StepCard slug="tracks" index={3} total={total} title="3 · What it tracks">
+        <p class="leading-relaxed text-muted">
+          There are two kinds of "usage", and Houdini is built to speak both.
+          Today it reveals your Claude subscription in full — every window, timer,
+          and extra-usage dollar.
         </p>
         <dl class="mt-6 space-y-3">
           <div class="rounded-card border border-border bg-surface/50 p-5">
@@ -144,8 +163,9 @@ const thresholds = [
               <span class="font-mono text-[11px] font-normal text-ok">Live</span>
             </dt>
             <dd class="mt-1.5 text-sm leading-relaxed text-muted">
-              Your rolling <strong class="text-text">5-hour</strong> limit — the one
-              that throttles a long coding session. Shown as a percent of the window used.
+              Your rolling <strong class="text-text">5-hour</strong> limit — the
+              one that throttles a long coding session. Shown as a percent of the
+              window used.
             </dd>
           </div>
           <div class="rounded-card border border-border bg-surface/50 p-5">
@@ -154,8 +174,9 @@ const thresholds = [
               <span class="font-mono text-[11px] font-normal text-ok">Live</span>
             </dt>
             <dd class="mt-1.5 text-sm leading-relaxed text-muted">
-              The <strong class="text-text">7-day</strong> cap, plus the model-specific
-              weekly (Sonnet / Opus) so a heavy week on one model is visible on its own.
+              The <strong class="text-text">7-day</strong> cap, plus the
+              model-specific weekly (Sonnet / Opus) so a heavy week on one model
+              is visible on its own.
             </dd>
           </div>
           <div class="rounded-card border border-border bg-surface/50 p-5">
@@ -164,8 +185,8 @@ const thresholds = [
               <span class="font-mono text-[11px] font-normal text-ok">Live</span>
             </dt>
             <dd class="mt-1.5 text-sm leading-relaxed text-muted">
-              Every window shows exactly when it rolls back to zero — so "wait it out"
-              becomes a real decision, not a guess.
+              Every window shows exactly when it rolls back to zero — so "wait it
+              out" becomes a real decision, not a guess.
             </dd>
           </div>
           <div class="rounded-card border border-border bg-surface/50 p-5">
@@ -174,17 +195,23 @@ const thresholds = [
               <span class="font-mono text-[11px] font-normal text-ok">Live</span>
             </dt>
             <dd class="mt-1.5 text-sm leading-relaxed text-muted">
-              If you've enabled Claude Extra, Houdini shows the dollars spent past your
-              plan against your budget (for example, <span class="font-mono text-text">$93 / 100</span>).
+              If you've enabled Claude Extra, Houdini shows the dollars spent past
+              your plan against your budget (for example, <span
+                class="font-mono text-text">$93 / 100</span
+              >).
             </dd>
           </div>
         </dl>
-      </section>
+      </StepCard>
 
       <!-- 4 · Connect a provider -->
-      <section id="connect" class="scroll-mt-24">
-        <h2 class="font-display text-2xl font-semibold sm:text-3xl">4 · Connect a provider</h2>
-        <p class="mt-4 leading-relaxed text-muted">
+      <StepCard
+        slug="connect"
+        index={4}
+        total={total}
+        title="4 · Connect a provider"
+      >
+        <p class="leading-relaxed text-muted">
           Houdini never asks you to paste a secret into a web form. It reuses a
           credential you already have, kept in your macOS Keychain.
         </p>
@@ -194,20 +221,25 @@ const thresholds = [
             <h3 class="font-semibold">Claude</h3>
             <span class="font-mono text-[11px] text-ok">Live</span>
           </div>
-          <p class="mt-2 text-sm leading-relaxed text-muted">Two ways in — pick whichever you already have:</p>
+          <p class="mt-2 text-sm leading-relaxed text-muted">
+            Two ways in — pick whichever you already have:
+          </p>
           <ul class="mt-3 space-y-3 text-sm leading-relaxed text-muted">
             <li class="flex gap-3">
               <span class="font-mono text-accent-hover">A</span>
               <span>
-                <strong class="text-text">You use Claude Code.</strong> Houdini reuses its
-                OAuth token straight from the Keychain. Nothing to set up — install and it's already reading.
+                <strong class="text-text">You use Claude Code.</strong> Houdini
+                reuses its OAuth token straight from the Keychain. Nothing to set
+                up — install and it's already reading.
               </span>
             </li>
             <li class="flex gap-3">
               <span class="font-mono text-accent-hover">B</span>
               <span>
-                <strong class="text-text">You don't.</strong> Open Houdini's settings and sign in
-                to claude.ai once, in a native window. The session is stored in your Keychain and reused — no repeated logins.
+                <strong class="text-text">You don't.</strong> Open Houdini's
+                settings and sign in to claude.ai once, in a native window. The
+                session is stored in your Keychain and reused — no repeated
+                logins.
               </span>
             </li>
           </ul>
@@ -215,16 +247,21 @@ const thresholds = [
 
         <p class="mt-4 text-sm leading-relaxed text-muted">
           Houdini's core is provider-agnostic — every source plugs into the same
-          capability-driven model. As more of the AI you pay for is supported, each
-          one connects with a credential you already hold, kept in the Keychain the
-          same way. Houdini never shows a gauge it can't honestly fill.
+          capability-driven model. As more of the AI you pay for is supported,
+          each one connects with a credential you already hold, kept in the
+          Keychain the same way. Houdini never shows a gauge it can't honestly
+          fill.
         </p>
-      </section>
+      </StepCard>
 
       <!-- 5 · Reading the gauges -->
-      <section id="read" class="scroll-mt-24">
-        <h2 class="font-display text-2xl font-semibold sm:text-3xl">5 · Reading the gauges</h2>
-        <p class="mt-4 leading-relaxed text-muted">
+      <StepCard
+        slug="read"
+        index={5}
+        total={total}
+        title="5 · Reading the gauges"
+      >
+        <p class="leading-relaxed text-muted">
           Every limit is a gauge, and every gauge is colored by how close you are.
           The menu bar shows your tightest one; the popover shows them all.
         </p>
@@ -232,54 +269,78 @@ const thresholds = [
           {
             thresholds.map((t) => (
               <li class="flex flex-col gap-2 rounded-card border border-border bg-surface/50 p-4 sm:flex-row sm:items-center sm:gap-5">
-                <span class={`inline-flex shrink-0 items-center gap-2 font-mono text-sm ${t.text}`}>
-                  <span class={`h-2.5 w-2.5 rounded-full ${t.dot}`} aria-hidden="true" />
+                <span
+                  class={`inline-flex shrink-0 items-center gap-2 font-mono text-sm ${t.text}`}
+                >
+                  <span
+                    class={`h-2.5 w-2.5 rounded-full ${t.dot}`}
+                    aria-hidden="true"
+                  />
                   {t.range}
                 </span>
-                <span class="text-sm leading-relaxed text-muted">{t.meaning}</span>
+                <span class="text-sm leading-relaxed text-muted">
+                  {t.meaning}
+                </span>
               </li>
             ))
           }
         </ul>
-        <details class="group mt-4 rounded-card border border-border bg-surface/40 p-4">
-          <summary class="cursor-pointer list-none text-sm font-medium text-text">
-            What does the menu bar number mean? <span class="text-accent">Expand</span>
+        <details
+          class="group mt-4 rounded-card border border-border bg-surface/40 p-4"
+        >
+          <summary
+            class="cursor-pointer list-none text-sm font-medium text-text"
+          >
+            What does the menu bar number mean? <span class="text-accent"
+              >Expand</span
+            >
           </summary>
           <p class="mt-3 text-sm leading-relaxed text-muted">
-            By default Houdini shows your <strong class="text-text">tightest</strong> limit —
-            whichever window is closest to full — so the headline is always the one that
-            matters. In Settings you can pin it to a specific metric instead: the 5-hour
-            window, the weekly cap, the model-specific weekly, or your extra-usage spend
-            (shown as <span class="font-mono text-text">$93/100</span> rather than a percent).
+            By default Houdini shows your <strong class="text-text">tightest</strong
+            > limit — whichever window is closest to full — so the headline is
+            always the one that matters. In Settings you can pin it to a specific
+            metric instead: the 5-hour window, the weekly cap, the model-specific
+            weekly, or your extra-usage spend (shown as <span
+              class="font-mono text-text">$93/100</span
+            > rather than a percent).
           </p>
         </details>
-      </section>
+      </StepCard>
 
       <!-- 6 · Subscription vs API -->
-      <section id="kinds" class="scroll-mt-24">
-        <h2 class="font-display text-2xl font-semibold sm:text-3xl">6 · Subscription vs. API usage</h2>
-        <p class="mt-4 leading-relaxed text-muted">
-          The two billing worlds work differently — so Houdini measures them differently.
+      <StepCard
+        slug="kinds"
+        index={6}
+        total={total}
+        title="6 · Subscription vs. API usage"
+      >
+        <p class="leading-relaxed text-muted">
+          The two billing worlds work differently — so Houdini measures them
+          differently.
         </p>
         <div class="mt-6 overflow-hidden rounded-card border border-border">
-          <table class="w-full border-collapse text-left text-sm">
-            <caption class="sr-only">Subscription usage compared with API usage</caption>
+          <div class="overflow-x-auto">
+            <table class="w-full min-w-[34rem] border-collapse text-left text-sm">
+            <caption class="sr-only"
+              >Subscription usage compared with API usage</caption
+            >
             <thead>
               <tr class="bg-surface-2/70 text-muted">
                 <th scope="col" class="p-4 font-medium"></th>
                 <th scope="col" class="p-4 font-semibold text-text">
                   Subscription
                 </th>
-                <th scope="col" class="p-4 font-semibold text-text">
-                  API
-                </th>
+                <th scope="col" class="p-4 font-semibold text-text"> API </th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-border [&_td]:p-4 [&_td]:align-top [&_th]:p-4">
+            <tbody
+              class="divide-y divide-border [&_td]:p-4 [&_td]:align-top [&_th]:p-4"
+            >
               <tr class="bg-surface/40">
                 <th scope="row" class="font-medium text-muted">You pay</th>
                 <td class="text-muted">A flat monthly plan (Pro or Max)</td>
-                <td class="text-muted">Per request — dollars per million tokens</td>
+                <td class="text-muted">Per request — dollars per million tokens</td
+                >
               </tr>
               <tr class="bg-surface/20">
                 <th scope="row" class="font-medium text-muted">The limit is</th>
@@ -288,7 +349,9 @@ const thresholds = [
               </tr>
               <tr class="bg-surface/40">
                 <th scope="row" class="font-medium text-muted">Houdini shows</th>
-                <td class="text-muted">% of each window + reset time + extra-usage $</td>
+                <td class="text-muted"
+                  >% of each window + reset time + extra-usage $</td
+                >
                 <td class="text-muted">$ spent this period + token counts</td>
               </tr>
               <tr class="bg-surface/20">
@@ -298,26 +361,35 @@ const thresholds = [
               </tr>
             </tbody>
           </table>
+          </div>
         </div>
         <p class="mt-3 text-sm leading-relaxed text-muted">
-          On a subscription there's no API key and no per-token bill — you're tracking
-          how much of your window is left. With an API key you're tracking spend.
-          Houdini is built to put both in the same menu bar; your Claude subscription
-          is revealed there today.
+          On a subscription there's no API key and no per-token bill — you're
+          tracking how much of your window is left. With an API key you're
+          tracking spend. Houdini is built to put both in the same menu bar; your
+          Claude subscription is revealed there today.
         </p>
-      </section>
+      </StepCard>
 
       <!-- 7 · What stays local -->
-      <section id="privacy" class="scroll-mt-24">
-        <h2 class="font-display text-2xl font-semibold sm:text-3xl">7 · What stays on your Mac</h2>
-        <p class="mt-4 leading-relaxed text-muted">
-          The privacy model is the simplest part of the act: there's nothing up the sleeve.
+      <StepCard
+        slug="privacy"
+        index={7}
+        total={total}
+        title="7 · What stays on your Mac"
+      >
+        <p class="leading-relaxed text-muted">
+          The privacy model is the simplest part of the act: there's nothing up
+          the sleeve.
         </p>
         <div class="mt-6 grid gap-3 sm:grid-cols-2">
           <div class="rounded-card border border-border bg-surface/50 p-5">
             <h3 class="font-semibold text-text">Stays local</h3>
             <ul class="mt-2 space-y-2 text-sm leading-relaxed text-muted">
-              <li>· Your tokens and cookies — in the macOS Keychain, read but never copied out.</li>
+              <li>
+                · Your tokens and cookies — in the macOS Keychain, read but never
+                copied out.
+              </li>
               <li>· Your usage numbers — fetched and rendered on-device.</li>
               <li>· Your settings — in local preferences.</li>
             </ul>
@@ -326,32 +398,42 @@ const thresholds = [
             <h3 class="font-semibold text-text">Leaves your Mac</h3>
             <ul class="mt-2 space-y-2 text-sm leading-relaxed text-muted">
               <li>· One request, straight to your provider's own endpoint.</li>
-              <li>· Signed with your own credential — no proxy, no Houdini server.</li>
+              <li>
+                · Signed with your own credential — no proxy, no Houdini server.
+              </li>
               <li>· No telemetry, no analytics, no account.</li>
             </ul>
           </div>
         </div>
         <p class="mt-4 text-sm leading-relaxed text-muted">
-          There is no Houdini backend — none exists to receive your data. The whole
-          project is open-source, so you can read exactly what it does before you run it.
+          There is no Houdini backend — none exists to receive your data. The
+          whole project is open-source, so you can read exactly what it does
+          before you run it.
         </p>
-      </section>
+      </StepCard>
 
       <!-- Closing CTA -->
-      <section class="scroll-mt-24">
-        <div class="relative overflow-hidden rounded-frame ring-grad p-8 text-center sm:p-12">
-          <div class="spotlight pointer-events-none absolute inset-0 -z-10 opacity-50" aria-hidden="true"></div>
-          <h2 class="font-display text-2xl font-semibold sm:text-3xl">Ready when you are.</h2>
-          <p class="mx-auto mt-3 max-w-md text-muted">
-            One line, no Gatekeeper prompt, nothing leaves your Mac. Pull your limits into the light.
-          </p>
-          <div class="mt-6 flex flex-wrap justify-center gap-3">
-            <Button href={links.install} variant="primary" size="lg">Install Houdini</Button>
-            <Button href="/#reveals" variant="secondary" size="lg">See what it reveals</Button>
-          </div>
+      <StepCard
+        slug="ready"
+        index={8}
+        total={total}
+        title="Ready when you are."
+        featured
+      >
+        <p class="text-muted">
+          One line, no Gatekeeper prompt, nothing leaves your Mac. Pull your
+          limits into the light.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <Button href={links.install} variant="primary" size="lg">
+            Install Houdini
+          </Button>
+          <Button href="/#reveals" variant="secondary" size="lg">
+            See what it reveals
+          </Button>
         </div>
-      </section>
-    </div>
+      </StepCard>
+    </Stepper>
   </main>
   <Footer />
 </Layout>

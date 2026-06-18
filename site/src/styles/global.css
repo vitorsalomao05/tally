@@ -177,3 +177,67 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ── Stepper / wizard ─────────────────────────────────────────────────────────
+   /install and /guide step through one card at a time. Progressive enhancement
+   built on the existing `html.js` (set before paint): with no JS every card is
+   rendered stacked and the chrome (progress, dots, prev/next) is hidden — full
+   content, anchor-navigable, good for SEO and as a fallback. With JS the engine
+   in Stepper.astro reveals one card at a time. The reduced-motion rule above
+   already neutralises the reveal animation and bar transition → instant swaps. */
+@layer components {
+  /* Interactive chrome is meaningless without JS — hide it, keep the cards. */
+  html:not(.js) .stepper-enhanced-only {
+    display: none !important;
+  }
+
+  /* Before the engine marks the stepper enhanced, collapse to the first card so
+     JS users don't see every card flash in stacked (pre-paint via html.js). */
+  .js .stepper:not([data-enhanced]) .stepper-card:not(:first-child) {
+    display: none;
+  }
+  /* Once enhanced, only the active card shows. */
+  .js .stepper[data-enhanced] .stepper-card:not(.is-active) {
+    display: none;
+  }
+  /* Safety net: if the engine throws, fall back to the full stacked content —
+     including any decision panel or recap line the engine had already hidden. */
+  .stepper.stepper-failed .stepper-card {
+    display: block !important;
+  }
+  .stepper.stepper-failed [data-choice-panel],
+  .stepper.stepper-failed [data-recap-when] {
+    display: block !important;
+  }
+
+  /* Each card enters with a short "reveal" (a lift into the spotlight). */
+  .js .stepper[data-enhanced] .stepper-card.is-active {
+    animation: stepper-reveal 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes stepper-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* The card heading is the programmatic focus target on step change. Suppress
+     the outline only for non-keyboard focus (e.g. after a mouse click on Next);
+     keyboard users still get the violet :focus-visible ring from the base layer. */
+  .stepper-card-title:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Progress fill — the violet→magenta spotlight track. */
+  .stepper-bar-fill {
+    background: linear-gradient(
+      90deg,
+      var(--color-accent),
+      var(--color-magenta)
+    );
+  }
+}

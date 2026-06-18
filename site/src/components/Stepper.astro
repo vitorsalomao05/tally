@@ -1,0 +1,388 @@
+---
+// Step-by-step container for /install (wizard) and /guide (linear tour).
+// Cards are slotted in by the page; the engine below auto-inits every
+// [data-stepper] on the page. Progressive enhancement: no JS → cards render
+// stacked (chrome hidden, see global.css); JS → one card at a time with
+// progress, prev/next, hash deep-linking, keyboard nav and focus management.
+interface Step {
+  slug: string;
+  label: string;
+}
+interface Props {
+  id: string;
+  label: string; // aria-label for the whole stepper
+  steps: Step[];
+  menu?: boolean; // render a jump-to-any-card menu (guide)
+  store?: boolean; // persist decision choices in localStorage (install)
+}
+const { id, label, steps, menu = false, store = false } = Astro.props;
+const total = steps.length;
+const storeKey = store ? `houdini.${id}` : undefined;
+---
+
+<section
+  class="stepper mx-auto mt-10 max-w-3xl px-5 sm:mt-12 sm:px-8"
+  data-stepper
+  data-stepper-store={storeKey}
+  id={id}
+  role="group"
+  aria-label={label}
+>
+  {/* Jump menu — real anchors, so they also work as a TOC without JS. */}
+  {
+    menu && (
+      <nav
+        class="stepper-menu -mx-1 mb-6 flex flex-wrap gap-2 px-1"
+        aria-label="Jump to a step"
+      >
+        {steps.map((s) => (
+          <a
+            href={`#${s.slug}`}
+            data-stepper-goto={s.slug}
+            class="rounded-full border border-border bg-surface/50 px-3 py-1.5 text-sm text-muted transition-colors hover:border-accent/60 hover:text-text aria-[current=step]:border-accent/70 aria-[current=step]:bg-accent/15 aria-[current=step]:text-text"
+          >
+            {s.label}
+          </a>
+        ))}
+      </nav>
+    )
+  }
+
+  {/* Progress bar + count */}
+  <div class="stepper-enhanced-only mb-5 flex items-center gap-4">
+    <div
+      class="relative h-1.5 flex-1 overflow-hidden rounded-full bg-surface-2"
+      role="progressbar"
+      data-stepper-progressbar
+      aria-valuemin="1"
+      aria-valuemax={total}
+      aria-valuenow="1"
+      aria-valuetext={`Step 1 of ${total}: ${steps[0]?.label ?? ""}`}
+      aria-label="Progress"
+    >
+      <div
+        class="stepper-bar-fill absolute inset-y-0 left-0 rounded-full transition-[width] duration-500 ease-out"
+        data-stepper-bar-fill
+        style="width:0%"
+      >
+      </div>
+    </div>
+    <span
+      class="shrink-0 font-mono text-xs text-muted"
+      data-stepper-count
+    >
+      Step 1 of {total}
+    </span>
+  </div>
+
+  {/* Dots — a glanceable map for the wizard (no jump menu). Decorative. */}
+  {
+    !menu && (
+      <ol
+        class="stepper-enhanced-only mb-6 flex items-center gap-2"
+        aria-hidden="true"
+      >
+        {steps.map(() => (
+          <li
+            class="h-1.5 w-1.5 rounded-full bg-border-bright transition-all duration-300 data-[state=done]:w-4 data-[state=done]:bg-accent data-[state=current]:w-6 data-[state=current]:bg-accent"
+            data-stepper-dot
+          />
+        ))}
+      </ol>
+    )
+  }
+
+  {/* Cards */}
+  <div class="stepper-cards space-y-5" data-stepper-cards>
+    <slot />
+  </div>
+
+  {/* Controls */}
+  <div
+    class="stepper-enhanced-only mt-6 flex items-center justify-between gap-4"
+  >
+    <button
+      type="button"
+      data-stepper-prev
+      class="group inline-flex items-center gap-2 rounded-xl border border-border bg-surface/60 px-4 py-2.5 text-sm font-medium text-text transition-colors hover:border-accent/60 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        class="transition-transform group-hover:-translate-x-0.5"
+      >
+        <path d="m15 18-6-6 6-6"></path>
+      </svg>
+      Back
+    </button>
+    <button
+      type="button"
+      data-stepper-next
+      class="group inline-flex items-center gap-2 rounded-xl bg-accent-strong px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-accent/25 transition-colors hover:bg-accent-strong-hover disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      Next
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        class="transition-transform group-hover:translate-x-0.5"
+      >
+        <path d="m9 18 6-6-6-6"></path>
+      </svg>
+    </button>
+  </div>
+
+  {/* Screen-reader step announcements */}
+  <p class="sr-only" role="status" aria-live="polite" data-stepper-live></p>
+</section>
+
+<script>
+  type El = HTMLElement;
+
+  function initStepper(root: El) {
+    const cardsWrap = root.querySelector<El>("[data-stepper-cards]");
+    if (!cardsWrap) return;
+    const cards = Array.from(
+      cardsWrap.querySelectorAll<El>(":scope > [data-step]"),
+    );
+    if (!cards.length) return;
+
+    const slugs = cards.map((c) => c.dataset.stepSlug ?? "");
+    const labels = cards.map((c) => c.dataset.stepLabel ?? "");
+    const total = cards.length;
+
+    const barFill = root.querySelector<El>("[data-stepper-bar-fill]");
+    const progressbar = root.querySelector<El>("[data-stepper-progressbar]");
+    const count = root.querySelector<El>("[data-stepper-count]");
+    const live = root.querySelector<El>("[data-stepper-live]");
+    const prevBtn = root.querySelector<HTMLButtonElement>("[data-stepper-prev]");
+    const nextBtn = root.querySelector<HTMLButtonElement>("[data-stepper-next]");
+    const gotoEls = Array.from(
+      root.querySelectorAll<El>("[data-stepper-goto]"),
+    );
+    const dots = Array.from(root.querySelectorAll<El>("[data-stepper-dot]"));
+    const storeKey = root.dataset.stepperStore ?? "";
+    const reduceMQ = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    const choices: Record<string, string> = {};
+    let index = 0;
+
+    // ── Decisions / branches ────────────────────────────────────────────────
+    function restoreChoices() {
+      // Defaults come from the markup: the first option seen sets a baseline,
+      // an explicit data-default wins.
+      root.querySelectorAll<El>("[data-choice]").forEach((btn) => {
+        const name = btn.dataset.choice;
+        const value = btn.dataset.value;
+        if (!name || value === undefined) return;
+        if (!(name in choices) || btn.hasAttribute("data-default"))
+          choices[name] = value;
+      });
+      if (storeKey) {
+        try {
+          const saved = JSON.parse(
+            localStorage.getItem(storeKey + ".choices") || "{}",
+          );
+          for (const k in saved)
+            if (typeof saved[k] === "string") choices[k] = saved[k];
+        } catch {
+          /* ignore unavailable / malformed storage */
+        }
+      }
+    }
+    function persist() {
+      if (!storeKey) return;
+      try {
+        localStorage.setItem(storeKey + ".choices", JSON.stringify(choices));
+      } catch {
+        /* ignore */
+      }
+    }
+    function syncChoiceUI() {
+      root.querySelectorAll<El>("[data-choice]").forEach((btn) => {
+        const name = btn.dataset.choice ?? "";
+        btn.setAttribute(
+          "aria-pressed",
+          String(btn.dataset.value === choices[name]),
+        );
+      });
+      root.querySelectorAll<El>("[data-choice-panel]").forEach((panel) => {
+        const name = panel.dataset.choicePanel ?? "";
+        panel.hidden = panel.dataset.value !== choices[name];
+      });
+      root.querySelectorAll<El>("[data-recap-when]").forEach((el) => {
+        const [name, value] = (el.dataset.recapWhen || "").split(":");
+        el.hidden = choices[name] !== value;
+      });
+    }
+    function choose(name: string, value: string) {
+      choices[name] = value;
+      syncChoiceUI();
+      persist();
+    }
+
+    // ── Rendering ───────────────────────────────────────────────────────────
+    function setActive(i: number) {
+      index = Math.max(0, Math.min(total - 1, i));
+      cards.forEach((c, idx) => {
+        const active = idx === index;
+        c.classList.toggle("is-active", active);
+        c.setAttribute("aria-hidden", String(!active));
+        // display:none already drops inactive cards from the tab order; inert is
+        // belt-and-suspenders (also covers the brief pre-[data-enhanced] window).
+        c.toggleAttribute("inert", !active);
+      });
+      const pct = ((index + 1) / total) * 100;
+      if (barFill) barFill.style.width = pct + "%";
+      if (count) count.textContent = `Step ${index + 1} of ${total}`;
+      if (progressbar) {
+        progressbar.setAttribute("aria-valuenow", String(index + 1));
+        progressbar.setAttribute(
+          "aria-valuetext",
+          `Step ${index + 1} of ${total}: ${labels[index]}`,
+        );
+      }
+      gotoEls.forEach((a) => {
+        if (a.dataset.stepperGoto === slugs[index])
+          a.setAttribute("aria-current", "step");
+        else a.removeAttribute("aria-current");
+      });
+      dots.forEach((d, idx) => {
+        d.dataset.state =
+          idx < index ? "done" : idx === index ? "current" : "upcoming";
+      });
+      if (prevBtn) prevBtn.disabled = index === 0;
+      if (nextBtn) nextBtn.disabled = index === total - 1;
+    }
+
+    function focusCard() {
+      const card = cards[index];
+      const target =
+        card.querySelector<El>("[data-step-focus]") ?? card;
+      target.focus({ preventScroll: true });
+    }
+    function scrollIntoView() {
+      const navOffset = 80; // matches global scroll-padding-top (5rem) + card scroll-mt-20
+      const top = root.getBoundingClientRect().top + window.scrollY - navOffset;
+      window.scrollTo({
+        top: Math.max(0, top),
+        behavior: reduceMQ.matches ? "auto" : "smooth",
+      });
+    }
+    function announce() {
+      if (live)
+        live.textContent = `Step ${index + 1} of ${total}: ${labels[index]}`;
+    }
+
+    function indexForHash(): number {
+      const h = decodeURIComponent(location.hash.replace(/^#/, ""));
+      const i = slugs.indexOf(h);
+      return i >= 0 ? i : 0;
+    }
+
+    function render(i: number, userMoved: boolean) {
+      setActive(i);
+      if (userMoved) {
+        announce();
+        focusCard();
+        scrollIntoView();
+      }
+    }
+
+    // User navigation drives the URL hash, so the URL stays shareable and the
+    // browser Back/Forward buttons step through cards.
+    function go(i: number) {
+      const target = Math.max(0, Math.min(total - 1, i));
+      const slug = slugs[target];
+      const current = decodeURIComponent(location.hash.replace(/^#/, ""));
+      if (slug && current !== slug) {
+        location.hash = slug; // → hashchange → render
+      } else {
+        render(target, true);
+      }
+    }
+
+    // ── Wire up ─────────────────────────────────────────────────────────────
+    restoreChoices();
+    syncChoiceUI();
+
+    root.addEventListener("click", (e) => {
+      const t = e.target as El;
+      const choiceBtn = t.closest<El>("[data-choice]");
+      if (choiceBtn && root.contains(choiceBtn)) {
+        choose(choiceBtn.dataset.choice ?? "", choiceBtn.dataset.value ?? "");
+        return;
+      }
+      const gotoEl = t.closest<El>("[data-stepper-goto]");
+      if (gotoEl) {
+        e.preventDefault();
+        go(slugs.indexOf(gotoEl.dataset.stepperGoto ?? ""));
+      }
+    });
+    prevBtn?.addEventListener("click", () => go(index - 1));
+    nextBtn?.addEventListener("click", () => go(index + 1));
+
+    root.addEventListener("keydown", (e) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const t = e.target as El;
+      if (
+        t.closest(
+          "input, textarea, select, [contenteditable], [data-no-arrow-nav]",
+        )
+      )
+        return;
+      switch (e.key) {
+        case "ArrowRight":
+          e.preventDefault();
+          go(index + 1);
+          break;
+        case "ArrowLeft":
+          e.preventDefault();
+          go(index - 1);
+          break;
+        case "Home":
+          e.preventDefault();
+          go(0);
+          break;
+        case "End":
+          e.preventDefault();
+          go(total - 1);
+          break;
+      }
+    });
+
+    window.addEventListener("hashchange", () => render(indexForHash(), true));
+
+    // ── Start ───────────────────────────────────────────────────────────────
+    const start = indexForHash();
+    setActive(start);
+    root.setAttribute("data-enhanced", "");
+    if (start > 0) {
+      announce(); // tell screen-reader users which step the deep link landed on
+      scrollIntoView(); // honour a deep link without stealing focus
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-stepper]").forEach((root) => {
+    try {
+      initStepper(root);
+    } catch (err) {
+      // Never trap the reader: revert to the full stacked content.
+      root.classList.add("stepper-failed");
+      console.error("Stepper failed to initialise:", err);
+    }
+  });
+</script>
