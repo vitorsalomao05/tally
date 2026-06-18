@@ -17,11 +17,11 @@ import { links } from "../config";
         Make your limits disappear.
       </h2>
       <p class="text-muted">
-        Put your AI usage and spend in the menu bar — refreshed every 60 seconds,
-        kept entirely on your Mac.
+        Put your AI usage and spend in your menu bar and on your desktop —
+        refreshed every 60 seconds, kept entirely on your Mac.
       </p>
       <div class="flex flex-wrap items-center justify-center gap-3">
-        <Button href="/#install" variant="primary" size="lg">Get Houdini — free</Button>
+        <Button href={links.install} variant="primary" size="lg">Install Houdini</Button>
         <Button href={links.github} variant="secondary" size="lg" external>
           View on GitHub
         </Button>
@@ -36,6 +36,7 @@ import { links } from "../config";
     >
       <Logo />
       <nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted" aria-label="Footer">
+        <a href={links.install} class="transition-colors hover:text-text">Install</a>
         <a href={links.guide} class="transition-colors hover:text-text">Guide</a>
         <a
           href={links.github}

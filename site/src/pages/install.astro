@@ -1,0 +1,168 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+import Button from "../components/Button.astro";
+import CopyBlock from "../components/CopyBlock.astro";
+import { installOneLiner, installFromSource, links, surfaces } from "../config";
+---
+
+<Layout
+  title="Install — Houdini"
+  description="Install Houdini in three steps: run one command, connect Claude, and read your AI usage and spend from your Mac menu bar and desktop. macOS 14+, Apple Silicon."
+>
+  <Nav />
+  <main id="main" tabindex="-1">
+    <!-- Header -->
+    <header class="relative overflow-hidden pt-28 sm:pt-36">
+      <div
+        class="spotlight pointer-events-none absolute -top-40 right-[-10%] -z-10 h-[440px] w-[440px] opacity-60"
+        aria-hidden="true"
+      >
+      </div>
+      <div class="mx-auto max-w-3xl px-5 sm:px-8">
+        <span
+          class="inline-flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.18em] text-accent"
+        >
+          <span class="inline-block h-[3px] w-6 rounded-full bg-gradient-to-r from-accent to-magenta" aria-hidden="true"></span>
+          Install
+        </span>
+        <h1 class="mt-4 font-display text-[2.4rem] font-semibold leading-[1.06] sm:text-5xl">
+          Up and running in three steps.
+        </h1>
+        <p class="mt-4 text-lg leading-relaxed text-muted">
+          One command installs Houdini, it reuses a login you already have, and
+          your limits appear in the menu bar. No account, no server — nothing
+          leaves your Mac.
+        </p>
+        <p class="mt-3 font-mono text-xs text-muted/80">
+          macOS 14 (Sonoma)+ · Apple Silicon · free &amp; open source
+        </p>
+      </div>
+    </header>
+
+    <!-- Three steps -->
+    <div class="mx-auto mt-16 max-w-3xl space-y-6 px-5 sm:px-8">
+      <!-- 1 · Run the command -->
+      <section class="rounded-frame ring-grad p-6 sm:p-8">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent-strong font-display text-sm font-semibold text-white">1</span>
+          <h2 class="font-display text-xl font-semibold sm:text-2xl">Run the command</h2>
+        </div>
+        <p class="mt-3 text-sm leading-relaxed text-muted">
+          Paste this into Terminal. It downloads Houdini and the
+          <code class="font-mono text-text">houdini</code> helper from the pinned
+          release, <span class="text-text">verifies their SHA-256</span>, then installs
+          without <code class="font-mono text-text">sudo</code> — and with no Gatekeeper
+          prompt. It offers (never forces) launch-at-login, and re-running is safe.
+        </p>
+        <div class="mt-5">
+          <CopyBlock code={installOneLiner} label="install · macOS 14+ · Apple Silicon" />
+        </div>
+      </section>
+
+      <!-- 2 · Connect Claude -->
+      <section class="rounded-frame border border-border bg-surface/50 p-6 sm:p-8">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2 font-display text-sm font-semibold text-text">2</span>
+          <h2 class="font-display text-xl font-semibold sm:text-2xl">Connect Claude</h2>
+        </div>
+        <p class="mt-3 text-sm leading-relaxed text-muted">
+          Houdini never asks you to paste a secret into a form. It reuses a credential
+          you already have, kept in your macOS Keychain.
+        </p>
+        <ul class="mt-4 space-y-3 text-sm leading-relaxed text-muted">
+          <li class="flex gap-3">
+            <span class="font-mono text-accent-hover">A</span>
+            <span>
+              <strong class="text-text">You use Claude Code.</strong> Houdini reuses its
+              OAuth token straight from the Keychain — nothing to set up. It's already reading.
+            </span>
+          </li>
+          <li class="flex gap-3">
+            <span class="font-mono text-accent-hover">B</span>
+            <span>
+              <strong class="text-text">You don't.</strong> Open Houdini's settings and sign
+              in to claude.ai once, in a native window. The session is stored in your Keychain
+              and reused — no repeated logins.
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <!-- 3 · You're done -->
+      <section class="rounded-frame border border-border bg-surface/50 p-6 sm:p-8">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-2 font-display text-sm font-semibold text-text">3</span>
+          <h2 class="font-display text-xl font-semibold sm:text-2xl">You're done</h2>
+        </div>
+        <p class="mt-3 text-sm leading-relaxed text-muted">
+          Your tightest limit is now in the menu bar, color-coded and refreshed every
+          60 seconds. Click it for the full popover — every window, its reset timer,
+          and any extra-usage spend. Want it on your wallpaper too? The
+          <strong class="text-text">desktop widget is part of the app</strong> — turn it
+          on in Settings.
+        </p>
+      </section>
+    </div>
+
+    <!-- What's included -->
+    <section class="mx-auto mt-20 max-w-3xl px-5 sm:px-8 sm:mt-24">
+      <h2 class="font-display text-2xl font-semibold sm:text-3xl">What's included</h2>
+      <p class="mt-3 text-sm leading-relaxed text-muted">
+        Houdini is one app. The same data shows up in two places — use one or both.
+      </p>
+      <div class="mt-6 grid gap-3 sm:grid-cols-2">
+        {
+          surfaces.map((s) => (
+            <div class="rounded-card border border-border bg-surface/50 p-5">
+              <div class="flex items-center gap-2">
+                <h3 class="font-semibold">{s.title}</h3>
+                <span class="inline-flex items-center gap-1.5 font-mono text-[11px] text-ok">
+                  <span class="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
+                  Built in
+                </span>
+              </div>
+              <p class="mt-2 text-sm leading-relaxed text-muted">{s.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <!-- For developers -->
+    <section class="mx-auto mt-12 max-w-3xl px-5 pb-4 sm:px-8">
+      <details class="group rounded-card border border-border bg-surface/40 p-5">
+        <summary class="cursor-pointer list-none text-sm font-medium text-muted transition-colors hover:text-text">
+          For developers — build from source <span class="text-accent">Show the commands</span>
+        </summary>
+        <div class="mt-4">
+          <p class="text-sm leading-relaxed text-muted">
+            Prefer to compile it yourself? Clone the repo and build the app. Needs the
+            Xcode Command Line Tools.
+          </p>
+          <div class="mt-3">
+            <CopyBlock code={installFromSource} label="build from source" />
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- Closing CTA -->
+    <section class="mx-auto mt-8 max-w-3xl px-5 pb-8 sm:px-8">
+      <div class="relative overflow-hidden rounded-frame ring-grad p-8 text-center sm:p-12">
+        <div class="spotlight pointer-events-none absolute inset-0 -z-10 opacity-50" aria-hidden="true"></div>
+        <h2 class="font-display text-2xl font-semibold sm:text-3xl">New here?</h2>
+        <p class="mx-auto mt-3 max-w-md text-muted">
+          The guide walks through what Houdini tracks, how to connect, and how to read
+          every gauge.
+        </p>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <Button href={links.guide} variant="primary" size="lg">Read the guide</Button>
+          <Button href={links.github} variant="secondary" size="lg" external>View on GitHub</Button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Layout>

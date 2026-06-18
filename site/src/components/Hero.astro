@@ -6,6 +6,8 @@ import { links } from "../config";
 import popoverDark from "../assets/popover-dark.png";
 ---
 
+
+
 <section id="top" class="relative overflow-hidden pt-28 sm:pt-36">
   <!-- the stage spotlight, behind the headline -->
   <div
@@ -39,28 +41,20 @@ import popoverDark from "../assets/popover-dark.png";
       </h1>
 
       <p class="max-w-xl text-lg leading-relaxed text-muted">
-        Houdini lives in your Mac menu bar and reveals what your AI is really
-        costing you — your Claude limits, reset timers, and extra-usage dollars
-        today, refreshed every 60 seconds. No account, no server. Nothing
-        leaves your Mac.
+        Houdini reveals what your AI is really costing you — your Claude limits,
+        reset timers, and extra-usage dollars, refreshed every 60 seconds. In
+        your menu bar and on your desktop. No account, no server. Nothing leaves
+        your Mac.
       </p>
 
       <div class="flex flex-wrap items-center gap-3 pt-1">
-        <Button href="#install" variant="primary" size="lg">Get Houdini — free</Button>
-        <Button href={links.github} variant="secondary" size="lg" external>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path
-              d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.05-.72.08-.7.08-.7 1.17.08 1.78 1.2 1.78 1.2 1.04 1.78 2.73 1.27 3.4.97.1-.75.4-1.27.73-1.56-2.56-.29-5.26-1.28-5.26-5.7 0-1.26.45-2.29 1.2-3.1-.12-.3-.52-1.47.11-3.05 0 0 .98-.31 3.2 1.18a11.1 11.1 0 0 1 5.83 0c2.22-1.5 3.2-1.18 3.2-1.18.63 1.58.23 2.75.11 3.05.75.81 1.2 1.84 1.2 3.1 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5Z"
-            ></path>
-          </svg>
-          View on GitHub
-        </Button>
+        <Button href={links.install} variant="primary" size="lg">Install Houdini</Button>
+        <Button href={links.guide} variant="secondary" size="lg">How it works</Button>
       </div>
 
-      <div class="space-y-1 font-mono text-xs text-muted/80">
-        <p>One line installs the menu bar app today — no Gatekeeper prompt · notarized DMG soon</p>
-        <p>macOS 14+ · Apple Silicon · Claude live today — OpenAI, Gemini &amp; Console next</p>
-      </div>
+      <p class="font-mono text-xs text-muted/80">
+        macOS 14+ · Apple Silicon · free, local-first &amp; open source
+      </p>
     </div>
 
     <div class="reveal" style="--reveal-delay: 120ms">

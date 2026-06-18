@@ -1,8 +1,11 @@
 # Houdini — landing site
 
-Static landing page for Houdini. **Astro + Tailwind CSS v4**, dark Linear-style with
-an electric-blue accent. Builds to `dist/`, deployed to **Vercel** at
-**[houdini.salomao.org](https://houdini.salomao.org)**.
+Static site for Houdini. **Astro + Tailwind CSS v4**, dark "stage" identity (velvet
+surfaces, violet→magenta spotlight, a gold reveal spark). Builds to `dist/`, deployed
+to **Vercel** at **[houdini.salomao.org](https://houdini.salomao.org)**.
+
+Houdini is the only brand on the site. "Menu bar" and "Desktop widget" are co-equal
+**features** of the one app — never separate products, sections, or logos.
 
 ## Develop
 
@@ -16,22 +19,26 @@ npm run preview  # serve the built dist/ locally
 
 ## Structure
 
-- `src/pages/index.astro` — composes the single page.
-- `src/components/*.astro` — one component per section (Hero, Surfaces, Install, …).
+- `src/pages/index.astro` — the home page (composed from section components).
+- `src/pages/install.astro` — the dedicated three-step install flow.
+- `src/pages/guide.astro` — the didactic walkthrough.
+- `src/components/*.astro` — one component per home section (Hero, Reveals, Surfaces, …).
 - `src/styles/global.css` — design tokens (`@theme`) + base + motion utilities.
-- `src/config.ts` — **all external URLs in one place.** Search `TODO(phase 6)` for the
-  links distribution must fill in (GitHub repo, signed DMG, changelog, OG image, domain).
+- `src/config.ts` — **all external URLs, the version pin, and the page content model in
+  one place.** A release bump or copy tweak is a one-file edit.
 - `src/assets/` — real product screenshots (optimized to webp at build).
-- `docs/screenshots/` — rendered home page captures (desktop 1440 + mobile 390).
 
 ## Notes
 
 - Accessible by design: WCAG AA contrast, visible keyboard focus, `prefers-reduced-motion`
   respected, on-scroll reveals gated behind `html.js` so the page is fully visible without JS.
-- Honest copy: no fabricated social proof; "coming soon" states for the signed DMG, Apple
-  notarization, the Notification Center widget, and non-Claude providers.
+- Honest copy: no fabricated social proof, and **no "coming soon" placeholders** — a surface
+  is real and shown, or absent (ADR-010). Capability is one honest line: Claude today,
+  built to grow.
+- No provider API/admin key ever lives in this site or the repo — keys belong only in the
+  app's macOS Keychain (ADR-011).
 - Deploy: **Vercel** — root directory `site`, framework Astro, build `npm run build`,
   output `dist`. Live at https://houdini.salomao.org. Production deploys with
-  `vercel --prod` from `site/`.
+  `vercel --prod` from `site/`; `vercel deploy` (no `--prod`) makes a review-only preview.
 - OG card: `node scripts/og/build.mjs` regenerates `public/og.png` (1200×630, rendered
   with headless Chrome from an inlined HTML template).

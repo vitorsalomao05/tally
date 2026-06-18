@@ -1,7 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import SectionHeader from "./SectionHeader.astro";
-import ubersichtPreview from "../assets/ubersicht-preview.png";
+import desktopWidget from "../assets/desktop-widget.png";
 
 // A native render of Houdini's gauge language (the product's signature), so it
 // lives in the DOM and not only inside the screenshots. Illustrative sample.
@@ -18,37 +18,26 @@ const gauges = [
 >
   <div class="reveal">
     <SectionHeader
-      eyebrow="Surfaces"
-      title="One core, wherever you look."
-      subtitle="The same shared data layer, revealed where it fits your workflow — pinned to the menu bar or laid out across your desktop."
+      eyebrow="Where it shows up"
+      title="In the menu bar, on your desktop — one app."
+      subtitle="The same Houdini, the same data, the same true 60-second refresh — revealed wherever it fits your workflow. Both are built in; pick one or run both."
     />
   </div>
 
   <div class="mt-14 grid gap-4 md:grid-cols-2">
-    <!-- Flagship: menu bar app — installable TODAY via the one-liner -->
-    <article class="reveal ring-grad flex flex-col overflow-hidden rounded-card">
+    <!-- Menu bar — native, with a live render of the gauge language -->
+    <article class="reveal flex flex-col overflow-hidden rounded-card border border-border bg-surface/50">
       <div class="p-6 sm:p-7">
         <div class="flex items-center justify-between gap-2">
-          <span
-            class="inline-flex items-center gap-1.5 rounded-full bg-accent/12 px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-accent-hover"
-          >
-            Flagship
-          </span>
+          <h3 class="text-xl font-semibold">Menu bar</h3>
           <span class="inline-flex items-center gap-1.5 font-mono text-xs text-ok">
             <span class="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true"></span>Live · every 60s
           </span>
         </div>
-        <h3 class="mt-5 text-xl font-semibold">Menu bar app</h3>
-        <p class="mt-2 text-sm leading-relaxed text-muted">
-          The full experience, and the one-liner installs it today. Your tightest
-          limit lives in the menu bar; click for a popover with every window, reset
-          timer, and overage — refreshed every 60 seconds. A notarized DMG is next.
+        <p class="mt-3 text-sm leading-relaxed text-muted">
+          Your tightest limit sits in the menu bar. Click for a popover with every
+          window, its reset timer, and any overage — refreshed every 60 seconds.
         </p>
-        <ul class="mt-5 flex flex-wrap gap-2 font-mono text-xs text-muted">
-          <li class="rounded-md border border-border bg-surface-2/60 px-2 py-1">SwiftUI MenuBarExtra</li>
-          <li class="rounded-md border border-border bg-surface-2/60 px-2 py-1">True 60s refresh</li>
-          <li class="rounded-md border border-border bg-surface-2/60 px-2 py-1">~6 MB</li>
-        </ul>
       </div>
       <div class="mt-auto border-t border-border/60 bg-surface-2/40 p-4">
         <div class="space-y-3 rounded-lg border border-border/60 bg-surface p-4">
@@ -69,50 +58,29 @@ const gauges = [
       </div>
     </article>
 
-    <!-- Übersicht widget with real preview -->
-    <article
-      class="reveal flex flex-col overflow-hidden rounded-card border border-border bg-surface/50"
-    >
-      <div class="flex items-center justify-between p-6 pb-4 sm:px-7">
-        <h3 class="text-xl font-semibold">Übersicht desktop widget</h3>
-        <span class="inline-flex items-center gap-1.5 font-mono text-xs text-ok">
-          <span class="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true"></span>Live · every 60s
-        </span>
+    <!-- Desktop widget — native, with a real preview -->
+    <article class="reveal flex flex-col overflow-hidden rounded-card border border-border bg-surface/50">
+      <div class="p-6 pb-3 sm:px-7">
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="text-xl font-semibold">Desktop widget</h3>
+          <span class="inline-flex items-center gap-1.5 font-mono text-xs text-ok">
+            <span class="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true"></span>Live · every 60s
+          </span>
+        </div>
+        <p class="mt-3 text-sm leading-relaxed text-muted">
+          Prefer it on the desktop? The same gauges, pinned to your wallpaper —
+          part of the app, not a separate install.
+        </p>
       </div>
-      <p class="px-6 text-sm leading-relaxed text-muted sm:px-7">
-        Prefer it on the desktop? The same gauges, pinned to your wallpaper via
-        Übersicht. Installs with one script.
-      </p>
-      <div class="mt-5 border-t border-border/60 bg-surface-2/40 p-4">
+      <div class="mt-auto border-t border-border/60 bg-surface-2/40 p-4">
         <Image
-          src={ubersichtPreview}
-          alt="The Houdini Übersicht desktop widget showing Claude usage rows — label, percentage, and a threshold-colored bar — on the desktop."
+          src={desktopWidget}
+          alt="The Houdini desktop widget showing Claude usage rows — label, percentage, and a threshold-colored bar — pinned to the desktop."
           widths={[400, 700, 1000]}
           sizes="(max-width: 768px) 90vw, 500px"
           class="block w-full rounded-lg border border-border/60"
           loading="lazy"
         />
-      </div>
-    </article>
-
-    <!-- Notification Center (macOS WidgetKit) — honest coming soon -->
-    <article
-      class="reveal flex flex-col gap-2 rounded-card border border-dashed border-border bg-surface/30 p-6 sm:col-span-2 sm:flex-row sm:items-center sm:justify-between sm:p-7"
-    >
-      <div>
-        <div class="flex items-center gap-3">
-          <h3 class="text-xl font-semibold text-muted">Notification Center widget</h3>
-          <span
-            class="rounded-full border border-border bg-surface px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-muted"
-          >
-            Coming soon
-          </span>
-        </div>
-        <p class="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-          A glanceable widget for macOS Notification Center. It won't hit 60s —
-          Apple budgets widget refreshes to roughly every 15 minutes — so we'll ship
-          it with honest "updated a few minutes ago" copy rather than fake a live gauge.
-        </p>
       </div>
     </article>
   </div>

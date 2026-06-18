@@ -143,11 +143,11 @@ const html = `<!doctype html>
       <div class="brand">
         ${mark}
         <span class="name">Houdini</span>
-        <span class="tag">macOS menu bar</span>
+        <span class="tag">macOS</span>
       </div>
       <div>
         <h1>See your AI usage and spend, <span class="accent">revealed</span>.</h1>
-        <p class="sub">A local-first menu bar app that reveals your Claude limits and extra-usage spend — refreshed every 60 seconds. Credentials stay in your Keychain.</p>
+        <p class="sub">A local-first macOS app that reveals your Claude limits and extra-usage spend — in your menu bar and on your desktop, refreshed every 60 seconds. Credentials stay in your Keychain.</p>
       </div>
       <div class="foot">
         <span class="chip"><span class="dot"></span>houdini.salomao.org</span>

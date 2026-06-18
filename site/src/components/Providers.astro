@@ -1,54 +1,15 @@
 ---
-import SectionHeader from "./SectionHeader.astro";
-import { providers } from "../config";
+import { providerLine } from "../config";
 ---
 
-<section class="mx-auto max-w-6xl px-5 py-20 sm:px-8 sm:py-28">
-  <div class="reveal">
-    <SectionHeader
-      eyebrow="Providers"
-      title="Claude today. Built to grow."
-      subtitle="Every provider plugs into one capability-driven core, so new ones appear without reshaping the UI. We won't show a gauge we can't honestly fill — soon means soon, not faked."
-    />
-  </div>
-
-  <div class="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    {
-      providers.map((p, i) => {
-        const live = p.status === "live";
-        return (
-          <article
-            class:list={[
-              "reveal flex flex-col rounded-card border p-5",
-              live ? "ring-grad" : "border-border bg-surface/50",
-            ]}
-            style={`--reveal-delay: ${i * 70}ms`}
-          >
-            <div class="flex items-start justify-between gap-2">
-              <div>
-                <h3 class="font-semibold leading-tight">{p.name}</h3>
-                <p class="font-mono text-xs text-muted">{p.plan}</p>
-              </div>
-              <span
-                class:list={[
-                  "inline-flex shrink-0 items-center gap-1.5 font-mono text-[11px]",
-                  live ? "text-ok" : "text-muted",
-                ]}
-              >
-                <span
-                  class:list={[
-                    "h-1.5 w-1.5 rounded-full",
-                    live ? "bg-ok" : "bg-muted",
-                  ]}
-                  aria-hidden="true"
-                />
-                {live ? "Live" : "Soon"}
-              </span>
-            </div>
-            <p class="mt-4 text-sm leading-relaxed text-muted">{p.detail}</p>
-          </article>
-        );
-      })
-    }
+<section class="mx-auto max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
+  <div class="reveal mx-auto max-w-3xl text-center">
+    <p class="font-display text-2xl font-semibold leading-snug sm:text-3xl">
+      Works with <span class="text-reveal">Claude</span> today.
+    </p>
+    <p class="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted sm:text-lg">
+      {providerLine} Houdini's core is provider-agnostic, so every AI you pay for
+      slots into the same gauges — and we never show a number we can't honestly read.
+    </p>
   </div>
 </section>

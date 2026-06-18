@@ -6,7 +6,7 @@ import Button from "../components/Button.astro";
 import CopyBlock from "../components/CopyBlock.astro";
 import { Image } from "astro:assets";
 import popoverDark from "../assets/popover-dark.png";
-import { installOneLiner } from "../config";
+import { installOneLiner, links } from "../config";
 
 const toc = [
   { id: "what", label: "What it does" },
@@ -58,7 +58,8 @@ const thresholds = [
         <div class="mt-7">
           <CopyBlock code={installOneLiner} label="install · macOS 14+ · Apple Silicon" />
           <p class="mt-2 font-mono text-xs text-muted/80">
-            Installs the menu bar app today — no Gatekeeper prompt. Notarized DMG soon.
+            Installs Houdini today — no Gatekeeper prompt.
+            <a href={links.install} class="text-accent underline-offset-2 hover:underline">Full install guide →</a>
           </p>
         </div>
 
@@ -83,10 +84,11 @@ const thresholds = [
       <section id="what" class="scroll-mt-24">
         <h2 class="font-display text-2xl font-semibold sm:text-3xl">1 · What Houdini does</h2>
         <p class="mt-4 leading-relaxed text-muted">
-          Houdini is a native macOS menu bar app. It reads the usage numbers your
-          AI provider already keeps for you, and puts the tightest one right in
-          your menu bar — refreshed every 60 seconds. Click it for the full
-          breakdown: each limit, when it resets, and any spend beyond your plan.
+          Houdini is a native macOS app that lives in your menu bar and on your
+          desktop. It reads the usage numbers your AI provider already keeps for
+          you, and puts the tightest one right in your menu bar — refreshed every
+          60 seconds. Click it for the full breakdown: each limit, when it resets,
+          and any spend beyond your plan.
         </p>
         <figure class="mt-6 overflow-hidden rounded-card border border-border bg-surface/50 p-4">
           <Image
@@ -121,7 +123,7 @@ const thresholds = [
             <h3 class="font-semibold">People paying per API call</h3>
             <p class="mt-1.5 text-sm leading-relaxed text-muted">
               You'd rather watch the dollars and tokens add up in real time than
-              find out at the end of the month. (API providers are coming soon.)
+              find out at the end of the month.
             </p>
           </div>
         </div>
@@ -131,9 +133,9 @@ const thresholds = [
       <section id="tracks" class="scroll-mt-24">
         <h2 class="font-display text-2xl font-semibold sm:text-3xl">3 · What it tracks</h2>
         <p class="mt-4 leading-relaxed text-muted">
-          There are two kinds of "usage", and Houdini speaks both. Today it reveals
-          your Claude subscription limits in full; API cost and tokens arrive with
-          the next providers.
+          There are two kinds of "usage", and Houdini is built to speak both. Today
+          it reveals your Claude subscription in full — every window, timer, and
+          extra-usage dollar.
         </p>
         <dl class="mt-6 space-y-3">
           <div class="rounded-card border border-border bg-surface/50 p-5">
@@ -176,16 +178,6 @@ const thresholds = [
               plan against your budget (for example, <span class="font-mono text-text">$93 / 100</span>).
             </dd>
           </div>
-          <div class="rounded-card border border-dashed border-border bg-surface/30 p-5">
-            <dt class="flex items-center gap-2 font-semibold text-muted">
-              API cost &amp; tokens
-              <span class="font-mono text-[11px] font-normal text-muted">Soon</span>
-            </dt>
-            <dd class="mt-1.5 text-sm leading-relaxed text-muted">
-              For OpenAI, Gemini, and the Anthropic Console: dollars spent and input/output
-              token counts for the current period, read with an API or admin key.
-            </dd>
-          </div>
         </dl>
       </section>
 
@@ -221,17 +213,12 @@ const thresholds = [
           </ul>
         </div>
 
-        <div class="mt-3 rounded-card border border-dashed border-border bg-surface/30 p-5">
-          <div class="flex items-center gap-2">
-            <h3 class="font-semibold text-muted">OpenAI · Gemini · Anthropic Console</h3>
-            <span class="font-mono text-[11px] text-muted">Soon</span>
-          </div>
-          <p class="mt-2 text-sm leading-relaxed text-muted">
-            These connect with an API or admin key you generate in the provider's
-            dashboard. They're on the roadmap — listed as "Soon" rather than shipped
-            half-working. When they land, this section gets the exact steps.
-          </p>
-        </div>
+        <p class="mt-4 text-sm leading-relaxed text-muted">
+          Houdini's core is provider-agnostic — every source plugs into the same
+          capability-driven model. As more of the AI you pay for is supported, each
+          one connects with a credential you already hold, kept in the Keychain the
+          same way. Houdini never shows a gauge it can't honestly fill.
+        </p>
       </section>
 
       <!-- 5 · Reading the gauges -->
@@ -281,10 +268,10 @@ const thresholds = [
               <tr class="bg-surface-2/70 text-muted">
                 <th scope="col" class="p-4 font-medium"></th>
                 <th scope="col" class="p-4 font-semibold text-text">
-                  Subscription <span class="font-mono text-[11px] font-normal text-ok">Live</span>
+                  Subscription
                 </th>
                 <th scope="col" class="p-4 font-semibold text-text">
-                  API <span class="font-mono text-[11px] font-normal text-muted">Soon</span>
+                  API
                 </th>
               </tr>
             </thead>
@@ -314,8 +301,9 @@ const thresholds = [
         </div>
         <p class="mt-3 text-sm leading-relaxed text-muted">
           On a subscription there's no API key and no per-token bill — you're tracking
-          how much of your window is left. With an API key you're tracking spend. Houdini
-          puts both in the same menu bar.
+          how much of your window is left. With an API key you're tracking spend.
+          Houdini is built to put both in the same menu bar; your Claude subscription
+          is revealed there today.
         </p>
       </section>
 
@@ -358,7 +346,7 @@ const thresholds = [
             One line, no Gatekeeper prompt, nothing leaves your Mac. Pull your limits into the light.
           </p>
           <div class="mt-6 flex flex-wrap justify-center gap-3">
-            <Button href="/#install" variant="primary" size="lg">Install Houdini</Button>
+            <Button href={links.install} variant="primary" size="lg">Install Houdini</Button>
             <Button href="/#reveals" variant="secondary" size="lg">See what it reveals</Button>
           </div>
         </div>
