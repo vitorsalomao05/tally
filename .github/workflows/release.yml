@@ -52,11 +52,8 @@ jobs:
           ditto -c -k --keepParent apps/menubar/build/Houdini.app "$STAGE/Houdini.app.zip"
           cp "$(cd core && swift build -c release --show-bin-path)/houdini" "$STAGE/houdini"
           chmod +x "$STAGE/houdini"
-          cp apps/ubersicht/houdini.jsx      "$STAGE/houdini.jsx"
-          cp apps/ubersicht/houdini-usage.sh "$STAGE/houdini-usage.sh"
-          chmod +x "$STAGE/houdini-usage.sh"
           # Bare filenames (no paths) so install.sh's `shasum -c` matches.
-          ( cd "$STAGE" && shasum -a 256 Houdini.app.zip houdini houdini.jsx houdini-usage.sh > SHASUMS256.txt )
+          ( cd "$STAGE" && shasum -a 256 Houdini.app.zip houdini > SHASUMS256.txt )
           echo "----- SHASUMS256.txt -----"; cat "$STAGE/SHASUMS256.txt"
           echo "STAGE=$STAGE" >> "$GITHUB_ENV"
 
@@ -82,9 +79,8 @@ jobs:
           hand with \`shasum -a 256 -c SHASUMS256.txt\`.
 
           ### What's in this release
-          - \`Houdini.app.zip\` — the menu bar app (ad-hoc signed, hardened runtime).
+          - \`Houdini.app.zip\` — the menu bar app + native desktop widget (ad-hoc signed, hardened runtime).
           - \`houdini\` — the data-layer CLI (\`houdini --json\`).
-          - \`houdini.jsx\`, \`houdini-usage.sh\` — the optional Übersicht widget.
           - \`SHASUMS256.txt\` — SHA-256 of every asset above.
           EOF
           gh release create "$TAG" \
@@ -92,6 +88,4 @@ jobs:
             --notes-file "$NOTES" \
             "$STAGE/Houdini.app.zip" \
             "$STAGE/houdini" \
-            "$STAGE/SHASUMS256.txt" \
-            "$STAGE/houdini.jsx" \
-            "$STAGE/houdini-usage.sh"
+            "$STAGE/SHASUMS256.txt"

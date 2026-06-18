@@ -9,7 +9,8 @@
 #      on any mismatch — it never installs unverified bytes, and downloads only
 #      from this one release.
 #   3. Installs WITHOUT sudo:  app → ~/Applications,  cli → ~/.local/bin.
-#   4. Offers — never forces — "start at login" and the Übersicht desktop widget.
+#   4. Offers — never forces — "start at login". The desktop widget is built into
+#      the app now (toggle it in Houdini ▸ Settings) — no separate install.
 #   5. Is idempotent (safe to re-run) and prints exactly how to uninstall.
 #
 # It never reads or prints your Claude token. Read this whole file before piping
@@ -18,7 +19,7 @@
 #
 # Interactive run:
 #   curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/houdini/v0.2.0/install.sh | bash
-# Unattended (also accept the optional login item + widget):
+# Unattended (also accept the optional login item):
 #   curl -fsSL .../install.sh | HOUDINI_YES=1 bash
 #
 set -euo pipefail
@@ -32,7 +33,6 @@ APP_NAME="Houdini.app"
 APP_DIR="$HOME/Applications"
 APP="$APP_DIR/$APP_NAME"
 BIN_DIR="$HOME/.local/bin"
-WIDGET_DIR="$HOME/Library/Application Support/Übersicht/widgets/houdini"
 
 # ── Output helpers ───────────────────────────────────────────────────────────
 BOLD=$'\033[1m'; BLUE=$'\033[1;34m'; GREEN=$'\033[1;32m'; YELLOW=$'\033[1;33m'; RED=$'\033[1;31m'; RST=$'\033[0m'
@@ -106,7 +106,7 @@ say "Installing houdini → $BIN_DIR/houdini"
 mkdir -p "$BIN_DIR"
 cp -f "$TMP/houdini" "$BIN_DIR/houdini"
 chmod +x "$BIN_DIR/houdini"
-ok "installed (the widget finds it here even if ~/.local/bin isn't on your PATH)"
+ok "installed the houdini CLI (try: houdini --json)"
 case ":${PATH}:" in
   *":$BIN_DIR:"*) : ;;
   *) warn "to run 'houdini' directly, add ~/.local/bin to PATH: export PATH=\"\$HOME/.local/bin:\$PATH\"" ;;
@@ -127,44 +127,16 @@ else
   ok "skipped login item — toggle it any time in Houdini ▸ Settings"
 fi
 
-# ── 6. Offer: Übersicht desktop widget (optional) ────────────────────────────
-# Mirrors apps/ubersicht/install.sh's widget-deploy step, but verified from the
-# pinned release and reusing the houdini just installed (no source build).
-if ask "Also install the Übersicht desktop widget?"; then
-  say "Downloading + verifying the widget…"
-  fetch "houdini.jsx"
-  fetch "houdini-usage.sh"
-  verify "houdini.jsx" "houdini-usage.sh"
-  mkdir -p "$WIDGET_DIR"
-  cp -f "$TMP/houdini.jsx"      "$WIDGET_DIR/houdini.jsx"
-  cp -f "$TMP/houdini-usage.sh" "$WIDGET_DIR/houdini-usage.sh"
-  chmod +x "$WIDGET_DIR/houdini-usage.sh"
-  ok "widget deployed → $WIDGET_DIR"
-  UB=""
-  for p in "/Applications/Übersicht.app" "$HOME/Applications/Übersicht.app"; do
-    [ -d "$p" ] && UB="$p" && break
-  done
-  if [ -z "$UB" ] && command -v mdfind >/dev/null 2>&1; then
-    UB="$(mdfind "kMDItemCFBundleIdentifier == 'tracesOf.Uebersicht'" 2>/dev/null | head -1)"
-  fi
-  if [ -n "$UB" ]; then
-    ok "Übersicht found — open it (or its menu ▸ Refresh All Widgets) to see Houdini top-right"
-  else
-    warn "Übersicht isn't installed yet. Install it, then it picks up the widget:"
-    printf '      brew install --cask ubersicht\n'
-  fi
-else
-  ok "skipped the Übersicht widget"
-fi
+# The desktop widget ships inside the app — turn it on in Houdini ▸ Settings.
+# No separate download needed.
 
-# ── 7. Summary + uninstall ───────────────────────────────────────────────────
+# ── 6. Summary + uninstall ───────────────────────────────────────────────────
 printf '\n%sHoudini %s is installed.%s\n' "$BOLD" "$TAG" "$RST"
 printf '  • App : %s\n' "$APP"
 printf '  • CLI : %s/houdini   (try: houdini --json)\n' "$BIN_DIR"
-[ -d "$WIDGET_DIR" ] && printf '  • Widget: %s\n' "$WIDGET_DIR"
+printf '  • Desktop widget: built in — enable it in Houdini ▸ Settings.\n'
 printf '\nTo uninstall:\n'
 printf '  "%s/Contents/MacOS/Houdini" --unregister-login-item   # if you enabled login\n' "$APP"
 printf '  rm -rf "%s"\n' "$APP"
 printf '  rm -f  "%s/houdini"\n' "$BIN_DIR"
-[ -d "$WIDGET_DIR" ] && printf '  rm -rf "%s"\n' "$WIDGET_DIR"
 printf '\nRe-running this installer is safe — it verifies and overwrites in place.\n'

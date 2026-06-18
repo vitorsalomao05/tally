@@ -17,8 +17,11 @@ Docs (README, ARCHITECTURE, DECISIONS, PROVIDERS, WORKFLOW), directory skeleton,
 - Settings: choose provider, launch-at-login (`SMAppService`), thresholds/colors.
 - Writes to App Group + `reloadTimelines()`.
 
-## Phase 3 — Übersicht widget
-- Single `.jsx`, `refreshFrequency = 60000`, calls `houdini`, color-coded gauges, install instructions.
+## Phase 3 — Desktop widget ✅ (native; superseded the Übersicht `.jsx`)
+- Shipped as a SwiftUI card in a desktop-level `NSPanel`, **inside the menu bar app** — draggable,
+  resizable, persistent (frame + displayID), glass with a Reduce-Transparency solid fallback.
+- Shares the app's `UsageModel`, so it tracks the same true 60s refresh. The earlier Übersicht
+  `.jsx` prototype (`apps/ubersicht`) is removed.
 
 ## Phase 4 — WidgetKit widget (glanceable)
 - Widget extension + App Group shared container; `.after(~15min)`; honest "updated X min ago" copy.

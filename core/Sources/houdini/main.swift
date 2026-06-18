@@ -8,8 +8,8 @@ import FetcherCore
 // Usage:
 //   houdini                 → fetch provider "claude"
 //   houdini <id>            → fetch a specific provider id
-//   houdini --json [<id>]   → same output; explicit flag so consumers (the
-//                               Übersicht wrapper) can pin a stable contract.
+//   houdini --json [<id>]   → same output; explicit flag so scripting consumers
+//                               can pin a stable contract.
 //
 // JSON is the only output mode, so `--json` is accepted and ignored. Any
 // non-flag argument is taken as the provider id; unknown flags are ignored.

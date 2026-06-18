@@ -30,7 +30,7 @@ let testLinkerSettings: [LinkerSetting] = needsTestingFrameworkPath
 let package = Package(
     name: "FetcherCore",
     platforms: [
-        .macOS(.v14), // macOS 14+ / Apple Silicon (menu bar app, Übersicht, CLI).
+        .macOS(.v14), // macOS 14+ / Apple Silicon (menu bar app + desktop widget, CLI).
         .iOS(.v17),   // iOS 17+ (HoudiniMobile app + WidgetKit) — see apps/ios/PLAN.md.
         // NOTE: the FetcherCore *library* is the only product an iOS app consumes.
         // `houdini` / `houdini-selftest` are macOS-only host tools (Foundation.Process);

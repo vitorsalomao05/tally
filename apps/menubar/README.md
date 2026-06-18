@@ -62,4 +62,4 @@ no restart needed:
 
 ## Not in this phase
 
-Other providers, WidgetKit/App-Group writes, Übersicht, distribution — later phases.
+Other providers, WidgetKit/App-Group writes, distribution — later phases.

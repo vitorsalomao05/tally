@@ -21,15 +21,16 @@ Downloads the ad-hoc-signed `Houdini.app` + the `houdini` CLI from the pinned
 [`v0.2.0` release](https://github.com/vitorsalomao05/houdini/releases/tag/v0.2.0),
 **verifies their SHA-256** against `SHASUMS256.txt`, then installs without `sudo`
 (app → `~/Applications`, CLI → `~/.local/bin`) — with no Gatekeeper prompt. It
-offers (never forces) launch at login and the desktop widget, and is safe to
-re-run. Read it first — it's at [`install.sh`](install.sh).
+offers (never forces) launch at login, and is safe to re-run. The desktop widget
+ships inside the app (toggle it in Settings) — no separate install. Read it
+first — it's at [`install.sh`](install.sh).
 
 Houdini is **one app** with two co-equal, user-facing features (the website brands
 neither separately — see ADR-010/011):
 
 1. **Menu bar** — your tightest limit, always visible; popover with every window. True 60s refresh.
-2. **Desktop widget** — the same gauges on your wallpaper. True 60s refresh. *(Übersicht-powered
-   today — `apps/ubersicht`; a native build is a later round. The installer offers it as part of setup.)*
+2. **Desktop widget** — the same gauges on your wallpaper, as a draggable, resizable glass panel.
+   **Native to the app** (SwiftUI in an `NSPanel`) — toggle it in Settings, no separate install. True 60s refresh.
 
 A glanceable **Notification Center widget** (WidgetKit, `apps/widget`) also exists in the repo;
 Apple caps its refresh at ~15 min (ADR-002), so it's an architecture surface, not advertised on the site.
@@ -62,9 +63,8 @@ houdini/
 ├── ROADMAP.md           ← phased plan
 ├── core/                ← FetcherCore Swift package (shared data layer) + `houdini` CLI
 ├── apps/
-│   ├── menubar/         ← SwiftUI MenuBarExtra app (flagship)
-│   ├── widget/          ← WidgetKit extension (glanceable)
-│   └── ubersicht/       ← single .jsx desktop widget
+│   ├── menubar/         ← SwiftUI MenuBarExtra app + native desktop widget (flagship)
+│   └── widget/          ← WidgetKit extension (glanceable Notification Center)
 ├── site/                ← Astro + Tailwind landing page
 ├── install.sh           ← one-liner installer (verified download from Releases)
 └── scripts/             ← release automation

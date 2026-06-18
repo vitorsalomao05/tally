@@ -21,13 +21,14 @@ The riskiest part of this product is **"can we reliably read the number the user
                   └───────┬───────────────┬──────────────┬──────┘
             links direct  │               │ CLI (JSON)   │ App Group cache
                           ▼               ▼              ▼
-              ┌────────────────┐  ┌────────────────┐  ┌────────────────────┐
-              │  MENU BAR APP  │  │  ÜBERSICHT .jsx │  │  WIDGETKIT WIDGET  │
-              │  Timer 60s     │  │  refresh 60s    │  │  reads cache only  │
-              │  MenuBarExtra  │  │  runs CLI/curl  │  │  ~15min .after()   │
-              │  + popover     │  │  render(output) │  │  host pushes reload│
-              │  TRUE 60s ✅   │  │  TRUE 60s ✅    │  │  NOT 60s ⚠️        │
-              └───────┬────────┘  └────────────────┘  └────────────────────┘
+              ┌──────────────────────┐  ┌──────────┐  ┌────────────────────┐
+              │  MENU BAR APP        │  │  houdini │  │  WIDGETKIT WIDGET  │
+              │  + DESKTOP WIDGET    │  │  CLI     │  │  reads cache only  │
+              │  one process, 60s    │  │  --json  │  │  ~15min .after()   │
+              │  MenuBarExtra popover│  │  stdout  │  │  host pushes reload│
+              │  + NSPanel glass card│  │          │  │  NOT 60s ⚠️        │
+              │  TRUE 60s ✅         │  │          │  │                    │
+              └───────┬──────────────┘  └──────────┘  └────────────────────┘
                       │ writes value to App Group + WidgetCenter.reloadTimelines()
                       └──────────────────────────────────────────►
 ```
@@ -40,19 +41,26 @@ The single source of truth for data. No UI. Exposes:
 - `CredentialStore` — reads/writes secrets in the macOS Keychain; can also read the Claude Code OAuth token (`~/.claude` / Keychain item `Claude Code`).
 - `Scheduler` — per-provider polling interval (default 60s), jitter, exponential backoff on 401/403/429, last-good caching.
 - `UsageSnapshot` — normalized result `[UsageMetric]` consumed by every frontend.
-- A thin **`houdini`** executable target that prints the current snapshot as JSON to stdout. This is what the Übersicht widget calls, and what we use to validate against a real account before building UI.
+- A thin **`houdini`** executable target that prints the current snapshot as JSON to stdout — a stable contract for scripting and what we use to validate against a real account before building UI.
 
 ### Menu bar app (flagship) — `apps/menubar`
 - SwiftUI `MenuBarExtra` (macOS 13+), `.menuBarExtraStyle(.window)` popover.
 - Timer lives in an `ObservableObject` owned at scene level (NOT inside the menu view — known macOS bug where menu-hosted timers stall).
 - `SMAppService.mainApp.register()` for launch-at-login, gated behind a user toggle.
 - Writes latest value into the **App Group** container and calls `WidgetCenter.shared.reloadAllTimelines()` so the WidgetKit widget stays as fresh as Apple allows.
-- True 60s refresh — the only surface that fully meets the original requirement.
+- True 60s refresh — the surface that fully meets the original requirement.
+- Also **hosts the desktop widget** (below) in the same process, so both share one `UsageModel`/timer.
 
-### Übersicht widget — `apps/ubersicht`
-- A single `.jsx` with `export const refreshFrequency = 60000`.
-- `command` calls `houdini` (or curls the endpoint directly with the Keychain token).
-- `render({ output })` draws color-coded gauges. Zero signing/notarization needed. Reference impl exists (`ttar-p/claude-usage-widget`).
+### Desktop widget (native) — part of `apps/menubar`
+- A SwiftUI card hosted in a desktop-level **`NSPanel`** (`.nonactivatingPanel`): draggable by its
+  background, resizable within limits (card 280×200 default; 220×150–480×360), behind app windows,
+  never steals focus. Two responsive breakpoints (compact `<260pt` / regular `≥260pt`).
+- **Shares the menu bar app's `UsageModel`** — same source, same true 60s refresh; no second poller.
+- Glass: `NSVisualEffectView(.hudWindow, .behindWindow)` + a violet wash + a 1px gradient border +
+  tight shadows; adopts the system `.glassEffect()` on macOS 26 (`#available`). ¾-ring gauges for the
+  percent windows, the spend `$` as a hero number. Reduce Transparency → a solid `#15101F` card.
+- Persists its frame + `displayID` to `UserDefaults`; restores across relaunch/reboot and clamps back
+  onto a visible screen if a monitor is unplugged. (Replaces the former Übersicht `.jsx` widget.)
 
 ### WidgetKit widget — `apps/widget`
 - `TimelineProvider` reads only the **cached** value from the App Group (cheap reloads).
