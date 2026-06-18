@@ -63,7 +63,7 @@ export const nav = [
 export const providers = [
   {
     name: "Claude",
-    plan: "Pro · Max · Team",
+    plan: "Pro · Max",
     status: "live" as const,
     detail: "Subscription windows + extra-usage spend, read from your Keychain.",
   },
@@ -134,7 +134,7 @@ export const faqs = [
   },
   {
     q: "Which providers work right now?",
-    a: "Claude (Pro, Max, Team) is live. OpenAI Platform, Google Gemini, and Anthropic Console are on the roadmap — shown as “Soon” here, never faked as working.",
+    a: "Claude Pro and Max are live. OpenAI Platform, Google Gemini, and Anthropic Console are on the roadmap — shown as “Soon” here, never faked as working.",
   },
   {
     q: "How does it read my Claude usage?",

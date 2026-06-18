@@ -205,14 +205,14 @@ const thresholds = [
           <p class="mt-2 text-sm leading-relaxed text-muted">Two ways in — pick whichever you already have:</p>
           <ul class="mt-3 space-y-3 text-sm leading-relaxed text-muted">
             <li class="flex gap-3">
-              <span class="font-mono text-accent">A</span>
+              <span class="font-mono text-accent-hover">A</span>
               <span>
                 <strong class="text-text">You use Claude Code.</strong> Houdini reuses its
                 OAuth token straight from the Keychain. Nothing to set up — install and it's already reading.
               </span>
             </li>
             <li class="flex gap-3">
-              <span class="font-mono text-accent">B</span>
+              <span class="font-mono text-accent-hover">B</span>
               <span>
                 <strong class="text-text">You don't.</strong> Open Houdini's settings and sign in
                 to claude.ai once, in a native window. The session is stored in your Keychain and reused — no repeated logins.
@@ -291,7 +291,7 @@ const thresholds = [
             <tbody class="divide-y divide-border [&_td]:p-4 [&_td]:align-top [&_th]:p-4">
               <tr class="bg-surface/40">
                 <th scope="row" class="font-medium text-muted">You pay</th>
-                <td class="text-muted">A flat monthly plan (Pro, Max, Team)</td>
+                <td class="text-muted">A flat monthly plan (Pro or Max)</td>
                 <td class="text-muted">Per request — dollars per million tokens</td>
               </tr>
               <tr class="bg-surface/20">

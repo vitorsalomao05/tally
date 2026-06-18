@@ -6,7 +6,7 @@
 > Target: **macOS 14+ / Apple Silicon**.
 
 Houdini is a multi-provider platform for AI usage + cost on macOS. **Claude
-(Pro/Max/Team) is live today** — your 5-hour and weekly limits, reset timers, and
+(Pro/Max) is live today** — your 5-hour and weekly limits, reset timers, and
 any extra-usage spend, refreshed about **every 60 seconds**. OpenAI, Gemini, and
 the Anthropic Console are on the roadmap. No account, no server; credentials stay
 in your Keychain.
@@ -41,7 +41,7 @@ The background-browser scrape survives only as a **last-resort fallback adapter*
 
 | Provider | Source | Method | Status |
 |---|---|---|---|
-| **Claude (Pro/Max/Team)** | `api.anthropic.com/api/oauth/usage` (Claude Code OAuth token in Keychain) **or** `claude.ai/api/organizations/{org}/usage` (session cookie) | JSON | **Live** |
+| **Claude (Pro/Max)** | `api.anthropic.com/api/oauth/usage` (Claude Code OAuth token in Keychain) **or** `claude.ai/api/organizations/{org}/usage` (session cookie) | JSON | **Live** |
 | **OpenAI Platform** (API usage/cost) | `/v1/organization/usage/*`, `/v1/organization/costs` | JSON (admin key) | Soon |
 | **Google Gemini** (API usage/cost) | API usage endpoints | JSON (API key) | Soon |
 | **Anthropic Console** (API usage/cost) | Admin API `usage_report` / `cost_report` | JSON (admin key) | Soon |
