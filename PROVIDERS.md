@@ -72,3 +72,46 @@ Cross-cutting services in `FetcherCore`: `CredentialStore` (Keychain), `Schedule
 2. `claude` `.sessionCookie` fallback (covers users without Claude Code).
 3. `openai-platform` + `anthropic-console` admin-API adapters.
 4. `chatgpt-plus` experimental.
+
+---
+
+## Provider switcher (app Settings) — design, not yet built
+
+The user picks and configures providers **inside the native app's Settings** — never
+on the website (ADR-011). The site presents capability as one honest line and ships
+no per-provider key UI.
+
+```
+Settings ▸ Providers
+  ● Claude            Connected · Claude Code token (Keychain)        [Reconnect]
+  ○ OpenAI Platform   Not connected                                  [Connect ▸]
+  ○ Anthropic Console Not connected                                  [Connect ▸]
+```
+
+- **Registry-driven.** The list is rendered from `ProviderRegistry`; adding a provider
+  in `FetcherCore` makes a row appear with no UI rewrite (capability flags drive what
+  each row can show — ADR-007).
+- **Connect flow per `authMethod`:**
+  - `.keychainOAuth` (Claude) — auto-detect the Claude Code token; one tap to reuse it.
+  - `.sessionCookie` (Claude fallback / ChatGPT Plus) — native `WKWebView` login; capture
+    cookie → Keychain.
+  - `.adminApiKey` (OpenAI Platform, Anthropic Console) — a single secure field in
+    Settings. The key is written **straight to the macOS Keychain** and read only by
+    native code at fetch time.
+- **Active provider** drives the menu-bar headline + popover ordering; multiple connected
+  providers stack in the popover.
+
+### OpenAI Platform = the planned 2nd provider
+- **Connect:** paste an **organization admin key** (`sk-admin-…`) in Settings.
+- **Stored:** macOS Keychain only (service-scoped, e.g. `Houdini-openai-admin`).
+- **Read:** native `URLSession` → `GET /v1/organization/usage/*`, `…/costs` (Bearer).
+- **Shows:** `$` spent this period + token counts (no clean per-user % — ADR-004).
+
+### Hard rule — keys never touch the frontend, site, or repo (ADR-011)
+A provider **API/admin key is a secret**. It is entered **only** in the native app's
+Settings and stored **only** in the macOS Keychain. It must **never** appear in:
+the website or any frontend/JS bundle, browser-shipped env vars, `site/src/config.ts`,
+or anywhere in the repo / git history. There is no Houdini server to receive it. The
+website therefore shows **no** OpenAI (or other) key field and **no** visible OpenAI
+placeholder — only the honest capability line. Code review and release (`RELEASE.md`)
+must reject any change that puts a provider secret in web/repo code.

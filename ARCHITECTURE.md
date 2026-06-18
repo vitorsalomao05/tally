@@ -59,9 +59,32 @@ The single source of truth for data. No UI. Exposes:
 - Steady-state `.after(~15min)` policy; host app pushes `reloadTimelines` on meaningful change.
 - Honest UX copy ("updated a few minutes ago"). Cannot do 60s — Apple budget ~40–70 reloads/day. See `DECISIONS.md` ADR-002.
 
+### Provider switcher & key handling — app Settings (design; see ADR-011, `PROVIDERS.md`)
+The user picks/configures providers **inside the native app's Settings**, never on the
+website. The Settings list is rendered from `ProviderRegistry`, so adding a provider in
+`FetcherCore` surfaces a row with no UI rewrite (capability flags drive each row — ADR-007).
+`.adminApiKey` providers (OpenAI Platform, Anthropic Console) take a key in a single secure
+Settings field that is written **straight to the macOS Keychain** and read only by native
+code at fetch time. **Hard rule:** a provider API/admin key is **never** placed in the
+website, any frontend/JS bundle, browser env vars, `config.ts`, or the repo/git history —
+Keychain only, no server (ADR-005, ADR-011). The site shows no key UI and no visible
+OpenAI placeholder — just one honest capability line. *(Switcher + OpenAI adapter are not
+built yet; this fixes the direction and the key-safety rule.)*
+
 ### Landing site — `site`
-- Astro + Tailwind, dark Linear-style. Hosted on Cloudflare Pages. DMG hosted on GitHub Releases.
-- Sections: hero + screenshot/video, install CTA, how-it-works, providers grid, **privacy/trust**, FAQ, footer CTA. Copy-to-clipboard install block.
+- Astro + Tailwind v4, dark "stage" identity. Static build → `dist/`, deployed on **Vercel**
+  at `houdini.salomao.org`. App + CLI artifacts hosted on GitHub Releases.
+- Information architecture (Houdini is the only brand; "Menu bar" and "Desktop widget" are
+  co-equal **features**, never separate products/logos):
+  - **Home** (`index.astro`) — hero (Install / How-it-works CTAs), trust strip, how-it-works,
+    a compact "what it reveals" strip, "where it shows up" (menu bar + desktop, co-equal),
+    one honest provider line, **privacy/trust**, FAQ, footer CTA. Detailed install lives off
+    the home.
+  - **`/install`** — three-step guided flow (run the one-liner → connect Claude → done),
+    "what's included" (one app, two surfaces), build-from-source behind a "For developers"
+    disclosure.
+  - **`/guide`** — didactic walkthrough of what Houdini tracks and how to read the gauges.
+- No "coming soon" placeholders in production (ADR-010). Copy-to-clipboard install block.
 
 ## Fetch mechanism priority (per provider)
 1. **JSON endpoint + Keychain token/cookie** (BEST — native `URLSession`, no browser).

@@ -1,6 +1,6 @@
 # Houdini — see your AI usage and spend, revealed
 
-> A local-first **macOS menu bar app** that reveals your AI usage and spend.
+> A local-first **macOS app** that reveals your AI usage and spend — in your menu bar and on your desktop.
 > Repo: [`vitorsalomao05/houdini`](https://github.com/vitorsalomao05/houdini) ·
 > Site: **[houdini.salomao.org](https://houdini.salomao.org)** ·
 > Target: **macOS 14+ / Apple Silicon**.
@@ -21,15 +21,18 @@ Downloads the ad-hoc-signed `Houdini.app` + the `houdini` CLI from the pinned
 [`v0.2.0` release](https://github.com/vitorsalomao05/houdini/releases/tag/v0.2.0),
 **verifies their SHA-256** against `SHASUMS256.txt`, then installs without `sudo`
 (app → `~/Applications`, CLI → `~/.local/bin`) — with no Gatekeeper prompt. It
-offers (never forces) launch at login and the Übersicht widget, and is safe to
-re-run. Read it first — it's at [`install.sh`](install.sh). A notarized DMG is the
-next milestone.
+offers (never forces) launch at login and the desktop widget, and is safe to
+re-run. Read it first — it's at [`install.sh`](install.sh).
 
-It ships in surfaces, all installable from the landing site:
+Houdini is **one app** with two co-equal, user-facing features (the website brands
+neither separately — see ADR-010/011):
 
-1. **Menu bar app** (flagship) — always visible, true 60s refresh.
-2. **Übersicht desktop widget** — single `.jsx`, true 60s refresh.
-3. **Notification Center widget (WidgetKit)** — glanceable, ~15 min refresh (Apple limitation, see `DECISIONS.md`).
+1. **Menu bar** — your tightest limit, always visible; popover with every window. True 60s refresh.
+2. **Desktop widget** — the same gauges on your wallpaper. True 60s refresh. *(Übersicht-powered
+   today — `apps/ubersicht`; a native build is a later round. The installer offers it as part of setup.)*
+
+A glanceable **Notification Center widget** (WidgetKit, `apps/widget`) also exists in the repo;
+Apple caps its refresh at ~15 min (ADR-002), so it's an architecture surface, not advertised on the site.
 
 ## The core idea (read this first)
 
@@ -42,9 +45,9 @@ The background-browser scrape survives only as a **last-resort fallback adapter*
 | Provider | Source | Method | Status |
 |---|---|---|---|
 | **Claude (Pro/Max)** | `api.anthropic.com/api/oauth/usage` (Claude Code OAuth token in Keychain) **or** `claude.ai/api/organizations/{org}/usage` (session cookie) | JSON | **Live** |
-| **OpenAI Platform** (API usage/cost) | `/v1/organization/usage/*`, `/v1/organization/costs` | JSON (admin key) | Soon |
-| **Google Gemini** (API usage/cost) | API usage endpoints | JSON (API key) | Soon |
-| **Anthropic Console** (API usage/cost) | Admin API `usage_report` / `cost_report` | JSON (admin key) | Soon |
+| **OpenAI Platform** (API usage/cost) | `/v1/organization/usage/*`, `/v1/organization/costs` | JSON (admin key) | Planned |
+| **Google Gemini** (API usage/cost) | API usage endpoints | JSON (API key) | Planned |
+| **Anthropic Console** (API usage/cost) | Admin API `usage_report` / `cost_report` | JSON (admin key) | Planned |
 
 See `PROVIDERS.md` for the full adapter contract and per-provider specs (including the experimental ChatGPT-Plus path), and `ARCHITECTURE.md` for the system design.
 
