@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "tally.salomao.org" }],
+      "destination": "https://houdini.salomao.org/",
+      "permanent": true
+    },
+    {
+      "source": "/:path+",
+      "has": [{ "type": "host", "value": "tally.salomao.org" }],
+      "destination": "https://houdini.salomao.org/:path+",
+      "permanent": true
+    }
+  ]
+}
