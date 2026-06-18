@@ -2,7 +2,15 @@
 // content model lives here, so a release bump or a copy tweak is a one-file edit.
 // Components and the /install + /guide pages read from this.
 
-export const version = "0.2.0";
+// The app/release version this build prepares (shown wherever a current version is
+// referenced). The PUBLISHED install one-liner still points at the last shipped
+// release (`installTag`) until go-live — see RELEASE.md. Go-live flips installTag
+// to `v${version}`.
+export const version = "0.3.0";
+
+// The release tag the installer downloads from. Kept at the last shipped release so
+// the one-liner on the live site keeps working; bumped to `v${version}` at go-live.
+export const installTag = "v0.2.0";
 
 export const site = {
   name: "Houdini",
@@ -29,7 +37,7 @@ export const links = {
 // verifies their SHA-256 against SHASUMS256.txt, then installs them (no sudo,
 // no Gatekeeper prompt). Pinned to the tag, so the bytes you run are the bytes
 // we shipped.
-export const installOneLiner = `curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/houdini/v${version}/install.sh | bash`;
+export const installOneLiner = `curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/houdini/${installTag}/install.sh | bash`;
 
 // Build-from-source path — kept behind a discreet "For developers" disclosure
 // on /install. Works today once cloned.
@@ -48,9 +56,10 @@ export const nav = [
   { label: "FAQ", href: "/#faq" },
 ];
 
-// One honest line about capability — no provider grid, no roadmap badges.
+// One honest line about capability — Claude-first, no provider grid, no roadmap
+// badges, no metric we can't actually fill. Multi-provider stays a soft direction.
 export const providerLine =
-  "Works with Claude today — built to track every AI you pay for.";
+  "The clearest way to see your Claude usage and spend — more providers as they open up.";
 
 // ── What Houdini reveals (compact icon strip) ────────────────────────────────
 // The four dimensions Houdini pulls into the open. `icon` maps to an inline SVG
@@ -104,7 +113,7 @@ export const faqs = [
   },
   {
     q: "Which AI providers does it work with?",
-    a: "Claude Pro and Max work today — your limits, reset timers, and extra-usage spend. Houdini is built as a multi-provider tool, so every other AI you pay for slots into the same gauges as it's added — we never fake a number we can't read.",
+    a: "Claude Pro and Max work today — your limits, reset timers, and extra-usage spend. Houdini is Claude-first; more providers can come as they open up, and it never shows a gauge it can't honestly fill.",
   },
   {
     q: "How does it read my Claude usage?",

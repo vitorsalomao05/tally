@@ -8,6 +8,40 @@ production — a surface is real and shown, or absent.
 
 Replace `X.Y.Z` with the new version (and `P.Q.R` with the previous one).
 
+---
+
+## ▶ v0.3.0 go-live (Round B — PREPARED, NOT YET PUBLISHED)
+
+Round B is staged on `master`: the **native desktop widget** (replaces Übersicht),
+the **redesigned logo** (free web mark + new `.icns`), honest **providers copy**,
+and the app bumped to **0.3.0** (`apps/menubar/Info.plist` → `CFBundleShortVersionString 0.3.0`,
+build `4`). The published install one-liner is deliberately **still pointing at the
+last shipped release** so nothing breaks before go-live:
+
+- `site/src/config.ts` → `version = "0.3.0"` (display) but `installTag = "v0.2.0"`
+  (the one-liner downloads the working v0.2.0 release).
+- `install.sh` → `TAG="v0.2.0"` (unchanged).
+- `README.md` install one-liner → `v0.2.0` (unchanged).
+
+A **preview** Vercel deploy shows the new look; **production
+(houdini.salomao.org) is untouched** (no `vercel --prod` was run).
+
+To go live (do these in order, only when the visual is approved):
+
+1. [ ] `site/src/config.ts` → set `installTag = "v0.3.0"` (or delete `installTag`
+       and point `installOneLiner` back at `v${version}`).
+2. [ ] `install.sh` → `TAG="v0.3.0"`.
+3. [ ] `README.md` → install one-liner + release link → `v0.3.0`.
+4. [ ] Commit: `chore(release): cut v0.3.0`.
+5. [ ] Build artifacts + tag + publish (steps 3–4 below): `git tag v0.3.0 && git push origin v0.3.0`,
+       then `gh release create v0.3.0 …` with `Houdini.app.zip`, `houdini`, `SHASUMS256.txt`.
+6. [ ] **Delete the old release + tag:** `gh release delete v0.2.0 --yes --cleanup-tag`.
+7. [ ] `cd site && vercel --prod` (production). Smoke-test home / `/install` / `/guide`.
+
+(Do **not** do any of the above as part of Round B — they are the go-live step.)
+
+---
+
 ## 1 · Pre-flight
 - [ ] `master` is green and clean (`git status` empty, CI passing).
 - [ ] Decide the bump (semver): patch / minor / major. Note it in the release notes.
