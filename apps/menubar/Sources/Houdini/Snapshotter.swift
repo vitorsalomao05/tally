@@ -16,14 +16,21 @@ enum Snapshotter {
     static func run(outputDir: String) {
         _ = NSApplication.shared // initialise AppKit so text/graphics render
 
-        let live = fetchSync()
+        // HOUDINI_SNAPSHOT_SAMPLE=1 forces the curated PreviewData (deterministic
+        // marketing shots that don't leak the operator's real account numbers).
+        let forceSample = ProcessInfo.processInfo.environment["HOUDINI_SNAPSHOT_SAMPLE"] == "1"
         let metrics: [UsageMetric]
-        switch live {
-        case .success(let m) where !m.isEmpty:
-            metrics = m
-        default:
-            FileHandle.standardError.write(Data("live fetch unavailable — using sample data\n".utf8))
+        if forceSample {
+            FileHandle.standardError.write(Data("HOUDINI_SNAPSHOT_SAMPLE=1 — using sample data\n".utf8))
             metrics = PreviewData.sampleMetrics()
+        } else {
+            switch fetchSync() {
+            case .success(let m) where !m.isEmpty:
+                metrics = m
+            default:
+                FileHandle.standardError.write(Data("live fetch unavailable — using sample data\n".utf8))
+                metrics = PreviewData.sampleMetrics()
+            }
         }
 
         MainActor.assumeIsolated {
@@ -81,7 +88,7 @@ enum Snapshotter {
         // Drive both layers: NSAppearance so dynamic NSColors resolve correctly,
         // and the SwiftUI colorScheme environment so semantic colors flip.
         NSApp.appearance = NSAppearance(named: scheme == .dark ? .darkAqua : .aqua)
-        let renderer = ImageRenderer(content: view.environment(\.colorScheme, scheme))
+        let renderer = ImageRenderer(content: view.environment(\.colorScheme, scheme).tint(.brand))
         renderer.scale = 2
         guard let nsImage = renderer.nsImage,
               let tiff = nsImage.tiffRepresentation,

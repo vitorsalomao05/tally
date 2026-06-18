@@ -8,16 +8,17 @@ import { links } from "../config";
   <!-- Repeated CTA -->
   <div class="relative mx-auto max-w-6xl overflow-hidden px-5 py-20 sm:px-8 sm:py-28">
     <div
-      class="glow pointer-events-none absolute inset-x-0 -bottom-32 -z-10 mx-auto h-72 w-72 opacity-50"
+      class="spotlight pointer-events-none absolute inset-x-0 -bottom-32 -z-10 mx-auto h-72 w-72 opacity-60"
       aria-hidden="true"
     >
     </div>
     <div class="reveal mx-auto flex max-w-2xl flex-col items-center gap-6 text-center">
-      <h2 class="text-3xl font-semibold tracking-tight sm:text-4xl">
-        Stop guessing your Claude usage.
+      <h2 class="font-display text-3xl font-semibold tracking-tight sm:text-[2.6rem]">
+        Make your limits disappear.
       </h2>
       <p class="text-muted">
-        Put your limits in the menu bar — refreshed every 60 seconds, kept entirely on your Mac.
+        Put your AI usage and spend in the menu bar — refreshed every 60 seconds,
+        kept entirely on your Mac.
       </p>
       <div class="flex flex-wrap items-center justify-center gap-3">
         <Button href="#install" variant="primary" size="lg">Get Houdini — free</Button>
@@ -34,14 +35,15 @@ import { links } from "../config";
       class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 sm:flex-row sm:px-8"
     >
       <Logo />
-      <nav class="flex items-center gap-6 text-sm text-muted" aria-label="Footer">
+      <nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted" aria-label="Footer">
+        <a href={links.guide} class="transition-colors hover:text-text">Guide</a>
         <a
           href={links.github}
           target="_blank"
           rel="noopener noreferrer"
           class="transition-colors hover:text-text">GitHub</a
         >
-        <a href="#privacy" class="transition-colors hover:text-text">Privacy</a>
+        <a href="/#privacy" class="transition-colors hover:text-text">Privacy</a>
         <a
           href={links.changelog}
           target="_blank"
@@ -49,7 +51,7 @@ import { links } from "../config";
           class="transition-colors hover:text-text">Changelog</a
         >
       </nav>
-      <p class="font-mono text-xs text-muted/80">Built for people who live in Claude.</p>
+      <p class="font-mono text-xs text-muted/80">Local-first. Open-source. No trapdoors.</p>
     </div>
   </div>
 </footer>

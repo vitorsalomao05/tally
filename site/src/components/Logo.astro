@@ -1,5 +1,5 @@
 ---
-// Wordmark + the gauge mark (the product's signature: stacked usage bars).
+// Wordmark: the top-hat mark (the brand's reveal) + "Houdini".
 interface Props {
   class?: string;
 }
@@ -16,18 +16,20 @@ const { class: cls = "" } = Astro.props;
     class="shrink-0"
   >
     <defs>
-      <linearGradient id="logo-g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#3B82F6"></stop>
-        <stop offset="1" stop-color="#7C5CFF"></stop>
+      <linearGradient id="logo-b" x1="16" y1="2" x2="16" y2="30" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#1E1A2B"></stop>
+        <stop offset="1" stop-color="#0B0A10"></stop>
+      </linearGradient>
+      <linearGradient id="logo-a" x1="8" y1="23" x2="24" y2="8" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="#7C3AED"></stop>
+        <stop offset="1" stop-color="#C026D3"></stop>
       </linearGradient>
     </defs>
-    <rect x="1" y="1" width="30" height="30" rx="8" fill="#14161B" stroke="#232733"></rect>
-    <rect x="8" y="10" width="16" height="3" rx="1.5" fill="#232733"></rect>
-    <rect x="8" y="10" width="11" height="3" rx="1.5" fill="url(#logo-g)"></rect>
-    <rect x="8" y="16" width="16" height="3" rx="1.5" fill="#232733"></rect>
-    <rect x="8" y="16" width="6" height="3" rx="1.5" fill="#34D399"></rect>
-    <rect x="8" y="22" width="16" height="3" rx="1.5" fill="#232733"></rect>
-    <rect x="8" y="22" width="14" height="3" rx="1.5" fill="#F5A623"></rect>
+    <rect x="1" y="1" width="30" height="30" rx="7" fill="url(#logo-b)" stroke="#3A3357"></rect>
+    <rect x="5" y="20.4" width="22" height="3.4" rx="1.7" fill="url(#logo-a)"></rect>
+    <path d="M11 23 V11.5 a2 2 0 0 1 2 -2 H19 a2 2 0 0 1 2 2 V23 Z" fill="url(#logo-a)"></path>
+    <rect x="11" y="17.4" width="10" height="2.2" fill="#F5C451"></rect>
+    <path d="M25 8.4 C 25.5 9.9, 26.1 10.5, 27.6 11 C 26.1 11.5, 25.5 12.1, 25 13.6 C 24.5 12.1, 23.9 11.5, 22.4 11 C 23.9 10.5, 24.5 9.9, 25 8.4 Z" fill="#F5C451"></path>
   </svg>
-  <span class="text-[17px] font-semibold tracking-tight text-text">Houdini</span>
+  <span class="font-display text-[19px] font-semibold tracking-tight text-text">Houdini</span>
 </span>

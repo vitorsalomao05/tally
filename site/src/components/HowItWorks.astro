@@ -5,17 +5,17 @@ const steps = [
   {
     n: "01",
     title: "Install",
-    body: "One command installs the Übersicht widget, or grab the menu bar app. Native Swift, Apple Silicon, ~6 MB — no Electron, no background browser.",
+    body: "One line installs the menu bar app — ad-hoc signed, so it opens with no Gatekeeper prompt. Native Swift, Apple Silicon, ~6 MB. No Electron, no background browser.",
   },
   {
     n: "02",
     title: "Connect",
-    body: "Already run Claude Code? Houdini reuses its token automatically — zero setup. Otherwise, sign in to Claude.ai once in a secure window; the session stays in your Keychain.",
+    body: "Already run Claude Code? Houdini reuses its token automatically — zero setup. Otherwise you sign in to claude.ai once in a native window; the session stays in your Keychain.",
   },
   {
     n: "03",
-    title: "Glance",
-    body: "Your tightest limit shows right in the menu bar, color-coded. Open the popover for every window, its reset time, and any extra-usage spend.",
+    title: "Reveal",
+    body: "Your tightest limit appears in the menu bar, color-coded. Open the popover for every window, its reset time, and any extra-usage spend — refreshed every 60 seconds.",
   },
 ];
 ---
@@ -24,8 +24,8 @@ const steps = [
   <div class="reveal">
     <SectionHeader
       eyebrow="How it works"
-      title="From install to glance in under a minute."
-      subtitle="No account to create, no server to trust. Houdini reads the usage numbers you already have access to and surfaces them where you can see them."
+      title="From install to the reveal in under a minute."
+      subtitle="No account to create, no server to trust. Houdini reads the usage numbers you already have a right to — and pulls them into the light."
     />
   </div>
 
@@ -36,7 +36,7 @@ const steps = [
           class="reveal rounded-card border border-border bg-surface/50 p-6"
           style={`--reveal-delay: ${i * 90}ms`}
         >
-          <span class="bg-gradient-to-br from-accent to-violet bg-clip-text font-mono text-3xl font-semibold text-transparent">
+          <span class="bg-gradient-to-br from-accent to-magenta bg-clip-text font-display text-3xl font-semibold text-transparent">
             {step.n}
           </span>
           <h3 class="mt-4 text-lg font-semibold">{step.title}</h3>

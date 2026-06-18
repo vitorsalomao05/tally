@@ -7,12 +7,13 @@ import popoverDark from "../assets/popover-dark.png";
 ---
 
 <section id="top" class="relative overflow-hidden pt-28 sm:pt-36">
-  <!-- ambient electric glow -->
+  <!-- the stage spotlight, behind the headline -->
   <div
-    class="glow pointer-events-none absolute -top-40 right-[-10%] -z-10 h-[520px] w-[520px] opacity-60"
+    class="spotlight pointer-events-none absolute -top-44 right-[-12%] -z-10 h-[560px] w-[560px] opacity-70"
     aria-hidden="true"
   >
   </div>
+  <div class="stage-grid pointer-events-none absolute inset-0 -z-10 h-[640px]" aria-hidden="true"></div>
 
   <div
     class="mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:pb-28"
@@ -27,17 +28,21 @@ import popoverDark from "../assets/popover-dark.png";
           ></span>
           <span class="relative inline-flex h-2 w-2 rounded-full bg-ok"></span>
         </span>
-        Now live for Claude Pro/Max
+        Live for Claude Pro · Max · Team
       </span>
 
-      <h1 class="text-4xl font-bold leading-[1.05] sm:text-5xl lg:text-6xl">
-        Know your Claude limits <br class="hidden sm:block" />before you hit them.
+      <h1
+        class="font-display text-[2.6rem] font-semibold leading-[1.04] sm:text-6xl"
+      >
+        See your AI usage<br class="hidden sm:block" /> and spend,
+        <span class="text-reveal">revealed</span>.
       </h1>
 
       <p class="max-w-xl text-lg leading-relaxed text-muted">
-        Houdini sits in your Mac menu bar and shows your Claude usage at a glance —
-        the 5-hour window, weekly caps, and any extra-usage spend — refreshed
-        every 60 seconds.
+        Houdini lives in your Mac menu bar and reveals what your AI is really
+        costing you — your Claude limits, reset timers, and extra-usage dollars
+        today, refreshed every 60 seconds. No account, no server. Nothing
+        leaves your Mac.
       </p>
 
       <div class="flex flex-wrap items-center gap-3 pt-1">
@@ -53,8 +58,8 @@ import popoverDark from "../assets/popover-dark.png";
       </div>
 
       <div class="space-y-1 font-mono text-xs text-muted/80">
-        <p>Übersicht widget installs today · signed menu bar app coming soon</p>
-        <p>macOS 14+ · Apple Silicon · Focused on Claude today — OpenAI &amp; more soon</p>
+        <p>One line installs the menu bar app today — no Gatekeeper prompt · notarized DMG soon</p>
+        <p>macOS 14+ · Apple Silicon · Claude live today — OpenAI, Gemini &amp; Console next</p>
       </div>
     </div>
 
@@ -62,7 +67,7 @@ import popoverDark from "../assets/popover-dark.png";
       <WindowFrame title="Houdini" glow class="mx-auto max-w-[360px]">
         <Image
           src={popoverDark}
-          alt="Houdini's menu bar popover showing Claude usage: a 5-hour window, weekly and Sonnet-weekly caps, and extra-usage spend, each with a color-coded gauge and reset time."
+          alt="Houdini's menu bar popover showing Claude usage: a 5-hour session window, weekly and Sonnet-weekly caps, and extra-usage spend, each with a color-coded gauge and reset time."
           widths={[320, 360, 720]}
           sizes="(max-width: 1024px) 80vw, 360px"
           class="block w-full"

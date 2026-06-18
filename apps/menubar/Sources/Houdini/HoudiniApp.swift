@@ -40,6 +40,7 @@ struct HoudiniMenuBarApp: App {
     var body: some Scene {
         MenuBarExtra {
             UsagePopover(model: appDelegate.model, session: appDelegate.session)
+                .tint(.brand)
         } label: {
             MenuBarLabelContent(model: appDelegate.model, settings: appDelegate.settings)
         }
@@ -51,6 +52,7 @@ struct HoudiniMenuBarApp: App {
             SettingsView(settings: appDelegate.settings,
                          launch: appDelegate.launch,
                          session: appDelegate.session)
+                .tint(.brand)
         }
     }
 }

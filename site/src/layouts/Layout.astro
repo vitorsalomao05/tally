@@ -1,5 +1,6 @@
 ---
 import "@fontsource-variable/inter";
+import "@fontsource-variable/fraunces";
 import "../styles/global.css";
 import { site } from "../config";
 
@@ -8,7 +9,7 @@ interface Props {
   description?: string;
 }
 const {
-  title = `${site.name} — Your Claude usage, at a glance`,
+  title = `${site.name} — See your AI usage and spend, revealed`,
   description = site.description,
 } = Astro.props;
 
@@ -34,7 +35,7 @@ const ogImageUrl = Astro.site
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#0A0B0E" />
+    <meta name="theme-color" content="#0B0A10" />
     <meta name="generator" content={Astro.generator} />
 
     <meta property="og:type" content="website" />

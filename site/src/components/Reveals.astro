@@ -1,0 +1,41 @@
+---
+import SectionHeader from "./SectionHeader.astro";
+import { reveals } from "../config";
+---
+
+<section id="reveals" class="mx-auto max-w-6xl scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28">
+  <div class="reveal">
+    <SectionHeader
+      eyebrow="What it reveals"
+      title="Every number your AI keeps backstage."
+      subtitle="Houdini pulls your real limits, timers, and spend into the open — so a throttle or a bill never catches you off guard."
+    />
+  </div>
+
+  <ul class="mt-14 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {
+      reveals.map((r, i) => (
+        <li
+          class="reveal flex flex-col gap-2 rounded-card border border-border bg-surface/50 p-5"
+          style={`--reveal-delay: ${i * 60}ms`}
+        >
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="font-semibold leading-tight">{r.title}</h3>
+            {r.status === "live" ? (
+              <span class="inline-flex items-center gap-1.5 font-mono text-[11px] text-ok">
+                <span class="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
+                Live
+              </span>
+            ) : (
+              <span class="inline-flex items-center gap-1.5 font-mono text-[11px] text-muted">
+                <span class="h-1.5 w-1.5 rounded-full bg-muted" aria-hidden="true" />
+                Soon
+              </span>
+            )}
+          </div>
+          <p class="text-sm leading-relaxed text-muted">{r.body}</p>
+        </li>
+      ))
+    }
+  </ul>
+</section>

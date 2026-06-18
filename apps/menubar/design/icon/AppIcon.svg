@@ -1,60 +1,70 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none"
      xmlns="http://www.w3.org/2000/svg">
   <!--
-    Houdini app icon. macOS Big Sur+ grid: 824×824 squircle body centered in a
-    1024 canvas (100 px margin on every side; system adds the drop shadow).
-    The mark derives from site/src/components/Logo.astro: three stacked usage
-    "gauge" bars (dark track + filled meter), here unified under the brand's
-    electric-blue→violet gradient for a clean, monochrome read at 16 px.
-    This SVG is the source of truth — render-icon.sh rasterizes it to the icns.
+    Houdini app icon — the escapist's top hat, the source of the reveal.
+    A clean top-hat silhouette in the brand violet→magenta gradient, a gold
+    hat-band + spark for the moment things are revealed (the brand's single
+    gold accent). macOS Big Sur+ grid: an 824×824 squircle body centered in a
+    1024 canvas (100px margin; the system adds the drop shadow).
+    This SVG is the source of truth — render-icon.sh rasterizes it (via
+    qlmanage, CommandLineTools-only) to AppIcon.icns. Uses only primitives
+    qlmanage renders faithfully: rect / path / linearGradient / radialGradient
+    / clipPath. No SVG filters. Alternatives live in candidates/.
   -->
   <defs>
-    <!-- Dark, faintly blue-tinted body gradient. -->
     <linearGradient id="body" x1="512" y1="100" x2="512" y2="924" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#1A1E28"/>
-      <stop offset="1" stop-color="#0B0D12"/>
+      <stop offset="0" stop-color="#1E1A2B"/>
+      <stop offset="1" stop-color="#0B0A10"/>
     </linearGradient>
-    <!-- Brand accent, shared across all three bars (continuous left→right field). -->
-    <linearGradient id="accent" x1="232" y1="288" x2="792" y2="736" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#3B82F6"/>
-      <stop offset="1" stop-color="#7C5CFF"/>
+    <linearGradient id="accent" x1="300" y1="708" x2="724" y2="296" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="0.52" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#C026D3"/>
     </linearGradient>
-    <!-- Soft accent glow sitting behind the meter. -->
-    <radialGradient id="glow" cx="512" cy="476" r="384" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#3B82F6" stop-opacity="0.22"/>
-      <stop offset="1" stop-color="#3B82F6" stop-opacity="0"/>
+    <radialGradient id="glow" cx="512" cy="476" r="404" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#A855F7" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#A855F7" stop-opacity="0"/>
     </radialGradient>
-    <!-- Top sheen for a subtle glassy depth. -->
     <linearGradient id="sheen" x1="512" y1="100" x2="512" y2="430" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.07"/>
       <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
     </linearGradient>
-    <clipPath id="squircle">
-      <rect x="100" y="100" width="824" height="824" rx="184"/>
-    </clipPath>
+    <clipPath id="sq"><rect x="100" y="100" width="824" height="824" rx="184"/></clipPath>
+    <clipPath id="crown"><path d="M396 644 V352 a46 46 0 0 1 46 -46 H582 a46 46 0 0 1 46 46 V644 Z"/></clipPath>
   </defs>
 
-  <!-- Body + everything painted on it, clipped to the squircle. -->
-  <g clip-path="url(#squircle)">
+  <!-- Velvet body + ambient violet glow + top sheen, clipped to the squircle. -->
+  <g clip-path="url(#sq)">
     <rect x="100" y="100" width="824" height="824" fill="url(#body)"/>
     <rect x="100" y="100" width="824" height="824" fill="url(#glow)"/>
     <rect x="100" y="100" width="824" height="330" fill="url(#sheen)"/>
 
-    <!-- Meter: three stacked pills — dark track + brand-gradient fill. -->
-    <g>
-      <!-- row 1 -->
-      <rect x="232" y="288" width="560" height="104" rx="52" fill="#242A37"/>
-      <rect x="232" y="288" width="370" height="104" rx="52" fill="url(#accent)"/>
-      <!-- row 2 -->
-      <rect x="232" y="460" width="560" height="104" rx="52" fill="#242A37"/>
-      <rect x="232" y="460" width="235" height="104" rx="52" fill="url(#accent)"/>
-      <!-- row 3 -->
-      <rect x="232" y="632" width="560" height="104" rx="52" fill="#242A37"/>
-      <rect x="232" y="632" width="493" height="104" rx="52" fill="url(#accent)"/>
+    <!-- Brim. -->
+    <rect x="210" y="636" width="604" height="78" rx="39" fill="url(#accent)"/>
+    <rect x="210" y="636" width="604" height="20" rx="10" fill="#FFFFFF" opacity="0.10"/>
+
+    <!-- Crown (rounded-top rect meeting the brim). -->
+    <path d="M396 644 V352 a46 46 0 0 1 46 -46 H582 a46 46 0 0 1 46 46 V644 Z" fill="url(#accent)"/>
+    <g clip-path="url(#crown)">
+      <!-- top sheen on the crown -->
+      <path d="M396 470 V352 a46 46 0 0 1 46 -46 H582 a46 46 0 0 1 46 46 V470 Z" fill="#FFFFFF" opacity="0.09"/>
+      <!-- gold hat-band: the level marker + the single gold accent -->
+      <rect x="396" y="556" width="232" height="54" fill="#F5C451"/>
+      <rect x="396" y="556" width="232" height="14" fill="#FFFFFF" opacity="0.18"/>
+    </g>
+
+    <!-- The reveal: a gold spark escaping over the hat, with a small trailing one. -->
+    <g transform="translate(708 322)">
+      <path d="M0 -60 C 9 -18, 18 -9, 60 0 C 18 9, 9 18, 0 60 C -9 18, -18 9, -60 0 C -18 -9, -9 -18, 0 -60 Z"
+            fill="#F5C451"/>
+    </g>
+    <g transform="translate(636 230)">
+      <path d="M0 -26 C 3.9 -7.8, 7.8 -3.9, 26 0 C 7.8 3.9, 3.9 7.8, 0 26 C -3.9 7.8, -7.8 3.9, -26 0 C -7.8 -3.9, -3.9 -7.8, 0 -26 Z"
+            fill="#F5C451" opacity="0.9"/>
     </g>
   </g>
 
-  <!-- Hairline inner border echoing the Logo card stroke. -->
+  <!-- Hairline inner border for crisp definition on light desktops. -->
   <rect x="101.5" y="101.5" width="821" height="821" rx="182.5"
-        fill="none" stroke="#2B3242" stroke-width="3"/>
+        fill="none" stroke="#3A3357" stroke-width="3"/>
 </svg>

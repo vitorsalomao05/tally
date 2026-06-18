@@ -137,9 +137,9 @@ export const className = `
 
 const Gauge = () => (
   <svg className="gauge" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-    <path d="M2.6 12 A6 6 0 1 1 13.4 12" fill="none" stroke="#5e9eff" strokeWidth="1.6" strokeLinecap="round" />
-    <line x1="8" y1="9" x2="11" y2="5.4" stroke="#5e9eff" strokeWidth="1.4" strokeLinecap="round" />
-    <circle cx="8" cy="9" r="1.35" fill="#5e9eff" />
+    <path d="M2.6 12 A6 6 0 1 1 13.4 12" fill="none" stroke="#8b5cf6" strokeWidth="1.6" strokeLinecap="round" />
+    <line x1="8" y1="9" x2="11" y2="5.4" stroke="#8b5cf6" strokeWidth="1.4" strokeLinecap="round" />
+    <circle cx="8" cy="9" r="1.35" fill="#8b5cf6" />
   </svg>
 );
 

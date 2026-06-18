@@ -1,0 +1,57 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+  <!-- Candidate A — "Hat-meter": the top-hat crown IS a vertical usage meter
+       (dark track + violet→magenta fill rising ~70%), gold spark at the reveal
+       point. Squircle grid: 824 body in 1024 canvas. qlmanage-safe primitives. -->
+  <defs>
+    <linearGradient id="bodyA" x1="512" y1="100" x2="512" y2="924" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1E1A2B"/>
+      <stop offset="1" stop-color="#0B0A10"/>
+    </linearGradient>
+    <linearGradient id="accentA" x1="382" y1="640" x2="642" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#C026D3"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="512" cy="470" r="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8B5CF6" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#8B5CF6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sheenA" x1="512" y1="100" x2="512" y2="430" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.07"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="sqA"><rect x="100" y="100" width="824" height="824" rx="184"/></clipPath>
+    <clipPath id="crownA"><rect x="384" y="300" width="256" height="340" rx="26"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#sqA)">
+    <rect x="100" y="100" width="824" height="824" fill="url(#bodyA)"/>
+    <rect x="100" y="100" width="824" height="824" fill="url(#glowA)"/>
+    <rect x="100" y="100" width="824" height="330" fill="url(#sheenA)"/>
+
+    <!-- Brim: a wide rounded bar. -->
+    <rect x="220" y="636" width="584" height="74" rx="37" fill="url(#accentA)"/>
+    <rect x="220" y="636" width="584" height="20" rx="10" fill="#FFFFFF" opacity="0.10"/>
+
+    <!-- Crown as a vertical meter: dark track + gradient fill (~70% from base). -->
+    <g clip-path="url(#crownA)">
+      <rect x="384" y="300" width="256" height="340" fill="#2A2540"/>
+      <rect x="384" y="404" width="256" height="236" fill="url(#accentA)"/>
+      <!-- gold reveal line at the meter's top edge -->
+      <rect x="384" y="396" width="256" height="12" fill="#F5C451"/>
+    </g>
+
+    <!-- Gold spark escaping the hat, top-right (the reveal). -->
+    <g transform="translate(712 322)">
+      <path d="M0 -54 C 8 -16, 16 -8, 54 0 C 16 8, 8 16, 0 54 C -8 16, -16 8, -54 0 C -16 -8, -8 -16, 0 -54 Z"
+            fill="#F5C451"/>
+    </g>
+    <g transform="translate(636 232)">
+      <path d="M0 -24 C 4 -7, 7 -4, 24 0 C 7 4, 4 7, 0 24 C -4 7, -7 4, -24 0 C -7 -4, -4 -7, 0 -24 Z"
+            fill="#F5C451" opacity="0.85"/>
+    </g>
+  </g>
+
+  <rect x="101.5" y="101.5" width="821" height="821" rx="182.5"
+        fill="none" stroke="#3A3357" stroke-width="3"/>
+</svg>
