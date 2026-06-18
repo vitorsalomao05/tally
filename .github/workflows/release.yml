@@ -69,7 +69,7 @@ jobs:
           set -euo pipefail
           NOTES="$RUNNER_TEMP/notes.md"
           cat > "$NOTES" <<EOF
-          **Houdini $TAG** — your Claude Pro/Max usage, always in the menu bar.
+          **Houdini $TAG** — your AI usage and spend, revealed — on your Mac.
 
           ### Install (macOS 14+, Apple Silicon)
 
