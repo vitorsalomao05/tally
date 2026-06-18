@@ -41,6 +41,11 @@ struct SettingsView: View {
                 caption("Which figure shows in the menu bar.")
             }
 
+            section("Desktop widget") {
+                desktopWidgetToggle
+                caption("A floating glass panel on your desktop with the same usage and spend.")
+            }
+
             section("Refresh") {
                 row("Interval") { intervalPicker }
                 caption("Applied live — the running timer reschedules, no restart.")
@@ -140,6 +145,20 @@ struct SettingsView: View {
         .pickerStyle(.radioGroup)
         .labelsHidden()
         .accessibilityLabel("Menu bar metric")
+    }
+
+    // MARK: - Desktop widget (native switch)
+
+    private var desktopWidgetToggle: some View {
+        Toggle(isOn: $settings.showDesktopWidget) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Show desktop widget").font(.system(size: 13))
+                Text("Drag it anywhere; it remembers its place.")
+                    .font(.system(size: 11)).foregroundStyle(.secondary)
+            }
+        }
+        .toggleStyle(.switch)
+        .tint(.brand)
     }
 
     // MARK: - Refresh interval (native segmented)

@@ -68,6 +68,16 @@ final class UsageModel: ObservableObject {
         }
     }
 
+    /// Build a model pinned to an explicit state, for headless `--snapshot` renders
+    /// of the desktop widget's loading / needs-auth / error variants. No timer runs.
+    convenience init(previewState: State, metrics: [UsageMetric] = [], needsLogin: Bool = false) {
+        self.init()
+        self.metrics = metrics
+        self.lastUpdated = metrics.isEmpty ? nil : Date()
+        self.needsLogin = needsLogin
+        self.state = previewState
+    }
+
     /// Start the immediate fetch + repeating timer. Idempotent.
     func start() {
         guard timer == nil else { return }

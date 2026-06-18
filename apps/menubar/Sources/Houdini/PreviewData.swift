@@ -7,6 +7,21 @@ import FetcherCore
 enum PreviewData {
     static let providerId = "claude"
 
+    /// An all-green "healthy account" reading, for the marketing two-up shot.
+    static func healthyMetrics(now: Date = Date()) -> [UsageMetric] {
+        [
+            UsageMetric(label: "5-hour", pct: 8,
+                        resetAt: now.addingTimeInterval(4 * 3600 + 12 * 60),
+                        providerId: providerId),
+            UsageMetric(label: "Weekly", pct: 22,
+                        resetAt: now.addingTimeInterval(6 * 86400 + 8 * 3600),
+                        providerId: providerId),
+            UsageMetric(label: "Extra usage ($)", pct: 0,
+                        used: 0, limit: 100, dollars: 0,
+                        providerId: providerId),
+        ]
+    }
+
     /// A representative reading. `Weekly` is the tightest window (95%, red), while
     /// the dollar overage sits at $93/100 — so `auto` and an explicit `extraUsage`
     /// pick visibly different menu-bar text.

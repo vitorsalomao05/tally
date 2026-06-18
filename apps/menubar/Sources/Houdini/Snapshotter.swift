@@ -74,7 +74,87 @@ enum Snapshotter {
             writePNG(MenuBarPreview(model: model, settings: settings, scheme: scheme),
                      to: "\(dir)/menubar-\(suffix).png", scheme: scheme)
         }
+
+        renderWidget(metrics: metrics, session: session, dir: dir)
         FileHandle.standardError.write(Data("snapshots (light+dark) written to \(dir)\n".utf8))
+    }
+
+    /// Desktop-widget snapshots: both breakpoints (compact/regular), all states
+    /// (data / loading / needs-auth / error), light + dark, plus the
+    /// Reduce-Transparency solid fallback. Rendered over a faux desktop so the
+    /// floating card + shadow read; the live behind-window blur can't be captured
+    /// offscreen, so `widgetRenderMode = .snapshot` draws a translucent stand-in.
+    @MainActor
+    private static func render(_ model: UsageModel, _ session: ClaudeSession,
+                              size: NSSize, lightBackdrop: Bool,
+                              reduceTransparency: Bool, to path: String) {
+        let view = ZStack {
+            WidgetBackdrop(light: lightBackdrop)
+            DesktopWidgetView(model: model, session: session,
+                              forceReduceTransparency: reduceTransparency)
+                .environment(\.widgetRenderMode, .snapshot)
+        }
+        .frame(width: size.width, height: size.height)
+        // The card forces its own dark scheme internally; the outer scheme only sets
+        // the backdrop's NSColor resolution, so .dark is fine for both backdrops.
+        writePNG(view, to: path, scheme: .dark)
+    }
+
+    @MainActor
+    private static func renderWidget(metrics: [UsageMetric], session: ClaudeSession, dir: String) {
+        let regular = NSSize(width: 312, height: 232)  // card 280×200 + shadow margin
+        let compact = NSSize(width: 252, height: 182)  // card 220×150 + shadow margin
+
+        // Data, both sizes. The widget is a dark glass card in either appearance, so
+        // "dark"/"light" here show it over a DARK vs a LIGHT wallpaper — the real
+        // accessibility question (does the text hold AA over a light desktop?).
+        for (suffix, light) in [("dark", false), ("light", true)] {
+            render(UsageModel(previewResult: .success(metrics)), session,
+                   size: regular, lightBackdrop: light, reduceTransparency: false,
+                   to: "\(dir)/widget-regular-\(suffix).png")
+            render(UsageModel(previewResult: .success(metrics)), session,
+                   size: compact, lightBackdrop: light, reduceTransparency: false,
+                   to: "\(dir)/widget-compact-\(suffix).png")
+        }
+
+        // States (over the dark wallpaper).
+        render(UsageModel(), session, size: regular, lightBackdrop: false,
+               reduceTransparency: false, to: "\(dir)/widget-loading-dark.png")
+        render(UsageModel(previewState: .signedOut), session, size: regular, lightBackdrop: false,
+               reduceTransparency: false, to: "\(dir)/widget-needs-auth-dark.png")
+        render(UsageModel(previewState: .error("Network error: request timed out"), metrics: metrics),
+               session, size: regular, lightBackdrop: false,
+               reduceTransparency: false, to: "\(dir)/widget-error-dark.png")
+
+        // Accessibility: Reduce Transparency → solid #15101F card.
+        render(UsageModel(previewResult: .success(metrics)), session, size: regular, lightBackdrop: false,
+               reduceTransparency: true, to: "\(dir)/widget-reduce-transparency-dark.png")
+
+        // Marketing two-up (busy + healthy) over the wallpaper — the site asset.
+        renderMarketing(session: session, to: "\(dir)/widget-marketing.png")
+    }
+
+    /// Two widget cards side by side (a busy account + a healthy one) over the
+    /// wallpaper — replaces the site's `desktop-widget.png` with the native look.
+    @MainActor
+    private static func renderMarketing(session: ClaudeSession, to path: String) {
+        let busy = UsageModel(previewResult: .success(PreviewData.sampleMetrics()))
+        let healthy = UsageModel(previewResult: .success(PreviewData.healthyMetrics()))
+        let card = NSSize(width: 312, height: 232)
+        let view = ZStack {
+            WidgetBackdrop()
+            HStack(spacing: 4) {
+                DesktopWidgetView(model: busy, session: session)
+                    .environment(\.widgetRenderMode, .snapshot)
+                    .frame(width: card.width, height: card.height)
+                DesktopWidgetView(model: healthy, session: session)
+                    .environment(\.widgetRenderMode, .snapshot)
+                    .frame(width: card.width, height: card.height)
+            }
+            .padding(.horizontal, 8)
+        }
+        .frame(width: card.width * 2 + 24, height: card.height + 16)
+        writePNG(view, to: path, scheme: .dark)
     }
 
     /// Wrap a view in an opaque, appearance-adaptive panel so the PNG isn't
@@ -98,6 +178,35 @@ enum Snapshotter {
             return
         }
         try? data.write(to: URL(fileURLWithPath: path))
+    }
+}
+
+/// A faux desktop wallpaper behind the widget snapshots so the floating card and
+/// its shadow read (the real panel sits over the user's wallpaper). A warm-to-cool
+/// gradient with a soft highlight — not a flat color — so the glass edge shows.
+private struct WidgetBackdrop: View {
+    /// A light/bright wallpaper instead of the dark one, to verify the dark card's
+    /// text holds AA contrast over a pale desktop.
+    var light: Bool = false
+
+    var body: some View {
+        ZStack {
+            if light {
+                LinearGradient(
+                    colors: [Color(hex: 0xE9D5FF), Color(hex: 0xF8FAFC), Color(hex: 0xBAE6FD)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                )
+            } else {
+                LinearGradient(
+                    colors: [Color(hex: 0x2B1840), Color(hex: 0x10131F), Color(hex: 0x1B2A3A)],
+                    startPoint: .topLeading, endPoint: .bottomTrailing
+                )
+                RadialGradient(
+                    colors: [Color(hex: 0xE879F9, alpha: 0.22), .clear],
+                    center: .topTrailing, startRadius: 0, endRadius: 260
+                )
+            }
+        }
     }
 }
 

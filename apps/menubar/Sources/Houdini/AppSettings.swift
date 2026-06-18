@@ -44,6 +44,7 @@ final class AppSettings: ObservableObject {
         static let primaryMetric = "houdini.primaryMetric"
         static let refreshInterval = "houdini.refreshIntervalSeconds"
         static let preferCookieAuth = "houdini.preferCookieAuth"
+        static let showDesktopWidget = "houdini.showDesktopWidget"
     }
 
     /// Refresh cadences offered in Settings. 60s is the ADR-002 default.
@@ -67,6 +68,13 @@ final class AppSettings: ObservableObject {
         didSet { defaults.set(preferCookieAuth, forKey: Keys.preferCookieAuth) }
     }
 
+    /// Whether the floating desktop widget is shown. Opt-in (off by default) so a
+    /// fresh install doesn't drop an unexpected panel on the user's desktop; the
+    /// `DesktopWidgetController` observes this and shows/hides live.
+    @Published var showDesktopWidget: Bool {
+        didSet { defaults.set(showDesktopWidget, forKey: Keys.showDesktopWidget) }
+    }
+
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
 
@@ -82,5 +90,6 @@ final class AppSettings: ObservableObject {
         refreshInterval = Self.allowedIntervals.contains(stored) ? stored : Self.defaultInterval
 
         preferCookieAuth = defaults.bool(forKey: Keys.preferCookieAuth)
+        showDesktopWidget = defaults.bool(forKey: Keys.showDesktopWidget)
     }
 }

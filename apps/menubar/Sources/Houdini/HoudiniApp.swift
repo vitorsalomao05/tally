@@ -22,6 +22,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         settings: settings,
         resolveProvider: { [weak self] in self?.session.currentProvider }
     )
+    /// Floating desktop widget (NSPanel). Shares the model/session, so it tracks the
+    /// same 60s refresh and auth state as the menu bar. Observes `showDesktopWidget`.
+    lazy var desktopWidget = DesktopWidgetController(model: model, session: session, settings: settings)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Agent app — no Dock icon. Also set via LSUIElement in Info.plist; this
@@ -31,6 +34,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Re-fetch immediately whenever the active Claude credential changes.
         session.onAuthChange = { [weak self] in self?.model.reloadAuth() }
         model.start()
+        // Instantiate the widget controller: its `showDesktopWidget` subscription
+        // fires with the current value, showing the panel if the user enabled it.
+        _ = desktopWidget
     }
 }
 

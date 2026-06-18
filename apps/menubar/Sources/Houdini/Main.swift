@@ -20,6 +20,10 @@ enum Main {
             SelfTest.metricTest()
             return
         }
+        if args.contains("--widgettest") {
+            MainActor.assumeIsolated { WidgetTest.run() }
+            return
+        }
         if args.contains("--launchtest") {
             SelfTest.launchTest()
             return
