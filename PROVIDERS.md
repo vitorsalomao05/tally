@@ -68,7 +68,7 @@ Cross-cutting services in `FetcherCore`: `CredentialStore` (Keychain), `Schedule
 ---
 
 ## Build order
-1. `claude` via `.keychainOAuth` (validate the number against the real account using `tally-cli`).
+1. `claude` via `.keychainOAuth` (validate the number against the real account using `houdini`).
 2. `claude` `.sessionCookie` fallback (covers users without Claude Code).
 3. `openai-platform` + `anthropic-console` admin-API adapters.
 4. `chatgpt-plus` experimental.

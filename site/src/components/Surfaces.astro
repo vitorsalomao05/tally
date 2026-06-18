@@ -4,7 +4,7 @@ import SectionHeader from "./SectionHeader.astro";
 import ubersichtPreview from "../assets/ubersicht-preview.png";
 import { links } from "../config";
 
-// A native render of Tally's gauge language (the product's signature), so it
+// A native render of Houdini's gauge language (the product's signature), so it
 // lives in the DOM and not only inside the screenshots. Illustrative sample.
 const gauges = [
   { label: "5-hour", pct: 34, bar: "bg-ok", text: "text-ok" },
@@ -87,7 +87,7 @@ const gauges = [
       <div class="mt-5 border-t border-border/60 bg-surface-2/40 p-4">
         <Image
           src={ubersichtPreview}
-          alt="The Tally Übersicht desktop widget showing Claude usage rows — label, percentage, and a threshold-colored bar — on the desktop."
+          alt="The Houdini Übersicht desktop widget showing Claude usage rows — label, percentage, and a threshold-colored bar — on the desktop."
           widths={[400, 700, 1000]}
           sizes="(max-width: 768px) 90vw, 500px"
           class="block w-full rounded-lg border border-border/60"
@@ -123,7 +123,7 @@ const gauges = [
     >
       <div>
         <div class="flex items-center gap-3">
-          <h3 class="text-xl font-semibold">Tally for iPhone</h3>
+          <h3 class="text-xl font-semibold">Houdini for iPhone</h3>
           <span
             class="inline-flex items-center gap-1.5 rounded-full bg-accent/12 px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-accent"
           >

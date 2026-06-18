@@ -12,7 +12,7 @@ enum SharedSnapshot {
     /// TODO(xcode): this must match the App Group capability enabled on BOTH the
     /// app and widget targets (see `project.yml`). Confirmed only after enrolling
     /// in the Apple Developer Program ($99/yr) and picking a real Team ID.
-    static let appGroupID = "group.org.salomao.tally"
+    static let appGroupID = "group.org.salomao.houdini"
 
     private static let fileName = "last-snapshot.json"
 

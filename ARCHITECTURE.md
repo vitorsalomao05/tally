@@ -40,7 +40,7 @@ The single source of truth for data. No UI. Exposes:
 - `CredentialStore` — reads/writes secrets in the macOS Keychain; can also read the Claude Code OAuth token (`~/.claude` / Keychain item `Claude Code`).
 - `Scheduler` — per-provider polling interval (default 60s), jitter, exponential backoff on 401/403/429, last-good caching.
 - `UsageSnapshot` — normalized result `[UsageMetric]` consumed by every frontend.
-- A thin **`tally-cli`** executable target that prints the current snapshot as JSON to stdout. This is what the Übersicht widget calls, and what we use to validate against a real account before building UI.
+- A thin **`houdini`** executable target that prints the current snapshot as JSON to stdout. This is what the Übersicht widget calls, and what we use to validate against a real account before building UI.
 
 ### Menu bar app (flagship) — `apps/menubar`
 - SwiftUI `MenuBarExtra` (macOS 13+), `.menuBarExtraStyle(.window)` popover.
@@ -51,7 +51,7 @@ The single source of truth for data. No UI. Exposes:
 
 ### Übersicht widget — `apps/ubersicht`
 - A single `.jsx` with `export const refreshFrequency = 60000`.
-- `command` calls `tally-cli` (or curls the endpoint directly with the Keychain token).
+- `command` calls `houdini` (or curls the endpoint directly with the Keychain token).
 - `render({ output })` draws color-coded gauges. Zero signing/notarization needed. Reference impl exists (`ttar-p/claude-usage-widget`).
 
 ### WidgetKit widget — `apps/widget`

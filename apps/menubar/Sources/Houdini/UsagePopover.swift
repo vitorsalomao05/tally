@@ -28,7 +28,7 @@ struct UsagePopover: View {
         HStack(spacing: 8) {
             Image(systemName: "gauge.with.dots.needle.67percent")
                 .foregroundStyle(.tint)
-            Text("Tally").font(.system(size: 14, weight: .semibold))
+            Text("Houdini").font(.system(size: 14, weight: .semibold))
             Spacer()
             statusBadge
         }
@@ -180,7 +180,7 @@ struct UsagePopover: View {
                 Image(systemName: "power").foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .help("Quit Tally")
+            .help("Quit Houdini")
         }
     }
 }

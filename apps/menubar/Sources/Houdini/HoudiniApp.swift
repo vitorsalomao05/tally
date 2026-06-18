@@ -34,7 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
-struct TallyMenuBarApp: App {
+struct HoudiniMenuBarApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 
     var body: some Scene {

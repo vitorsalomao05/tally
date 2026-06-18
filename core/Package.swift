@@ -2,8 +2,8 @@
 import PackageDescription
 import Foundation
 
-// FetcherCore — the shared, UI-less data layer for Tally (see ../ARCHITECTURE.md).
-// `tally-cli` is the thin executable used to validate providers against a real
+// FetcherCore — the shared, UI-less data layer for Houdini (see ../ARCHITECTURE.md).
+// `houdini` is the thin executable used to validate providers against a real
 // account before any UI exists (see ../ROADMAP.md, Phase 1).
 
 // Tests use swift-testing (`import Testing`). This machine has CommandLineTools
@@ -31,26 +31,26 @@ let package = Package(
     name: "FetcherCore",
     platforms: [
         .macOS(.v14), // macOS 14+ / Apple Silicon (menu bar app, Übersicht, CLI).
-        .iOS(.v17),   // iOS 17+ (TallyMobile app + WidgetKit) — see apps/ios/PLAN.md.
+        .iOS(.v17),   // iOS 17+ (HoudiniMobile app + WidgetKit) — see apps/ios/PLAN.md.
         // NOTE: the FetcherCore *library* is the only product an iOS app consumes.
-        // `tally-cli` / `tally-selftest` are macOS-only host tools (Foundation.Process);
+        // `houdini` / `houdini-selftest` are macOS-only host tools (Foundation.Process);
         // they are never built for, nor linked into, iOS.
     ],
     products: [
         .library(name: "FetcherCore", targets: ["FetcherCore"]),
-        .executable(name: "tally-cli", targets: ["tally-cli"]),
-        .executable(name: "tally-selftest", targets: ["tally-selftest"]),
+        .executable(name: "houdini", targets: ["houdini"]),
+        .executable(name: "houdini-selftest", targets: ["houdini-selftest"]),
     ],
     targets: [
         .target(name: "FetcherCore"),
         .executableTarget(
-            name: "tally-cli",
+            name: "houdini",
             dependencies: ["FetcherCore"]
         ),
         // Runnable mirror of FetcherCoreTests for CommandLineTools-only machines,
         // where `swift test`'s swift-testing runner no-ops (see target source).
         .executableTarget(
-            name: "tally-selftest",
+            name: "houdini-selftest",
             dependencies: ["FetcherCore"]
         ),
         .testTarget(

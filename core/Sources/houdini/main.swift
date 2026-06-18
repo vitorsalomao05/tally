@@ -1,14 +1,14 @@
 import Foundation
 import FetcherCore
 
-// tally-cli — Phase 1 validation tool (ROADMAP.md).
+// houdini — Phase 1 validation tool (ROADMAP.md).
 // Fetches the "claude" provider snapshot and prints it as readable JSON to stdout.
 // No UI, no colors. NEVER prints the OAuth token.
 //
 // Usage:
-//   tally-cli                 → fetch provider "claude"
-//   tally-cli <id>            → fetch a specific provider id
-//   tally-cli --json [<id>]   → same output; explicit flag so consumers (the
+//   houdini                 → fetch provider "claude"
+//   houdini <id>            → fetch a specific provider id
+//   houdini --json [<id>]   → same output; explicit flag so consumers (the
 //                               Übersicht wrapper) can pin a stable contract.
 //
 // JSON is the only output mode, so `--json` is accepted and ignored. Any

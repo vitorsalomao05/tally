@@ -139,7 +139,7 @@ const html = `<!doctype html>
     <div class="left">
       <div class="brand">
         ${gauge}
-        <span class="name">Tally</span>
+        <span class="name">Houdini</span>
         <span class="tag">macOS menu bar</span>
       </div>
       <div>
@@ -147,7 +147,7 @@ const html = `<!doctype html>
         <p class="sub">A native menu bar app that shows your Claude Pro/Max usage at a glance — refreshed every 60 seconds. Credentials stay in your Keychain.</p>
       </div>
       <div class="foot">
-        <span class="chip"><span class="dot"></span>tally.salomao.org</span>
+        <span class="chip"><span class="dot"></span>houdini.salomao.org</span>
       </div>
     </div>
     <div class="right">
@@ -159,7 +159,7 @@ const html = `<!doctype html>
 </body></html>`;
 
 // ── Render with headless Chrome ─────────────────────────────────────────────
-const tmp = mkdtempSync(join(tmpdir(), "tally-og-"));
+const tmp = mkdtempSync(join(tmpdir(), "houdini-og-"));
 const htmlFile = join(tmp, "og.html");
 writeFileSync(htmlFile, html);
 

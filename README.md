@@ -1,23 +1,23 @@
-# Tally — your AI usage, always in sight
+# Houdini — your AI usage, always in sight
 
-> Working codename: **Tally** (changeable). Repo: [`vitorsalomao05/tally`](https://github.com/vitorsalomao05/tally).
-> Site: **[tally.salomao.org](https://tally.salomao.org)**.
+> Working codename: **Houdini** (changeable). Repo: [`vitorsalomao05/houdini`](https://github.com/vitorsalomao05/houdini).
+> Site: **[houdini.salomao.org](https://houdini.salomao.org)**.
 > Target: **macOS 14+ / Apple Silicon only**. June 2026.
 
 ## Install (macOS 14+, Apple Silicon)
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/tally/v0.1.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/vitorsalomao05/houdini/v0.1.1/install.sh | bash
 ```
 
-Downloads the ad-hoc-signed `Tally.app` + `tally-cli` from the pinned
-[`v0.1.1` release](https://github.com/vitorsalomao05/tally/releases/tag/v0.1.1),
+Downloads the ad-hoc-signed `Houdini.app` + `houdini` from the pinned
+[`v0.1.1` release](https://github.com/vitorsalomao05/houdini/releases/tag/v0.1.1),
 **verifies their SHA-256** against `SHASUMS256.txt`, then installs without `sudo`
 (app → `~/Applications`, CLI → `~/.local/bin`). It offers (never forces) launch
 at login and the Übersicht widget, and is safe to re-run. Read it first — it's at
 [`install.sh`](install.sh). A signed, notarized DMG is the next milestone.
 
-Tally is a lightweight macOS app that keeps your **AI subscription usage / remaining credits** visible at a glance and refreshes about **every 60 seconds**. It ships in three surfaces, all installable from the landing site:
+Houdini is a lightweight macOS app that keeps your **AI subscription usage / remaining credits** visible at a glance and refreshes about **every 60 seconds**. It ships in three surfaces, all installable from the landing site:
 
 1. **Menu bar app** (flagship) — always visible, true 60s refresh.
 2. **Übersicht desktop widget** — single `.jsx`, true 60s refresh.
@@ -25,7 +25,7 @@ Tally is a lightweight macOS app that keeps your **AI subscription usage / remai
 
 ## The core idea (read this first)
 
-The naive approach is "open a logged-in page in a background browser, reload every minute, scrape the number." We researched this and found a **much better path**: most AI usage numbers are backed by a **JSON endpoint**, not just rendered HTML. So instead of driving a browser, Tally reads the user's existing credential (Keychain OAuth token or session cookie) and calls the JSON endpoint directly. This is lighter (~6 MB native vs hundreds of MB of bundled Chromium), more robust (no DOM breakage), and far easier to sign/notarize.
+The naive approach is "open a logged-in page in a background browser, reload every minute, scrape the number." We researched this and found a **much better path**: most AI usage numbers are backed by a **JSON endpoint**, not just rendered HTML. So instead of driving a browser, Houdini reads the user's existing credential (Keychain OAuth token or session cookie) and calls the JSON endpoint directly. This is lighter (~6 MB native vs hundreds of MB of bundled Chromium), more robust (no DOM breakage), and far easier to sign/notarize.
 
 The background-browser scrape survives only as a **last-resort fallback adapter** for providers that genuinely have no readable endpoint.
 
@@ -43,7 +43,7 @@ See `PROVIDERS.md` for the adapter contract and `ARCHITECTURE.md` for the system
 ## Repo layout
 
 ```
-tally/
+houdini/
 ├── README.md            ← this file
 ├── ARCHITECTURE.md      ← system design + diagram
 ├── DECISIONS.md         ← ADRs (why menu bar, why no 60s widget, distribution…)
@@ -62,4 +62,4 @@ tally/
 
 ## Privacy posture
 
-Credentials never leave the device. Tokens/cookies live in the macOS Keychain. No Tally server ever sees them. The landing site has a dedicated trust/privacy section because the app touches logins.
+Credentials never leave the device. Tokens/cookies live in the macOS Keychain. No Houdini server ever sees them. The landing site has a dedicated trust/privacy section because the app touches logins.

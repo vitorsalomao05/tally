@@ -34,7 +34,7 @@ struct ClaudeLoginView: View {
         }
     }
 
-    /// Persist the captured cookie. Tally owns this Keychain item, so it reads it
+    /// Persist the captured cookie. Houdini owns this Keychain item, so it reads it
     /// back later (app + widget) without a prompt.
     private func store(_ value: String) {
         try? CredentialStore().nativeWriteGenericPassword(

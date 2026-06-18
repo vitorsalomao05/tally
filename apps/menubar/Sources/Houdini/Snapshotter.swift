@@ -51,7 +51,7 @@ enum Snapshotter {
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
 
         // Isolated defaults so a snapshot run never clobbers the user's real prefs.
-        let settings = AppSettings(defaults: UserDefaults(suiteName: "tally.snapshot") ?? .standard)
+        let settings = AppSettings(defaults: UserDefaults(suiteName: "houdini.snapshot") ?? .standard)
         settings.primaryMetric = .fiveHour // mirror the shipped default (out-of-the-box bar)
         settings.refreshInterval = 60
         let launch = LaunchAtLogin()

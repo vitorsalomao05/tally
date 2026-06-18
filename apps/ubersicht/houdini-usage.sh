@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 #
-# tally-usage.sh — data wrapper for the Tally Übersicht widget.
+# houdini-usage.sh — data wrapper for the Houdini Übersicht widget.
 #
 # Prints the current Claude usage snapshot as JSON on stdout. Two paths:
 #
-#   1. PRIMARY  — run `tally-cli --json`. Output is passed through verbatim, so
-#                 it is byte-identical to running tally-cli directly (the
+#   1. PRIMARY  — run `houdini --json`. Output is passed through verbatim, so
+#                 it is byte-identical to running houdini directly (the
 #                 normalized {providerId, displayName, capturedAt, metrics[]}
 #                 snapshot from FetcherCore).
-#   2. FALLBACK — if tally-cli is nowhere to be found, curl the Anthropic OAuth
+#   2. FALLBACK — if houdini is nowhere to be found, curl the Anthropic OAuth
 #                 usage endpoint directly, reading the token from the macOS
 #                 Keychain, and normalize the raw response (via jq) into the SAME
 #                 shape. Marked with "source":"curl-fallback" so it is traceable.
@@ -17,7 +17,7 @@
 # {"error":"<message>"} so the widget can render a clear message instead of
 # breaking. The OAuth token is NEVER printed.
 #
-# tally-cli is searched on PATH and in: /usr/local/bin, ~/.local/bin, the dev
+# houdini is searched on PATH and in: /usr/local/bin, ~/.local/bin, the dev
 # release build (../../core/.build/release), and next to this script.
 
 # Deliberately no `set -e`: every path must reach an emit() so stdout is always
@@ -53,17 +53,17 @@ emit_error() {
   fi
 }
 
-# First existing tally-cli, or empty string.
+# First existing houdini, or empty string.
 find_cli() {
   local c
-  if c="$(command -v tally-cli 2>/dev/null)" && [ -n "$c" ]; then
+  if c="$(command -v houdini 2>/dev/null)" && [ -n "$c" ]; then
     printf '%s' "$c"; return 0
   fi
   local candidates=(
-    "/usr/local/bin/tally-cli"
-    "$HOME/.local/bin/tally-cli"
-    "$SCRIPT_DIR/../../core/.build/release/tally-cli"
-    "$SCRIPT_DIR/tally-cli"
+    "/usr/local/bin/houdini"
+    "$HOME/.local/bin/houdini"
+    "$SCRIPT_DIR/../../core/.build/release/houdini"
+    "$SCRIPT_DIR/houdini"
   )
   for c in "${candidates[@]}"; do
     if [ -x "$c" ]; then printf '%s' "$c"; return 0; fi
@@ -72,10 +72,10 @@ find_cli() {
 }
 
 # FALLBACK: curl the endpoint with the Keychain token and normalize via jq into
-# the same snapshot shape tally-cli produces.
+# the same snapshot shape houdini produces.
 fallback_curl() {
   if ! command -v jq >/dev/null 2>&1; then
-    emit_error "tally-cli not found and jq is unavailable for the curl fallback"
+    emit_error "houdini not found and jq is unavailable for the curl fallback"
     return
   fi
 
@@ -105,7 +105,7 @@ fallback_curl() {
 
   # Mirror ClaudeOAuthProvider.parse: only windows with a non-null utilization;
   # extra_usage credits divided by 10^decimal_places. Null-valued keys are
-  # stripped at the end so the shape matches tally-cli's nil-omitting Codable.
+  # stripped at the end so the shape matches houdini's nil-omitting Codable.
   printf '%s' "$raw" | jq --arg now "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '
     def window(b; lbl):
       if (b != null and b.utilization != null)
@@ -142,7 +142,7 @@ fallback_curl() {
 main() {
   local cli out rc
   if cli="$(find_cli)"; then
-    # PRIMARY: pass tally-cli's JSON through verbatim. On success stdout is pure
+    # PRIMARY: pass houdini's JSON through verbatim. On success stdout is pure
     # JSON and stderr is empty; on failure stdout is empty and stderr carries the
     # message, which we surface as {"error": ...}.
     out="$("$cli" --json 2>&1)"
@@ -150,7 +150,7 @@ main() {
     if [ $rc -eq 0 ] && [ -n "$out" ]; then
       printf '%s\n' "$out"
     else
-      emit_error "tally-cli failed: ${out:-exit $rc}"
+      emit_error "houdini failed: ${out:-exit $rc}"
     fi
   else
     fallback_curl

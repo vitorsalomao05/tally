@@ -21,7 +21,7 @@ struct SettingsView: View {
         VStack(alignment: .leading, spacing: 20) {
             HStack(spacing: 8) {
                 Image(systemName: "gauge.with.dots.needle.67percent").foregroundStyle(.tint)
-                Text("Tally Settings").font(.system(size: 15, weight: .semibold))
+                Text("Houdini Settings").font(.system(size: 15, weight: .semibold))
             }
 
             section("Claude account") {

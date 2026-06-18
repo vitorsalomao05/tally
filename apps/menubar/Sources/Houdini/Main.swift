@@ -34,6 +34,6 @@ enum Main {
             SelfTest.setLoginItem(false)
             return
         }
-        TallyMenuBarApp.main()
+        HoudiniMenuBarApp.main()
     }
 }

@@ -1,4 +1,4 @@
-# XcodeGen spec for Tally for iPhone.
+# XcodeGen spec for Houdini for iPhone.
 #
 # This file DOCUMENTS the iOS target layout (app + widget extension, App Group,
 # FetcherCore-by-path) in a form a tool can consume — it does NOT build anything
@@ -6,9 +6,9 @@
 #
 # TODO(xcode): replace DEVELOPMENT_TEAM with a real Team ID once enrolled in the
 # Apple Developer Program ($99/yr). Bundle IDs / App Group are placeholders.
-name: Tally
+name: Houdini
 options:
-  bundleIdPrefix: org.salomao.tally
+  bundleIdPrefix: org.salomao.houdini
   deploymentTarget:
     iOS: "17.0"            # Lock Screen widgets need iOS 16; app targets 17.
 
@@ -30,39 +30,39 @@ settings:
 
 targets:
   # ── App ───────────────────────────────────────────────────────────────────
-  TallyMobile:
+  HoudiniMobile:
     type: application
     platform: iOS
-    sources: [TallyMobile, Shared]
+    sources: [HoudiniMobile, Shared]
     dependencies:
       - package: FetcherCore
         product: FetcherCore
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: org.salomao.tally.mobile
+        PRODUCT_BUNDLE_IDENTIFIER: org.salomao.houdini.mobile
         INFOPLIST_KEY_UILaunchScreen_Generation: "YES"
         INFOPLIST_KEY_UIApplicationSceneManifest_Generation: "YES"
     entitlements:
-      path: TallyMobile/TallyMobile.entitlements
+      path: HoudiniMobile/HoudiniMobile.entitlements
       properties:
-        com.apple.security.application-groups: [group.org.salomao.tally]
-        keychain-access-groups: ["$(AppIdentifierPrefix)org.salomao.tally"]
+        com.apple.security.application-groups: [group.org.salomao.houdini]
+        keychain-access-groups: ["$(AppIdentifierPrefix)org.salomao.houdini"]
 
   # ── Widget extension ──────────────────────────────────────────────────────
-  TallyWidget:
+  HoudiniWidget:
     type: app-extension
     platform: iOS
-    sources: [TallyWidget, Shared]
+    sources: [HoudiniWidget, Shared]
     dependencies:
       - package: FetcherCore
         product: FetcherCore
-      - target: TallyMobile     # extension is embedded in the app
+      - target: HoudiniMobile     # extension is embedded in the app
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: org.salomao.tally.mobile.widget
+        PRODUCT_BUNDLE_IDENTIFIER: org.salomao.houdini.mobile.widget
         INFOPLIST_KEY_NSExtension_PointIdentifier: com.apple.widgetkit-extension
     entitlements:
-      path: TallyWidget/TallyWidget.entitlements
+      path: HoudiniWidget/HoudiniWidget.entitlements
       properties:
-        com.apple.security.application-groups: [group.org.salomao.tally]
-        keychain-access-groups: ["$(AppIdentifierPrefix)org.salomao.tally"]
+        com.apple.security.application-groups: [group.org.salomao.houdini]
+        keychain-access-groups: ["$(AppIdentifierPrefix)org.salomao.houdini"]

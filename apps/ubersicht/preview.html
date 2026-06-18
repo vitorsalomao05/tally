@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Tally — Übersicht widget preview</title>
+<title>Houdini — Übersicht widget preview</title>
 <!--
-  Standalone calibration preview for the Tally Übersicht widget. Open in a
+  Standalone calibration preview for the Houdini Übersicht widget. Open in a
   browser to tune the look without installing Übersicht.
 
-  The `.tally` CSS below is the CARD_CSS block from tally.jsx, pasted VERBATIM
-  (only wrapped in a `.tally {}` selector + a position override for layout). The
-  JS render logic mirrors tally.jsx's render(). KEEP BOTH IN SYNC with tally.jsx.
+  The `.houdini` CSS below is the CARD_CSS block from houdini.jsx, pasted VERBATIM
+  (only wrapped in a `.houdini {}` selector + a position override for layout). The
+  JS render logic mirrors houdini.jsx's render(). KEEP BOTH IN SYNC with houdini.jsx.
 -->
 <style>
   html, body { height: 100%; margin: 0; }
@@ -43,8 +43,8 @@
     letter-spacing: 0.3px;
   }
 
-  /* ── CARD_CSS (verbatim from tally.jsx) ────────────────────────────────── */
-  .tally {
+  /* ── CARD_CSS (verbatim from houdini.jsx) ────────────────────────────────── */
+  .houdini {
     position: relative;            /* preview layout; the widget uses top/right */
     box-sizing: border-box;
     width: 280px;
@@ -88,7 +88,7 @@
 <div class="stage" id="stage"></div>
 
 <script>
-  // ── Shared formatting/threshold logic (mirrors tally.jsx) ────────────────
+  // ── Shared formatting/threshold logic (mirrors houdini.jsx) ────────────────
   const GREEN = "#30d158", ORANGE = "#ff9f0a", RED = "#ff453a", TEXT = "#e5e5ea";
 
   function barColor(pct) {
@@ -158,16 +158,16 @@
 
   function cardHTML(snap) {
     if (snap.error) {
-      return `<div class="tally">
-        <div class="head">${GAUGE}<span class="brand">Tally</span></div>
+      return `<div class="houdini">
+        <div class="head">${GAUGE}<span class="brand">Houdini</span></div>
         <hr class="divider"/>
         <div class="error-title"><span>⚠</span><span>Can't read usage</span></div>
         <div class="error-msg">${snap.error}</div>
       </div>`;
     }
     const rows = (snap.metrics || []).map(metricHTML).join("");
-    return `<div class="tally">
-      <div class="head">${GAUGE}<span class="brand">Tally</span><span class="spacer"></span><span class="dot" style="background:${GREEN}"></span></div>
+    return `<div class="houdini">
+      <div class="head">${GAUGE}<span class="brand">Houdini</span><span class="spacer"></span><span class="dot" style="background:${GREEN}"></span></div>
       <hr class="divider"/>
       ${rows}
       <div class="foot">${fmtUpdated(snap.capturedAt)}</div>

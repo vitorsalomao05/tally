@@ -2,31 +2,29 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleName</key>
-	<string>Tally</string>
 	<key>CFBundleDisplayName</key>
-	<string>Tally</string>
+	<string>Houdini</string>
 	<key>CFBundleExecutable</key>
-	<string>Tally</string>
-	<key>CFBundleIdentifier</key>
-	<string>com.tally.menubar</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<!-- App icon: Resources/AppIcon.icns (generated from design/icon/AppIcon.svg). -->
+	<string>Houdini</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
 	<key>CFBundleIconName</key>
 	<string>AppIcon</string>
-	<key>CFBundleVersion</key>
-	<string>2</string>
+	<key>CFBundleIdentifier</key>
+	<string>org.salomao.houdini</string>
+	<key>CFBundleName</key>
+	<string>Houdini</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>0.1.1</string>
+	<key>CFBundleVersion</key>
+	<string>2</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
-	<!-- Agent app: no Dock icon, no main window. -->
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSHumanReadableCopyright</key>
-	<string>Tally</string>
+	<string>Houdini — local-first AI usage for macOS.</string>
 </dict>
 </plist>

@@ -1,4 +1,4 @@
-# Tally — menu bar app (flagship)
+# Houdini — menu bar app (flagship)
 
 SwiftUI `MenuBarExtra` agent app that shows your tightest Claude usage limit in the
 menu bar and the full breakdown in a popover. True 60s refresh (ADR-002). Consumes
@@ -11,8 +11,8 @@ SwiftPM executable and wrapped into a `.app` bundle by `build.sh` (XcodeGen/`.xc
 both need `xcodebuild`, which requires full Xcode).
 
 ```sh
-./build.sh release          # → build/Tally.app (ad-hoc signed, hardened runtime)
-open build/Tally.app        # runs as a menu bar agent (no Dock icon, LSUIElement)
+./build.sh release          # → build/Houdini.app (ad-hoc signed, hardened runtime)
+open build/Houdini.app        # runs as a menu bar agent (no Dock icon, LSUIElement)
 ```
 
 Headless helpers (no GUI needed):
@@ -20,16 +20,16 @@ Headless helpers (no GUI needed):
 ```sh
 # Render the real popover + settings + menu-bar views to PNGs, light AND dark
 # (falls back to sample data if no Claude token is present):
-./build/Tally.app/Contents/MacOS/Tally --snapshot docs/screenshots
+./build/Houdini.app/Contents/MacOS/Houdini --snapshot docs/screenshots
 
 # Prove the refresh timer fires AND reschedules live (interval, duration in seconds):
-./build/Tally.app/Contents/MacOS/Tally --selftest 60 75
+./build/Houdini.app/Contents/MacOS/Houdini --selftest 60 75
 
 # Print the menu-bar text for every primary-metric choice (switch proof):
-./build/Tally.app/Contents/MacOS/Tally --metrictest
+./build/Houdini.app/Contents/MacOS/Houdini --metrictest
 
 # Exercise SMAppService.register()/unregister() and report the real result:
-./build/Tally.app/Contents/MacOS/Tally --launchtest
+./build/Houdini.app/Contents/MacOS/Houdini --launchtest
 ```
 
 ## Settings (⌘, or the gear in the popover footer)
@@ -57,7 +57,7 @@ no restart needed:
   drawn in pure SwiftUI (not native `Picker`/`Toggle`) so they also render via `ImageRenderer`.
 - **Last-good cache:** on a fetch error the previous reading stays visible with a warning;
   a credential/auth error before any reading shows "Claude token expired / not found".
-- **No App Sandbox** (see `Tally.entitlements`): we must read the Claude Code Keychain item.
+- **No App Sandbox** (see `Houdini.entitlements`): we must read the Claude Code Keychain item.
   Hardened runtime is on; entitlement is `com.apple.security.network.client`.
 
 ## Not in this phase

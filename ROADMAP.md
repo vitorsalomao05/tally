@@ -6,11 +6,11 @@ Each phase = one or more prompts handed to Claude Code. We build the data layer 
 Docs (README, ARCHITECTURE, DECISIONS, PROVIDERS, WORKFLOW), directory skeleton, ADRs. Git init + first commit handled in Phase 1 prompt.
 
 ## Phase 1 — FetcherCore + Claude adapter (data layer)  ← WE ARE HERE
-- SwiftPM workspace: `FetcherCore` library + `tally-cli` executable.
+- SwiftPM workspace: `FetcherCore` library + `houdini` executable.
 - `UsageProvider` protocol, `CredentialStore` (Keychain), models.
 - **Claude `.keychainOAuth` adapter**: read Claude Code OAuth token, call `api.anthropic.com/api/oauth/usage` with mandatory `claude-code/<ver>` UA, parse 5h/weekly/Opus.
-- `tally-cli` prints the live snapshot as JSON.
-- **Validation gate:** run `tally-cli` against the real account; confirm numbers match `claude.ai/settings/usage`.
+- `houdini` prints the live snapshot as JSON.
+- **Validation gate:** run `houdini` against the real account; confirm numbers match `claude.ai/settings/usage`.
 
 ## Phase 2 — Menu bar app (flagship)
 - SwiftUI `MenuBarExtra` + popover; timer in scene-level `ObservableObject` (60s).
@@ -18,7 +18,7 @@ Docs (README, ARCHITECTURE, DECISIONS, PROVIDERS, WORKFLOW), directory skeleton,
 - Writes to App Group + `reloadTimelines()`.
 
 ## Phase 3 — Übersicht widget
-- Single `.jsx`, `refreshFrequency = 60000`, calls `tally-cli`, color-coded gauges, install instructions.
+- Single `.jsx`, `refreshFrequency = 60000`, calls `houdini`, color-coded gauges, install instructions.
 
 ## Phase 4 — WidgetKit widget (glanceable)
 - Widget extension + App Group shared container; `.after(~15min)`; honest "updated X min ago" copy.
@@ -39,7 +39,7 @@ Docs (README, ARCHITECTURE, DECISIONS, PROVIDERS, WORKFLOW), directory skeleton,
 ## Phase 8 — Polish & launch
 - Icon/branding, accessibility pass, auto-update (Sparkle) for mature release, README badges, screenshots/video.
 
-## Phase 9 — Mobile: Tally for iPhone (iOS)  — NEW DIRECTION
+## Phase 9 — Mobile: Houdini for iPhone (iOS)  — NEW DIRECTION
 See `apps/ios/PLAN.md` and `DECISIONS.md` ADR-008. Native iOS app (no PWA — CORS + httpOnly cookie + the "no server sees your creds" promise rule it out).
 - **FetcherCore iOS-ready** ✅ — only macOS-only dep was `Foundation.Process`; guarded behind `#if os(macOS)`, macOS build unchanged. Cookie path (`ClaudeCookieProvider` + `ClaudeUsageParser`) reused verbatim.
 - **App scaffold** ✅ (source only — *not* compiled; needs Xcode) — SwiftUI app + `UsageViewModel`, in-app `WKWebView` claude.ai login → capture `sessionKey` → iOS Keychain → native `URLSession` fetch.

@@ -36,9 +36,9 @@ public struct ProviderRegistry: Sendable {
     public func provider(id: String) -> (any UsageProvider)? { providers[id] }
 
     /// Default registry. `claude` is the OAuth (Claude Code) adapter — unchanged,
-    /// so `tally-cli` (and `tally-cli claude`) keeps printing the real numbers.
+    /// so `houdini` (and `houdini claude`) keeps printing the real numbers.
     /// `claude-cookie` is the claude.ai session-cookie adapter, registered so it
-    /// can be exercised live via `tally-cli claude-cookie` after a WebView login.
+    /// can be exercised live via `houdini claude-cookie` after a WebView login.
     public static func makeDefault() -> ProviderRegistry {
         ProviderRegistry([ClaudeOAuthProvider(), ClaudeCookieProvider()])
     }

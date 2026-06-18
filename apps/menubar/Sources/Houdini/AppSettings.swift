@@ -41,9 +41,9 @@ enum PrimaryMetricChoice: String, CaseIterable, Identifiable, Sendable {
 @MainActor
 final class AppSettings: ObservableObject {
     private enum Keys {
-        static let primaryMetric = "tally.primaryMetric"
-        static let refreshInterval = "tally.refreshIntervalSeconds"
-        static let preferCookieAuth = "tally.preferCookieAuth"
+        static let primaryMetric = "houdini.primaryMetric"
+        static let refreshInterval = "houdini.refreshIntervalSeconds"
+        static let preferCookieAuth = "houdini.preferCookieAuth"
     }
 
     /// Refresh cadences offered in Settings. 60s is the ADR-002 default.

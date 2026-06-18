@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Regenerate the Tally app icon from AppIcon.svg (the source of truth).
+# Regenerate the Houdini app icon from AppIcon.svg (the source of truth).
 # CommandLineTools-only pipeline: qlmanage (SVG→PNG) → sips (sizes) → iconutil.
 #   ./render-icon.sh
 # Outputs:
@@ -12,7 +12,7 @@ cd "$HERE"
 
 SVG="AppIcon.svg"
 PNG="AppIcon-1024.png"
-ICONSET="Tally.iconset"
+ICONSET="Houdini.iconset"
 ICNS="../../Resources/AppIcon.icns"
 PREVIEW="../../docs/screenshots/app-icon.png"
 

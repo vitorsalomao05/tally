@@ -2,7 +2,7 @@ import WidgetKit
 import SwiftUI
 import FetcherCore
 
-/// Tally Home Screen + Lock Screen widget (placeholder, but structurally complete).
+/// Houdini Home Screen + Lock Screen widget (placeholder, but structurally complete).
 ///
 /// It reads the **cached** `UsageSnapshot` the app wrote to the App Group — it does
 /// not try to fake a live gauge. Timeline refresh is `.after(~15 min)`: Apple
@@ -19,7 +19,7 @@ struct UsageEntry: TimelineEntry {
     let snapshot: UsageSnapshot?
 }
 
-struct TallyProvider: TimelineProvider {
+struct HoudiniProvider: TimelineProvider {
     func placeholder(in context: Context) -> UsageEntry {
         UsageEntry(date: Date(), snapshot: nil)
     }
@@ -46,7 +46,7 @@ private func tightest(_ snapshot: UsageSnapshot?) -> UsageMetric? {
         .max(by: { ($0.pct ?? 0) < ($1.pct ?? 0) })
 }
 
-struct TallyWidgetEntryView: View {
+struct HoudiniWidgetEntryView: View {
     @Environment(\.widgetFamily) private var family
     var entry: UsageEntry
 
@@ -64,7 +64,7 @@ struct TallyWidgetEntryView: View {
     private var metric: UsageMetric? { tightest(entry.snapshot) }
 
     private var inlineText: String {
-        guard let m = metric, let pct = m.pct else { return "Tally — sign in" }
+        guard let m = metric, let pct = m.pct else { return "Houdini — sign in" }
         return "\(m.label) \(Int(pct.rounded()))%"
     }
 
@@ -76,7 +76,7 @@ struct TallyWidgetEntryView: View {
                 Gauge(value: pct, in: 0...100) { EmptyView() }
                     .gaugeStyle(.accessoryLinearCapacity)
             } else {
-                Text("Open Tally to sign in").font(.caption)
+                Text("Open Houdini to sign in").font(.caption)
             }
         }
     }
@@ -84,7 +84,7 @@ struct TallyWidgetEntryView: View {
     private var homeScreen: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("Tally").font(.caption).foregroundStyle(Theme.muted)
+                Text("Houdini").font(.caption).foregroundStyle(Theme.muted)
                 Spacer()
                 Text(updatedText).font(.caption2).foregroundStyle(Theme.muted)
             }
@@ -97,7 +97,7 @@ struct TallyWidgetEntryView: View {
                     .tint(Theme.color(forPct: pct))
             } else {
                 Spacer()
-                Text("Open Tally to sign in")
+                Text("Open Houdini to sign in")
                     .font(.subheadline).foregroundStyle(Theme.muted)
             }
             Spacer(minLength: 0)
@@ -114,12 +114,12 @@ struct TallyWidgetEntryView: View {
 
 // MARK: - Widget
 
-struct TallyWidget: Widget {
-    let kind = "TallyWidget"
+struct HoudiniWidget: Widget {
+    let kind = "HoudiniWidget"
 
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: TallyProvider()) { entry in
-            TallyWidgetEntryView(entry: entry)
+        StaticConfiguration(kind: kind, provider: HoudiniProvider()) { entry in
+            HoudiniWidgetEntryView(entry: entry)
                 .containerBackground(Theme.bg, for: .widget)
         }
         .configurationDisplayName("Claude usage")

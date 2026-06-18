@@ -6,8 +6,8 @@ import SwiftUI
 ///
 /// TODO(xcode): WidgetKit extensions build only in Xcode.
 @main
-struct TallyWidgetBundle: WidgetBundle {
+struct HoudiniWidgetBundle: WidgetBundle {
     var body: some Widget {
-        TallyWidget()
+        HoudiniWidget()
     }
 }

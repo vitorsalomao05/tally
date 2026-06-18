@@ -75,14 +75,14 @@ enum SelfTest {
             // untouched; values flow through the real AppSettings persistence path.
             err("--- default resolution (clean vs. saved UserDefaults) ---")
 
-            let cleanName = "tally.metrictest.clean"
+            let cleanName = "houdini.metrictest.clean"
             let clean = UserDefaults(suiteName: cleanName)!
             clean.removePersistentDomain(forName: cleanName)
             let freshChoice = AppSettings(defaults: clean).primaryMetric
             let freshText = metrics.primary(for: freshChoice).map(Format.barLabel) ?? "—"
             err("  clean install     → choice=\(freshChoice.rawValue), menu bar: \"\(freshText)\"")
 
-            let savedName = "tally.metrictest.saved"
+            let savedName = "houdini.metrictest.saved"
             let saved = UserDefaults(suiteName: savedName)!
             saved.removePersistentDomain(forName: savedName)
             // Simulate a user who explicitly picked Extra usage, then relaunched.

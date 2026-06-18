@@ -1,7 +1,7 @@
-// tally.jsx — Übersicht desktop widget for Claude usage (Tally, Phase 3).
+// houdini.jsx — Übersicht desktop widget for Claude usage (Houdini, Phase 3).
 //
 // Second surface after the menu bar app; TRUE 60s refresh. Reuses the data layer
-// via `tally-usage.sh` (which runs tally-cli, or curls the endpoint as a
+// via `houdini-usage.sh` (which runs houdini, or curls the endpoint as a
 // documented fallback). Visual is intentionally coherent with the menu bar
 // popover: one row per metric (label, %, threshold-colored bar), relative reset,
 // and the "$used / $limit" overage line.
@@ -19,7 +19,7 @@ export const refreshFrequency = 60000; // 60s — the real requirement (ADR-002)
 // regardless of Übersicht's working directory. install.sh copies the script
 // here; manual installs must keep this folder name (see README).
 export const command =
-  'bash "$HOME/Library/Application Support/Übersicht/widgets/tally/tally-usage.sh"';
+  'bash "$HOME/Library/Application Support/Übersicht/widgets/houdini/houdini-usage.sh"';
 
 // ── Shared visual + formatting (keep in sync with preview.html) ──────────────
 
@@ -147,7 +147,7 @@ const ErrorCard = ({ message }) => (
   <div>
     <div className="head">
       <Gauge />
-      <span className="brand">Tally</span>
+      <span className="brand">Houdini</span>
     </div>
     <hr className="divider" />
     <div className="error-title">
@@ -181,8 +181,8 @@ export const render = ({ output }) => {
   try {
     snap = JSON.parse(output);
   } catch (e) {
-    if (!output || !output.trim()) return <div className="head"><Gauge /><span className="brand">Tally</span><span className="spacer" /><span className="reset">starting…</span></div>;
-    return <ErrorCard message="Couldn't parse the usage data from tally-usage.sh." />;
+    if (!output || !output.trim()) return <div className="head"><Gauge /><span className="brand">Houdini</span><span className="spacer" /><span className="reset">starting…</span></div>;
+    return <ErrorCard message="Couldn't parse the usage data from houdini-usage.sh." />;
   }
 
   if (snap && snap.error) return <ErrorCard message={snap.error} />;
@@ -196,7 +196,7 @@ export const render = ({ output }) => {
     <div>
       <div className="head">
         <Gauge />
-        <span className="brand">Tally</span>
+        <span className="brand">Houdini</span>
         <span className="spacer" />
         <span className="dot" style={{ background: GREEN }} />
       </div>

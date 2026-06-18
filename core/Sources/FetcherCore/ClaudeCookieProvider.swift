@@ -17,10 +17,10 @@ public struct ClaudeCookieProvider: UsageProvider {
     public let capabilities: Capabilities = [.usagePct, .resetTimer, .dollarBalance]
     public let refreshInterval: TimeInterval = 60
 
-    /// Keychain coordinates for the cookie Tally captures via its WebView login.
+    /// Keychain coordinates for the cookie Houdini captures via its WebView login.
     /// Distinct from the Claude Code OAuth item — this one is created and owned by
-    /// Tally itself, so the app reads it back silently.
-    public static let keychainService = "Tally-claude-session"
+    /// Houdini itself, so the app reads it back silently.
+    public static let keychainService = "Houdini-claude-session"
     public static let keychainAccount = "sessionKey"
 
     static let orgsURL = URL(string: "https://claude.ai/api/organizations")!
@@ -29,14 +29,14 @@ public struct ClaudeCookieProvider: UsageProvider {
     }
 
     /// Reads the `sessionKey` cookie value. Injectable so tests never touch the
-    /// Keychain or the network. Default reads Tally's own Keychain item natively.
+    /// Keychain or the network. Default reads Houdini's own Keychain item natively.
     private let sessionKeyReader: @Sendable () throws -> String
 
     public init(store: CredentialStore = CredentialStore()) {
         self.sessionKeyReader = {
             let data: Data
             do {
-                // Tally created this item, so the native path reads it without a prompt.
+                // Houdini created this item, so the native path reads it without a prompt.
                 data = try store.nativeReadGenericPassword(
                     service: Self.keychainService, account: Self.keychainAccount
                 )

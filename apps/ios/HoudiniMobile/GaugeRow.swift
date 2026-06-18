@@ -1,7 +1,7 @@
 import SwiftUI
 import FetcherCore
 
-/// One usage gauge — Tally's signature: a label, the percentage (or dollar
+/// One usage gauge — Houdini's signature: a label, the percentage (or dollar
 /// balance), and a threshold-colored bar. Renders whatever a `UsageMetric`
 /// supplies (capability-driven, ADR-007): a `pct` becomes a bar; a `dollars`-only
 /// metric (Claude Extra overage) becomes a "$" line with no bar.

@@ -1,7 +1,7 @@
 import SwiftUI
 
-/// Tally's dark/blue palette — kept in lockstep with the website's design tokens
-/// (`site/src/styles/global.css`) so the app, the widget, and tally.salomao.org
+/// Houdini's dark/blue palette — kept in lockstep with the website's design tokens
+/// (`site/src/styles/global.css`) so the app, the widget, and houdini.salomao.org
 /// read as one product. Hex values mirror the CSS custom properties.
 ///
 /// Lives in `Shared/` so BOTH the app and the widget targets compile it (the

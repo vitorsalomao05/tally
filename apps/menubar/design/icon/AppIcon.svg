@@ -1,7 +1,7 @@
 <svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none"
      xmlns="http://www.w3.org/2000/svg">
   <!--
-    Tally app icon. macOS Big Sur+ grid: 824×824 squircle body centered in a
+    Houdini app icon. macOS Big Sur+ grid: 824×824 squircle body centered in a
     1024 canvas (100 px margin on every side; system adds the drop shadow).
     The mark derives from site/src/components/Logo.astro: three stacked usage
     "gauge" bars (dark track + filled meter), here unified under the brand's

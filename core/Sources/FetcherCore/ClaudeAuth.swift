@@ -21,7 +21,7 @@ public enum ClaudeAuthKind: String, Sendable {
 /// All Keychain reads are best-effort: any failure (missing item, denied access)
 /// is treated as "credential absent", never thrown — resolution must not crash the
 /// poll loop. OAuth presence is checked via the silent `security` CLI path; the
-/// cookie via Tally's own native item. The OAuth check runs first in the default
+/// cookie via Houdini's own native item. The OAuth check runs first in the default
 /// order, so a Claude Code user never triggers a read of the cookie item.
 public struct ClaudeAuthResolver: Sendable {
     private let store: CredentialStore
@@ -48,7 +48,7 @@ public struct ClaudeAuthResolver: Sendable {
         return true
     }
 
-    /// True when Tally has a non-empty captured `sessionKey` cookie in its Keychain.
+    /// True when Houdini has a non-empty captured `sessionKey` cookie in its Keychain.
     public func hasSessionCookie() -> Bool {
         guard let data = try? store.nativeReadGenericPassword(
             service: ClaudeCookieProvider.keychainService,

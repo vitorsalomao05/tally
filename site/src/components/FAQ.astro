@@ -3,16 +3,16 @@ import SectionHeader from "./SectionHeader.astro";
 
 const faqs = [
   {
-    q: "Is Tally safe to use?",
-    a: "Yes. It runs entirely on your Mac, keeps credentials only in the macOS Keychain, and talks directly to Anthropic with your own token. There's no Tally server to send anything to, and the source is open for you to read.",
+    q: "Is Houdini safe to use?",
+    a: "Yes. It runs entirely on your Mac, keeps credentials only in the macOS Keychain, and talks directly to Anthropic with your own token. There's no Houdini server to send anything to, and the source is open for you to read.",
   },
   {
     q: "Why does it need my Claude login?",
-    a: "To read your usage, Tally needs the same credential your tools already use. If you run Claude Code, it reuses that token automatically. If not, you sign in to Claude.ai once in a secure window and the session is stored in your Keychain — used only to call Claude's own usage endpoint, never sent anywhere else.",
+    a: "To read your usage, Houdini needs the same credential your tools already use. If you run Claude Code, it reuses that token automatically. If not, you sign in to Claude.ai once in a secure window and the session is stored in your Keychain — used only to call Claude's own usage endpoint, never sent anywhere else.",
   },
   {
     q: "Is it Apple Silicon only?",
-    a: "For now, yes — macOS 14+ on Apple Silicon, which is where Tally is built and tested. Native Swift, around 6 MB, no Electron.",
+    a: "For now, yes — macOS 14+ on Apple Silicon, which is where Houdini is built and tested. Native Swift, around 6 MB, no Electron.",
   },
   {
     q: "Does it really refresh every minute?",
@@ -20,7 +20,7 @@ const faqs = [
   },
   {
     q: "How do I uninstall it?",
-    a: "Menu bar app: quit Tally and drag <code class='font-mono text-text'>Tally.app</code> to the Trash. Übersicht widget: delete the <code class='font-mono text-text'>tally</code> folder from your Übersicht widgets directory (and <code class='font-mono text-text'>~/.local/bin/tally-cli</code> if you like). Any stored session can be removed in Keychain Access.",
+    a: "Menu bar app: quit Houdini and drag <code class='font-mono text-text'>Houdini.app</code> to the Trash. Übersicht widget: delete the <code class='font-mono text-text'>houdini</code> folder from your Übersicht widgets directory (and <code class='font-mono text-text'>~/.local/bin/houdini</code> if you like). Any stored session can be removed in Keychain Access.",
   },
 ];
 ---

@@ -24,7 +24,7 @@ struct ContentView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(Theme.bg.ignoresSafeArea())
-            .navigationTitle("Tally")
+            .navigationTitle("Houdini")
             .toolbar {
                 if model.isSignedIn {
                     ToolbarItem(placement: .topBarTrailing) {

@@ -1,7 +1,7 @@
 import Foundation
 import FetcherCore
 
-// tally-selftest — a runnable proof of the FetcherCore parser + org-selection
+// houdini-selftest — a runnable proof of the FetcherCore parser + org-selection
 // logic, reading the SAME committed fixtures as Tests/FetcherCoreTests.
 //
 // Why this exists alongside the swift-testing suite: this machine has only
@@ -29,7 +29,7 @@ func check(_ name: String, _ passed: Bool, _ detail: @autoclosure () -> String =
 
 // Locate the committed fixtures relative to this source file.
 let fixturesDir = URL(fileURLWithPath: #filePath)
-    .deletingLastPathComponent()            // Sources/tally-selftest
+    .deletingLastPathComponent()            // Sources/houdini-selftest
     .deletingLastPathComponent()            // Sources
     .deletingLastPathComponent()            // core
     .appendingPathComponent("Tests/FetcherCoreTests/Fixtures")
@@ -62,7 +62,7 @@ let expected: [UsageMetric] = {
     ]
 }()
 
-print("=== tally-selftest: ClaudeUsageParser (2 fixtures) ===")
+print("=== houdini-selftest: ClaudeUsageParser (2 fixtures) ===")
 
 do {
     let oauth = try ClaudeUsageParser.parse(fixture("oauth_usage"), providerId: "claude")

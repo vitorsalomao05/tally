@@ -1,4 +1,4 @@
-# Tally for iPhone (`apps/ios`) — scaffold
+# Houdini for iPhone (`apps/ios`) — scaffold
 
 **This does not build on this machine.** It is **source + plan only**. An iOS app
 and a WidgetKit extension require **Xcode** (full IDE + iOS SDK); `swift build` on
@@ -20,18 +20,18 @@ apps/ios/
 ├── PLAN.md                      # the mobile plan (read this first)
 ├── README.md                    # you are here
 ├── project.yml                  # XcodeGen spec — documents the two targets + App Group
-├── TallyMobile/                 # the app target (SwiftUI)
-│   ├── TallyMobileApp.swift     #   @main entry
+├── HoudiniMobile/                 # the app target (SwiftUI)
+│   ├── HoudiniMobileApp.swift     #   @main entry
 │   ├── ContentView.swift        #   main screen (gauges / signed-out / error states)
 │   ├── UsageViewModel.swift     #   @MainActor model over FetcherCore (cookie path)
 │   ├── ClaudeLoginView.swift    #   WKWebView login → capture sessionKey → Keychain
-│   └── GaugeRow.swift           #   one usage gauge row (Tally's signature)
+│   └── GaugeRow.swift           #   one usage gauge row (Houdini's signature)
 ├── Shared/                      # compiled into BOTH the app and the widget targets
 │   ├── Theme.swift              #   dark/blue palette matching the site tokens
 │   └── SharedSnapshot.swift     #   App Group read/write of the cached UsageSnapshot
-└── TallyWidget/                 # the widget extension target (placeholder)
-    ├── TallyWidgetBundle.swift  #   @main WidgetBundle
-    └── TallyWidget.swift        #   Home + Lock Screen timeline reading the cache
+└── HoudiniWidget/                 # the widget extension target (placeholder)
+    ├── HoudiniWidgetBundle.swift  #   @main WidgetBundle
+    └── HoudiniWidget.swift        #   Home + Lock Screen timeline reading the cache
 ```
 
 ## How it will be built (in Xcode, once unblocked)
@@ -40,14 +40,14 @@ apps/ios/
    ```sh
    brew install xcodegen      # requires Xcode to then open/build the result
    cd apps/ios && xcodegen generate
-   open Tally.xcodeproj
+   open Houdini.xcodeproj
    ```
    …or create the two targets by hand in Xcode and add the files above.
 2. Add **`../../core`** as a local Swift Package dependency; link the `FetcherCore`
    library product to **both** the app and the widget targets.
-3. Enable the **App Group** capability (`group.org.salomao.tally`) on both targets,
+3. Enable the **App Group** capability (`group.org.salomao.houdini`) on both targets,
    and Keychain Sharing on both.
-4. Set a real **Team** and bundle IDs (placeholders are `org.salomao.tally.*`).
+4. Set a real **Team** and bundle IDs (placeholders are `org.salomao.houdini.*`).
 5. Build to a device (free personal team = 7-day signature) to smoke-test, then
    TestFlight → App Store (needs the **$99/yr** Apple Developer Program).
 

@@ -32,12 +32,12 @@ public enum CredentialError: Error, CustomStringConvertible, Sendable {
 ///  - ``cliReadGenericPassword(service:account:)`` — shells out to `/usr/bin/security`.
 ///    A *generic-password* item is ACL-bound to the app that created it (Claude
 ///    Code). On this machine the `security` tool reads that item silently, so
-///    this is the **default** for Phase 1 / `tally-cli`.
+///    this is the **default** for Phase 1 / `houdini`.
 ///
 ///  - ``nativeReadGenericPassword(service:account:)`` — the Security framework
 ///    (`SecItemCopyMatching`). Cleaner API, but a *different* unsigned binary
-///    (e.g. `swift run tally-cli`) trips the item's ACL and triggers a blocking
-///    interactive Keychain prompt. Switch to this once Tally ships as a signed
+///    (e.g. `swift run houdini`) trips the item's ACL and triggers a blocking
+///    interactive Keychain prompt. Switch to this once Houdini ships as a signed
 ///    app that has been added to the item's ACL.
 public struct CredentialStore: Sendable {
     public init() {}
@@ -46,7 +46,7 @@ public struct CredentialStore: Sendable {
     /// Code credential). Returns the raw secret bytes.
     ///
     /// TODO(phase ≥2, signed app): migrate this default to
-    /// ``nativeReadGenericPassword(service:account:)`` once Tally ships as a
+    /// ``nativeReadGenericPassword(service:account:)`` once Houdini ships as a
     /// **code-signed** app that has been **added to the Keychain item's ACL**.
     /// The native path avoids spawning `/usr/bin/security` on every poll (the
     /// menu bar refreshes every 60s), which is wasteful and ~10ms slower per call.
@@ -133,11 +133,11 @@ public struct CredentialStore: Sendable {
         }
     }
 
-    // MARK: - native write / delete (for Tally's own secrets, e.g. the cookie)
+    // MARK: - native write / delete (for Houdini's own secrets, e.g. the cookie)
 
-    /// Upsert a generic-password item Tally owns (e.g. the captured `sessionKey`).
+    /// Upsert a generic-password item Houdini owns (e.g. the captured `sessionKey`).
     /// Stored `AfterFirstUnlock` so the menu bar agent can read it when launched at
-    /// login. Tally creates the item, so it reads it back later without a prompt.
+    /// login. Houdini creates the item, so it reads it back later without a prompt.
     public func nativeWriteGenericPassword(service: String, account: String, data: Data) throws {
         let base: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
@@ -162,7 +162,7 @@ public struct CredentialStore: Sendable {
         }
     }
 
-    /// Remove a generic-password item Tally owns. A missing item is not an error.
+    /// Remove a generic-password item Houdini owns. A missing item is not an error.
     public func nativeDeleteGenericPassword(service: String, account: String? = nil) throws {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,

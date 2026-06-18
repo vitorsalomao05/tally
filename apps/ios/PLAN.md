@@ -1,4 +1,4 @@
-# Tally for iPhone — plan
+# Houdini for iPhone — plan
 
 Status: **planning + scaffold only.** No iOS build has happened (this machine has
 CommandLineTools only — no Xcode, no iOS SDK, no Apple Developer account). Every
@@ -32,7 +32,7 @@ Flow (mirrors `apps/menubar/.../ClaudeLoginWindow.swift`, ported to UIKit/SwiftU
    `document.cookie` / a plain browser is not. This is why a native app can do
    what a PWA cannot (see §2).
 3. **Store** — write the value to the **iOS Keychain** via
-   `CredentialStore.nativeWriteGenericPassword` (service `Tally-claude-session`,
+   `CredentialStore.nativeWriteGenericPassword` (service `Houdini-claude-session`,
    account `sessionKey`, accessible `AfterFirstUnlock` so the widget can read it).
    `Security.framework` / Keychain Services is fully available on iOS.
 4. **Fetch** — `ClaudeCookieProvider.fetch()` runs unchanged: native
@@ -59,10 +59,10 @@ core already exposes.
 
 ## 2. Why **not** a pure PWA / web app
 
-A browser-only "open tally.salomao.org and it shows your usage" cannot work
+A browser-only "open houdini.salomao.org and it shows your usage" cannot work
 honestly, for two independent reasons:
 
-- **CORS.** A page served from `tally.salomao.org` calling
+- **CORS.** A page served from `houdini.salomao.org` calling
   `claude.ai/api/organizations/{id}/usage` is a cross-origin request. claude.ai
   does not send `Access-Control-Allow-Origin` for us, so the browser blocks the
   response. (`URLSession` in a native app is not subject to CORS — §1.)
@@ -132,7 +132,7 @@ difference from the Mac app, and the copy must say so plainly:
   - AltStore / third-party sideloading is fragile, region-dependent (EU
     alternative marketplaces under the DMA), and not something we'll ask users to
     do.
-  - **Bottom line:** to put Tally for iPhone in someone else's hands, you pay the
+  - **Bottom line:** to put Houdini for iPhone in someone else's hands, you pay the
     $99 and go through TestFlight → App Store. No way around it.
 
 This reuses **ADR-006**'s "$99 buys the clean path" conclusion; iOS just removes
@@ -162,8 +162,8 @@ guard needed there.
 
 **Changes applied (this commit set):**
 
-- `core/Package.swift`: added `.iOS(.v17)` to `platforms`. `tally-cli` /
-  `tally-selftest` remain macOS-only host tools (they use `Process`) and are never
+- `core/Package.swift`: added `.iOS(.v17)` to `platforms`. `houdini` /
+  `houdini-selftest` remain macOS-only host tools (they use `Process`) and are never
   built for / linked into iOS — only the `FetcherCore` **library** product is.
 - `CredentialStore.readGenericPassword`: `#if os(macOS)` → CLI; `#else` → native.
 - `CredentialStore.cliReadGenericPassword`: whole method wrapped in `#if os(macOS)`.
@@ -171,7 +171,7 @@ guard needed there.
   `#if os(macOS)`; falls through to the constant elsewhere.
 
 **Validation:** `swift build` (macOS host) still succeeds and `swift run
-tally-selftest` still passes all 14 checks — the macOS build is untouched. iOS
+houdini-selftest` still passes all 14 checks — the macOS build is untouched. iOS
 compilation itself can only be *verified in Xcode* (no iOS SDK here), so it stays
 a documented assumption until then, but the guards are mechanical and the
 remaining code is plain Foundation.
@@ -217,7 +217,7 @@ Registered as a **future** option, not implemented:
 
 1. In Xcode: create the App + Widget Extension targets, add `core/` as a local
    Swift Package dependency, enable the **App Group** capability on both
-   (`group.org.salomao.tally`), and add the Keychain sharing entitlement.
+   (`group.org.salomao.houdini`), and add the Keychain sharing entitlement.
    (`apps/ios/project.yml` documents exactly this target layout for XcodeGen.)
 2. Build to a **personal-team** device (free) to smoke-test the WebView login,
    the Keychain write, the live fetch, and the widget timeline.
@@ -239,7 +239,7 @@ need, in order:
 - An **Apple Developer Program** membership (**$99/yr**) — to run on a real device
   beyond 7 days, and for TestFlight / App Store.
 - A confirmed **Team ID / bundle-ID prefix** — the scaffold uses placeholders
-  (`org.salomao.tally.*`, `group.org.salomao.tally`) marked `TODO`.
+  (`org.salomao.houdini.*`, `group.org.salomao.houdini`) marked `TODO`.
 
 None of those can be produced on this machine, so the scaffold is intentionally
 **not compiled here**. See each scaffold file's header `// TODO(xcode)` notes.
