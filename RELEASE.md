@@ -10,35 +10,28 @@ Replace `X.Y.Z` with the new version (and `P.Q.R` with the previous one).
 
 ---
 
-## ▶ v0.3.0 go-live (Round B — PREPARED, NOT YET PUBLISHED)
+## ▶ v0.3.0 — SHIPPED 2026-06-18 (Round B)
 
-Round B is staged on `master`: the **native desktop widget** (replaces Übersicht),
-the **redesigned logo** (free web mark + new `.icns`), honest **providers copy**,
-and the app bumped to **0.3.0** (`apps/menubar/Info.plist` → `CFBundleShortVersionString 0.3.0`,
-build `4`). The published install one-liner is deliberately **still pointing at the
-last shipped release** so nothing breaks before go-live:
+Round B is **live**: the **native desktop widget** (replaced Übersicht), the
+**redesigned logo** (free web mark + new `.icns`), honest **providers copy**, the
+interactive **/install wizard** and **/guide** card tour, and the app at **0.3.0**
+(`apps/menubar/Info.plist` → `CFBundleShortVersionString 0.3.0`, build `4`).
 
-- `site/src/config.ts` → `version = "0.3.0"` (display) but `installTag = "v0.2.0"`
-  (the one-liner downloads the working v0.2.0 release).
-- `install.sh` → `TAG="v0.2.0"` (unchanged).
-- `README.md` install one-liner → `v0.2.0` (unchanged).
+Go-live executed in order:
 
-A **preview** Vercel deploy shows the new look; **production
-(houdini.salomao.org) is untouched** (no `vercel --prod` was run).
+1. [x] `site/src/config.ts` → `installTag = "v0.3.0"`.
+2. [x] `install.sh` → `TAG="v0.3.0"`.
+3. [x] `README.md` → install one-liner + release link → `v0.3.0`.
+4. [x] Commit: `chore(release): point install to v0.3.0` (`7d5b796`).
+5. [x] Built artifacts (CommandLineTools), tagged `v0.3.0`, published
+       `gh release create v0.3.0` with `Houdini.app.zip`, `houdini`, `SHASUMS256.txt`.
+6. [x] Deleted the old release + tag: `gh release delete v0.2.0 --yes --cleanup-tag`
+       (`gh release list` → only `v0.3.0`).
+7. [x] `cd site && vercel --prod`. Production `houdini.salomao.org` serves the new
+       site; home, `/install`, `/guide`, `og.png` all 200; `tally → houdini` redirect OK.
 
-To go live (do these in order, only when the visual is approved):
-
-1. [ ] `site/src/config.ts` → set `installTag = "v0.3.0"` (or delete `installTag`
-       and point `installOneLiner` back at `v${version}`).
-2. [ ] `install.sh` → `TAG="v0.3.0"`.
-3. [ ] `README.md` → install one-liner + release link → `v0.3.0`.
-4. [ ] Commit: `chore(release): cut v0.3.0`.
-5. [ ] Build artifacts + tag + publish (steps 3–4 below): `git tag v0.3.0 && git push origin v0.3.0`,
-       then `gh release create v0.3.0 …` with `Houdini.app.zip`, `houdini`, `SHASUMS256.txt`.
-6. [ ] **Delete the old release + tag:** `gh release delete v0.2.0 --yes --cleanup-tag`.
-7. [ ] `cd site && vercel --prod` (production). Smoke-test home / `/install` / `/guide`.
-
-(Do **not** do any of the above as part of Round B — they are the go-live step.)
+Install validated against the published `v0.3.0` tag in an isolated `HOME`: download
+from the new release, SHA-256 match, idempotent re-run.
 
 ---
 
