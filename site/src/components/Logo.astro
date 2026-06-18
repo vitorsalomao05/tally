@@ -1,35 +1,84 @@
 ---
-// Wordmark: the top-hat mark (the brand's reveal) + "Houdini".
+// Wordmark: the free top-hat mark (transparent — no card/squircle) + "Houdini".
+// The mark is the brand's reveal: a flared violet→magenta crown, a gold hat-band,
+// a curved brim, and a gold spark escaping over it. On the web the mark is always
+// free-standing; only the macOS app icon (.icns) keeps the squircle (Apple masks
+// app icons). On hover the spark twinkles — disabled under reduced motion.
 interface Props {
   class?: string;
 }
 const { class: cls = "" } = Astro.props;
 ---
 
-<span class={`inline-flex items-center gap-2.5 ${cls}`}>
+<span class={`logo inline-flex items-center gap-2.5 ${cls}`}>
   <svg
-    width="26"
-    height="26"
+    class="logo-mark shrink-0"
+    width="27"
+    height="27"
     viewBox="0 0 32 32"
     fill="none"
     aria-hidden="true"
-    class="shrink-0"
   >
     <defs>
-      <linearGradient id="logo-b" x1="16" y1="2" x2="16" y2="30" gradientUnits="userSpaceOnUse">
-        <stop offset="0" stop-color="#1E1A2B"></stop>
-        <stop offset="1" stop-color="#0B0A10"></stop>
-      </linearGradient>
-      <linearGradient id="logo-a" x1="8" y1="23" x2="24" y2="8" gradientUnits="userSpaceOnUse">
+      <linearGradient id="lm-hat" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
         <stop offset="0" stop-color="#7C3AED"></stop>
+        <stop offset="0.55" stop-color="#8B5CF6"></stop>
         <stop offset="1" stop-color="#C026D3"></stop>
       </linearGradient>
+      <clipPath id="lm-crown">
+        <path d="M11 22.6 L9.7 11 Q9.6 8.6 12.1 8.6 L19.9 8.6 Q22.4 8.6 22.3 11 L21 22.6 Z"></path>
+      </clipPath>
     </defs>
-    <rect x="1" y="1" width="30" height="30" rx="7" fill="url(#logo-b)" stroke="#3A3357"></rect>
-    <rect x="5" y="20.4" width="22" height="3.4" rx="1.7" fill="url(#logo-a)"></rect>
-    <path d="M11 23 V11.5 a2 2 0 0 1 2 -2 H19 a2 2 0 0 1 2 2 V23 Z" fill="url(#logo-a)"></path>
-    <rect x="11" y="17.4" width="10" height="2.2" fill="#F5C451"></rect>
-    <path d="M25 8.4 C 25.5 9.9, 26.1 10.5, 27.6 11 C 26.1 11.5, 25.5 12.1, 25 13.6 C 24.5 12.1, 23.9 11.5, 22.4 11 C 23.9 10.5, 24.5 9.9, 25 8.4 Z" fill="#F5C451"></path>
+    <g class="hat-group">
+      <ellipse cx="16" cy="23.2" rx="12.4" ry="3" fill="url(#lm-hat)"></ellipse>
+      <ellipse cx="16" cy="22.5" rx="12.4" ry="2.4" fill="#000000" opacity="0.12"></ellipse>
+      <path d="M11 22.6 L9.7 11 Q9.6 8.6 12.1 8.6 L19.9 8.6 Q22.4 8.6 22.3 11 L21 22.6 Z" fill="url(#lm-hat)"></path>
+      <g clip-path="url(#lm-crown)">
+        <path d="M11 16 L9.7 11 Q9.6 8.6 12.1 8.6 L19.9 8.6 Q22.4 8.6 22.3 11 L21.6 16 Z" fill="#FFFFFF" opacity="0.10"></path>
+        <rect x="8" y="17.6" width="16" height="2.9" fill="#F5C451"></rect>
+        <rect x="8" y="17.6" width="16" height="0.9" fill="#FFFFFF" opacity="0.25"></rect>
+      </g>
+    </g>
+    <g transform="translate(25 6.6)">
+      <g class="spark">
+        <path d="M0 -4.4 C0.7 -1.3 1.3 -0.7 4.4 0 C1.3 0.7 0.7 1.3 0 4.4 C-0.7 1.3 -1.3 0.7 -4.4 0 C-1.3 -0.7 -0.7 -1.3 0 -4.4 Z" fill="#F5C451"></path>
+      </g>
+    </g>
+    <g transform="translate(21.2 3)">
+      <g class="spark spark--sm">
+        <path d="M0 -1.9 C0.3 -0.57 0.57 -0.3 1.9 0 C0.57 0.3 0.3 0.57 0 1.9 C-0.3 0.57 -0.57 0.3 -1.9 0 C-0.57 -0.3 -0.3 -0.57 0 -1.9 Z" fill="#F5C451" opacity="0.85"></path>
+      </g>
+    </g>
   </svg>
   <span class="font-display text-[19px] font-semibold tracking-tight text-text">Houdini</span>
 </span>
+
+<style>
+  .logo-mark .hat-group {
+    transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .logo-mark .spark {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+  .logo-mark .spark--sm {
+    transition-delay: 0.05s;
+  }
+  .logo:hover .hat-group {
+    transform: translateY(-0.7px);
+  }
+  .logo:hover .spark {
+    transform: rotate(90deg) scale(1.18);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .logo-mark .hat-group,
+    .logo-mark .spark {
+      transition: none;
+    }
+    .logo:hover .hat-group,
+    .logo:hover .spark {
+      transform: none;
+    }
+  }
+</style>
