@@ -68,15 +68,55 @@ enum Snapshotter {
             let suffix = scheme == .dark ? "dark" : "light"
             let model = UsageModel(previewResult: .success(metrics))
 
-            writePNG(panel(UsagePopover(model: model, session: session)), to: "\(dir)/popover-\(suffix).png", scheme: scheme)
+            // The popover is now forced-dark glass (rendered once, all states, below).
             writePNG(SettingsView(settings: settings, launch: launch, session: session),
                      to: "\(dir)/settings-\(suffix).png", scheme: scheme)
             writePNG(MenuBarPreview(model: model, settings: settings, scheme: scheme),
                      to: "\(dir)/menubar-\(suffix).png", scheme: scheme)
         }
 
+        renderPopover(metrics: metrics, session: session, dir: dir)
         renderWidget(metrics: metrics, session: session, dir: dir)
         FileHandle.standardError.write(Data("snapshots (light+dark) written to \(dir)\n".utf8))
+    }
+
+    /// Popover snapshots: the forced-dark glass card in every state (data / loading
+    /// skeleton / needs-auth / error / stale), rendered over a faux desktop so the
+    /// rounded card + hairline read. The live MenuBarExtra window material can't be
+    /// captured offscreen, so `widgetRenderMode = .snapshot` draws the same opaque
+    /// dark-glass approximation the widget uses — an approximation for review.
+    @MainActor
+    private static func renderPopover(metrics: [UsageMetric], session: ClaudeSession, dir: String) {
+        let states: [(String, UsageModel)] = [
+            ("ok",         UsageModel(previewResult: .success(metrics))),
+            ("loading",    UsageModel()),                                   // .loading, no data → skeleton
+            ("needs-auth", UsageModel(previewState: .signedOut)),
+            ("error",      UsageModel(previewState: .error("Claude token expired / not found — re-authenticate Claude Code."))),
+            ("stale",      UsageModel(previewState: .error("Network error: request timed out"), metrics: metrics)),
+        ]
+        for (name, model) in states {
+            let view = UsagePopover(model: model, session: session)
+                .environment(\.widgetRenderMode, .snapshot)
+                .padding(28)
+                .background(WidgetBackdrop())
+            writePNG(view, to: "\(dir)/popover-\(name).png", scheme: .dark)
+        }
+
+        // Accessibility: Reduce Transparency → solid #15101F card (same as the widget).
+        let solid = UsagePopover(model: UsageModel(previewResult: .success(metrics)),
+                                 session: session, forceReduceTransparency: true)
+            .environment(\.widgetRenderMode, .snapshot)
+            .padding(28)
+            .background(WidgetBackdrop())
+        writePNG(solid, to: "\(dir)/popover-reduce-transparency.png", scheme: .dark)
+
+        // Legibility check: the LIVE ink-scrim path (not the snapshot approximation)
+        // over a light "wallpaper", to confirm the forced-dark card holds AA contrast
+        // when the system material is light.
+        let lightCheck = UsagePopover(model: UsageModel(previewResult: .success(metrics)), session: session)
+            .padding(28)
+            .background(WidgetBackdrop(light: true))
+        writePNG(lightCheck, to: "\(dir)/popover-light-backdrop.png", scheme: .dark)
     }
 
     /// Desktop-widget snapshots: both breakpoints (compact/regular), all states
@@ -155,12 +195,6 @@ enum Snapshotter {
         }
         .frame(width: card.width * 2 + 24, height: card.height + 16)
         writePNG(view, to: path, scheme: .dark)
-    }
-
-    /// Wrap a view in an opaque, appearance-adaptive panel so the PNG isn't
-    /// transparent (the live popover gets this from the system window material).
-    private static func panel(_ view: some View) -> some View {
-        view.background(Color(nsColor: .windowBackgroundColor))
     }
 
     @MainActor

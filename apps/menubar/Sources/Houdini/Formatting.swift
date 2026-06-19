@@ -51,6 +51,21 @@ extension Array where Element == UsageMetric {
     /// Back-compat alias for the auto/tightest pick.
     var primary: UsageMetric? { tightest }
 
+    /// Percentage windows (no dollar overage) ordered 5-hour → Weekly → the rest by
+    /// tightness, so the prominent hero rings are the figures users glance at. Shared
+    /// by the desktop widget and the popover so the two pick the SAME rings.
+    var rankedRingWindows: [UsageMetric] {
+        let priority: [String: Int] = ["5-hour": 0, "Weekly": 1]
+        return filter { $0.dollars == nil }.sorted { a, b in
+            let pa = priority[a.label] ?? 9, pb = priority[b.label] ?? 9
+            if pa != pb { return pa < pb }
+            return (a.pct ?? -1) > (b.pct ?? -1)
+        }
+    }
+
+    /// The dollar-overage metric (e.g. "Extra usage ($)"), if present.
+    var dollarOverage: UsageMetric? { first { $0.dollars != nil } }
+
     /// The metric to surface in the menu bar for the user's chosen mode.
     /// • `auto` → the tightest limit (may be the dollar overage — that's its job).
     /// • a pinned window → that exact window; if it isn't on the account (rare,

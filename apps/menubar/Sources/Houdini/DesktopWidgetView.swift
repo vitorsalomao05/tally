@@ -98,30 +98,9 @@ struct DesktopWidgetView: View {
 
     private var header: some View {
         HStack(spacing: 7) {
-            Text("Houdini")
-                .font(.system(size: 13, weight: .semibold, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(colors: [.brandViolet, .brandMagenta],
-                                   startPoint: .leading, endPoint: .trailing)
-                )
+            BrandWordmark(size: 13)
             Spacer()
-            statusDot
-        }
-    }
-
-    @ViewBuilder
-    private var statusDot: some View {
-        switch model.state {
-        case .ok:
-            Circle().fill(.green).frame(width: 7, height: 7)
-        case .loading:
-            Circle().fill(Color.secondary.opacity(0.6)).frame(width: 7, height: 7)
-        case .error:
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 10)).foregroundStyle(.orange)
-        case .signedOut:
-            Image(systemName: "person.crop.circle.badge.questionmark")
-                .font(.system(size: 11)).foregroundStyle(.secondary)
+            StatusDot(state: model.state)
         }
     }
 
@@ -246,11 +225,19 @@ struct DesktopWidgetView: View {
     private var emptyState: some View {
         switch model.state {
         case .loading:
-            loadingSkeleton
+            RingPairSkeleton(diameter: 92)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .signedOut:
-            needsAuth
+            NeedsAuthView(session: session)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .error(let message):
-            if model.needsLogin { needsAuth } else { errorState(message) }
+            if model.needsLogin {
+                NeedsAuthView(session: session)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                ErrorStateView(message: message)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         case .ok:
             Text("No usage metrics available.")
                 .font(.system(size: 12)).foregroundStyle(.secondary)
@@ -258,75 +245,13 @@ struct DesktopWidgetView: View {
         }
     }
 
-    /// Skeleton: track-only rings + a placeholder bar. No spinner; a calm pulse
-    /// only when motion is allowed.
-    private var loadingSkeleton: some View {
-        VStack(spacing: 14) {
-            HStack(spacing: 16) {
-                WidgetRingGauge(title: "5h", pct: nil, resetText: nil, diameter: 92, isPlaceholder: true)
-                WidgetRingGauge(title: "Weekly", pct: nil, resetText: nil, diameter: 92, isPlaceholder: true)
-            }
-            RoundedRectangle(cornerRadius: 5).fill(Color.white.opacity(0.06)).frame(height: 22)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .modifier(SkeletonPulse(enabled: !reduceMotion))
-    }
+    // MARK: - Metric selection (shared with the popover via `[UsageMetric]`)
 
-    private var needsAuth: some View {
-        VStack(spacing: 9) {
-            Image(systemName: "wand.and.stars")
-                .font(.system(size: 26))
-                .foregroundStyle(LinearGradient(colors: [.brandViolet, .brandMagenta],
-                                                startPoint: .top, endPoint: .bottom))
-            Text("Connect Claude")
-                .font(.system(size: 14, weight: .semibold))
-            Text("Sign in to see your Claude usage and spend.")
-                .font(.system(size: 11)).foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            if let session {
-                Button { session.signIn() } label: {
-                    Text("Connect Claude").frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-                .tint(.brandViolet)
-            }
-        }
-        .padding(.horizontal, 8)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
+    /// Percentage windows ordered 5-hour → Weekly → the rest, so the two prominent
+    /// rings are the figures users glance at. Shared so the popover picks the same.
+    private var ringMetrics: [UsageMetric] { model.metrics.rankedRingWindows }
 
-    private func errorState(_ message: String) -> some View {
-        VStack(spacing: 8) {
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 22)).foregroundStyle(.orange)
-            Text("Can't read usage")
-                .font(.system(size: 13, weight: .medium))
-            Text(message)
-                .font(.system(size: 11)).foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .padding(.horizontal, 8)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    // MARK: - Metric selection
-
-    /// Percentage windows (no dollar overage), ordered 5-hour → Weekly → the rest
-    /// by tightness, so the two prominent rings are the figures users glance at.
-    private var ringMetrics: [UsageMetric] {
-        let pct = model.metrics.filter { $0.dollars == nil }
-        let priority: [String: Int] = ["5-hour": 0, "Weekly": 1]
-        return pct.sorted { a, b in
-            let pa = priority[a.label] ?? 9, pb = priority[b.label] ?? 9
-            if pa != pb { return pa < pb }
-            return (a.pct ?? -1) > (b.pct ?? -1)
-        }
-    }
-
-    private var dollarMetric: UsageMetric? { model.metrics.first { $0.dollars != nil } }
+    private var dollarMetric: UsageMetric? { model.metrics.dollarOverage }
 
     /// Compact mode's one-line summary of the windows not shown as the hero ring.
     private var secondaryLine: String? {
@@ -339,19 +264,6 @@ struct DesktopWidgetView: View {
     private var isStale: Bool {
         if case .error = model.state { return !model.metrics.isEmpty }
         return false
-    }
-}
-
-/// Calm loading pulse (opacity), disabled under Reduce Motion.
-private struct SkeletonPulse: ViewModifier {
-    let enabled: Bool
-    @State private var dim = false
-    func body(content: Content) -> some View {
-        content
-            .opacity(enabled ? (dim ? 0.55 : 1.0) : 1.0)
-            .animation(enabled ? .easeInOut(duration: 1.0).repeatForever(autoreverses: true) : nil,
-                       value: dim)
-            .onAppear { if enabled { dim = true } }
     }
 }
 

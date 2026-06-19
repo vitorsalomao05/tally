@@ -54,6 +54,18 @@ struct VisualEffectBlur: NSViewRepresentable {
 
 // MARK: - Glass card background
 
+/// Where the card's translucent base comes from.
+enum SurfaceBase {
+    /// The desktop widget — a free-floating panel. Draws its own behind-window blur
+    /// (`NSVisualEffectView`) or Liquid Glass under the wash.
+    case glass
+    /// The menu bar popover — already hosted by `MenuBarExtra(.window)`, which
+    /// supplies a system material. Stacking another blur would be glass-on-glass, so
+    /// instead a translucent ink scrim keeps the card a consistent dark glass over
+    /// either appearance (a flat tint over the host material, not a second blur).
+    case hostMaterial
+}
+
 /// The widget's layered "glass" background, composed as a single reusable
 /// modifier so every state (data / loading / needs-auth / error) shares the exact
 /// same shell. Honors accessibility:
@@ -73,6 +85,9 @@ struct GlassCardBackground: View {
     /// environment value (can't be injected), so the snapshotter sets this to render
     /// the accessible variant.
     var forceSolid: Bool = false
+    /// Where the translucent base comes from — own blur (widget) or the host window
+    /// material (popover). Defaults to the widget's free-floating glass.
+    var surface: SurfaceBase = .glass
 
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @Environment(\.colorSchemeContrast) private var contrast
@@ -124,6 +139,11 @@ struct GlassCardBackground: View {
         if renderMode == .snapshot {
             // Headless render approximation of the blurred glass.
             Color(hex: 0x1A1426, alpha: 0.92)
+        } else if surface == .hostMaterial {
+            // Popover: the MenuBarExtra window already supplies a system material, so
+            // we add only a translucent dark scrim (not a second blur) under the wash
+            // — keeping the card a consistent dark glass over either appearance.
+            Color.widgetInk.opacity(0.6)
         } else if #available(macOS 26, *) {
             // Liquid Glass (system). Clear so the system effect shows through.
             Color.clear.glassEffect(in: shape)

@@ -2,203 +2,188 @@ import SwiftUI
 import AppKit
 import FetcherCore
 
-/// The window-style popover: header, every metric with a gauge + reset time, and
-/// a footer (last-updated, manual refresh, quit).
+/// The menu bar popover, finished to the same visual language as the desktop
+/// widget: a dark glass card with the brand wordmark header, two hero ring gauges
+/// (5-hour / Weekly) on top, the remaining windows as compact rows below, and a
+/// footer of actions. It shares the widget's components (wordmark, status dot, ring
+/// gauges, skeleton, needs-auth, glass styling) so the two never drift.
+///
+/// Glass: the popover is hosted by `MenuBarExtra(.window)`, which already supplies a
+/// system material — so it uses `GlassCardBackground(surface: .hostMaterial)`, which
+/// layers the violet wash + gradient hairline (and a translucent ink scrim, not a
+/// second blur) over that material. The card is forced dark so it reads as the same
+/// dark glass in either system appearance, exactly like the widget. Accessibility:
+/// Reduce Transparency → solid `#15101F`; Increase Contrast → brighter hairline
+/// (both via `GlassCardBackground`); Reduce Motion gates every animation.
 struct UsagePopover: View {
     @ObservedObject var model: UsageModel
-    /// Optional so headless renders (`--snapshot`) can build the popover without
-    /// an auth session; the sign-in CTA only appears when a session is present.
+    /// Optional so headless renders (`--snapshot`) can build the popover without an
+    /// auth session; the sign-in CTA only appears when a session is present.
     var session: ClaudeSession?
+    /// Force the opaque Reduce-Transparency card (snapshots only — the live flag is
+    /// read from the environment by `GlassCardBackground`), mirroring the widget.
+    var forceReduceTransparency: Bool = false
+
+    /// Fixed for the popover's fixed width; the skeleton reuses it so loading matches
+    /// the populated layout.
+    private let ringDiameter: CGFloat = 84
+    private let width: CGFloat = 344
+    private let corner: CGFloat = 14
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
-            Divider()
             content
-            Divider()
+            // A faint hairline divides the data from the actions, echoing the glass edge.
+            Rectangle().fill(Color.white.opacity(0.07)).frame(height: 1)
             footer
         }
         .padding(14)
-        .frame(width: 320)
+        .frame(width: width)
+        .background(GlassCardBackground(cornerRadius: corner,
+                                        forceSolid: forceReduceTransparency,
+                                        surface: .hostMaterial))
+        // The card reads as dark glass in either system appearance, like the widget.
+        .environment(\.colorScheme, .dark)
     }
 
-    // MARK: Header
+    // MARK: - Header
 
     private var header: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "gauge.with.dots.needle.67percent")
-                .foregroundStyle(.tint)
-            Text("Houdini").font(.system(size: 14, weight: .semibold))
+        HStack(spacing: 7) {
+            BrandWordmark(size: 15)
             Spacer()
-            statusBadge
+            StatusDot(state: model.state)
         }
     }
 
-    @ViewBuilder
-    private var statusBadge: some View {
-        switch model.state {
-        case .loading:
-            Text("Updating…").font(.system(size: 11)).foregroundStyle(.secondary)
-        case .ok:
-            Circle().fill(.green).frame(width: 8, height: 8)
-        case .error:
-            Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 11)).foregroundStyle(.orange)
-        case .signedOut:
-            Image(systemName: "person.crop.circle.badge.questionmark")
-                .font(.system(size: 11)).foregroundStyle(.secondary)
-        }
-    }
-
-    // MARK: Content
+    // MARK: - Content
 
     @ViewBuilder
     private var content: some View {
         if model.metrics.isEmpty {
-            switch model.state {
-            case .loading:
-                HStack(spacing: 8) {
-                    ProgressView().controlSize(.small)
-                    Text("Loading usage…").foregroundStyle(.secondary)
-                }
-            case .error(let message):
-                // Credential / auth error before any good reading → message, not a number.
-                VStack(alignment: .leading, spacing: 6) {
-                    Label("Can't read usage", systemImage: "exclamationmark.triangle.fill")
-                        .font(.system(size: 13, weight: .medium))
-                        .foregroundStyle(.orange)
-                    Text(message)
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                    if model.needsLogin { signInButton }
-                }
-            case .signedOut:
-                signedOutPrompt
-            case .ok:
-                Text("No usage metrics available.").foregroundStyle(.secondary)
-            }
+            emptyState
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
         } else {
             VStack(alignment: .leading, spacing: 12) {
                 if case .error(let message) = model.state {
-                    warningBanner(message) // stale data: show last-good + reason
+                    staleBanner(message) // stale data: show last-good + reason
                 }
-                ForEach(Array(model.metrics.enumerated()), id: \.offset) { _, metric in
-                    metricRow(metric)
+                if !heroRings.isEmpty {
+                    HStack(alignment: .top, spacing: 16) {
+                        ForEach(Array(heroRings.enumerated()), id: \.offset) { _, m in
+                            WidgetRingGauge(title: Format.shortLabel(m.label), pct: m.pct,
+                                            resetText: Format.resetString(m.resetAt),
+                                            diameter: ringDiameter)
+                                .frame(maxWidth: .infinity)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+                if !rowMetrics.isEmpty {
+                    VStack(spacing: 10) {
+                        ForEach(Array(rowMetrics.enumerated()), id: \.offset) { _, m in
+                            MetricRow(metric: m)
+                        }
+                    }
                 }
             }
         }
     }
 
-    private var signedOutPrompt: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("Not signed in", systemImage: "person.crop.circle.badge.questionmark")
-                .font(.system(size: 13, weight: .medium))
-            Text("Sign in to your Claude.ai account to see your usage — or run Claude Code to reuse its token.")
-                .font(.system(size: 12)).foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-            signInButton
-        }
-    }
-
-    /// Present only when a session is available (i.e. not in a headless render).
     @ViewBuilder
-    private var signInButton: some View {
-        if let session {
-            Button {
-                session.signIn()
-            } label: {
-                Label("Sign in to Claude", systemImage: "globe")
-            }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.small)
+    private var emptyState: some View {
+        switch model.state {
+        case .loading:
+            RingPairSkeleton(diameter: ringDiameter)
+        case .signedOut:
+            NeedsAuthView(session: session)
+        case .error(let message):
+            // Credential/auth error before any good reading → CTA or message, not a number.
+            if model.needsLogin { NeedsAuthView(session: session) }
+            else { ErrorStateView(message: message) }
+        case .ok:
+            Text("No usage metrics available.")
+                .font(.system(size: 12)).foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
         }
     }
 
-    private func warningBanner(_ message: String) -> some View {
+    /// Stale banner: a restyled glass chip kept when an error lands on top of a
+    /// last-good reading (the rings/rows still show the previous value).
+    private func staleBanner(_ message: String) -> some View {
         HStack(alignment: .top, spacing: 6) {
-            Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange)
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 11)).foregroundStyle(.orange)
             Text("Showing last value — \(message)")
                 .font(.system(size: 11)).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.orange.opacity(0.12))
-        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.orange.opacity(0.12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(Color.orange.opacity(0.25), lineWidth: 1)
+                )
+        )
     }
 
-    private func metricRow(_ metric: UsageMetric) -> some View {
-        let isDollar = metric.dollars != nil
-        return VStack(alignment: .leading, spacing: 4) {
-            HStack {
-                Text(metric.label).font(.system(size: 13, weight: .medium))
-                Spacer()
-                Text(isDollar
-                     ? "\(Format.dollars(metric.used)) / \(Format.dollars(metric.limit))"
-                     : Format.pctText(metric.pct))
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Thresholds.labelColor(metric.pct))
-                    .monospacedDigit()
-            }
-            ProgressBar(pct: metric.pct ?? 0, color: Thresholds.barColor(metric.pct))
-            if let reset = Format.resetString(metric.resetAt) {
-                Text(reset).font(.system(size: 11)).foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    // MARK: Footer
+    // MARK: - Footer
 
     private var footer: some View {
-        HStack(spacing: 8) {
-            if let updated = model.lastUpdated {
-                (Text("Updated ") + Text(updated, style: .relative))
-                    .font(.system(size: 11)).foregroundStyle(.secondary)
-            } else {
-                Text("Never updated").font(.system(size: 11)).foregroundStyle(.secondary)
+        HStack(spacing: 4) {
+            Group {
+                if let updated = model.lastUpdated {
+                    (Text("Updated ") + Text(updated, style: .relative))
+                } else {
+                    Text("Never updated")
+                }
             }
+            .font(.system(size: 11)).foregroundStyle(.secondary)
+
             Spacer()
+
             Button { model.refreshNow() } label: {
-                Image(systemName: "arrow.clockwise").foregroundStyle(.secondary)
+                Image(systemName: "arrow.clockwise")
             }
             .buttonStyle(.plain)
+            .footerHover()
             .help("Refresh now")
 
-            // Opens the standard Settings scene (also reachable via ⌘,). Bring
-            // the app forward since we're an .accessory (no Dock) agent.
+            // Opens the standard Settings scene (also reachable via ⌘,). Bring the app
+            // forward since we're an .accessory (no Dock) agent.
             SettingsLink {
-                Image(systemName: "gearshape").foregroundStyle(.secondary)
+                Image(systemName: "gearshape")
             }
             .buttonStyle(.plain)
+            .footerHover()
             .help("Settings…")
             .simultaneousGesture(TapGesture().onEnded {
                 NSApp.activate(ignoringOtherApps: true)
             })
 
             Button { NSApplication.shared.terminate(nil) } label: {
-                Image(systemName: "power").foregroundStyle(.secondary)
+                Image(systemName: "power")
             }
             .buttonStyle(.plain)
+            .footerHover()
             .help("Quit Houdini")
         }
     }
-}
 
-/// Simple threshold-colored progress bar (ProgressView's tint can't vary per value cleanly).
-struct ProgressBar: View {
-    let pct: Double
-    let color: Color
+    // MARK: - Metric selection (shared with the widget via `[UsageMetric]`)
 
-    var body: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .leading) {
-                Capsule().fill(Color.secondary.opacity(0.2))
-                Capsule()
-                    .fill(color)
-                    .frame(width: max(0, min(1, pct / 100)) * geo.size.width)
-            }
-        }
-        .frame(height: 6)
+    /// The two hero rings: 5-hour → Weekly (or the tightest windows available).
+    private var heroRings: [UsageMetric] { Array(model.metrics.rankedRingWindows.prefix(2)) }
+
+    /// Rows below the rings: the percentage windows not promoted to a ring (e.g.
+    /// Sonnet/Opus weekly), then the dollar overage (Extra usage).
+    private var rowMetrics: [UsageMetric] {
+        Array(model.metrics.rankedRingWindows.dropFirst(2))
+            + (model.metrics.dollarOverage.map { [$0] } ?? [])
     }
 }
