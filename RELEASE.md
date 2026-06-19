@@ -10,6 +10,36 @@ Replace `X.Y.Z` with the new version (and `P.Q.R` with the previous one).
 
 ---
 
+## ▶ v0.4.0 — SHIPPED 2026-06-19 (popover redesign)
+
+The menu-bar **popover was redesigned** onto the desktop widget's visual system
+(consistent gauges, typography, and reset/overage readouts across both surfaces).
+A **UI-only release** — no data-layer change: same providers, same Keychain-only
+credential flow, same true 60-second refresh; the `houdini` CLI is byte-for-byte
+identical to v0.3.0. App bumped to **0.4.0** (`apps/menubar/Info.plist` →
+`CFBundleShortVersionString 0.4.0`, build `5`).
+
+Go-live executed in order:
+
+1. [x] `site/src/config.ts` → `version = "0.4.0"`, `installTag = "v0.4.0"`;
+       `install.sh` → `TAG="v0.4.0"`; `README.md` one-liner + release link → `v0.4.0`;
+       `site/package.json` → `0.4.0`.
+2. [x] Commit: `chore(release): point install to v0.4.0` (`3ba16e1`).
+3. [x] Built artifacts (CommandLineTools), tagged `v0.4.0` on `3ba16e1`, published
+       `gh release create v0.4.0` with `Houdini.app.zip`, `houdini`, `SHASUMS256.txt`.
+4. [x] Deleted the old release + tag: `gh release delete v0.3.0 --yes --cleanup-tag`
+       (`gh release list` → only `v0.4.0`).
+5. [x] `cd site && vercel build --prod && vercel deploy --prebuilt --prod`. Production
+       `houdini.salomao.org` serves the new site; the 7 routes all 200; `tally → houdini`
+       redirect (308) OK.
+
+Install validated against the published `v0.4.0` tag in an isolated `HOME`: download
+from the new release, SHA-256 match, idempotent re-run. Checksums (SHA-256):
+`Houdini.app.zip` `0235f256552c8652633f5c6ec75b932898d54777f6e753e74331c3cd9eec2304`,
+`houdini` `1d17035e281aa30dc68cbb45a298ba3c89f2d6cdffe0d53be71ee09a0c29270f`.
+
+---
+
 ## ▶ v0.3.0 — SHIPPED 2026-06-18 (Round B)
 
 Round B is **live**: the **native desktop widget** (replaced Übersicht), the
