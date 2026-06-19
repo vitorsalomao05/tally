@@ -3,14 +3,13 @@
 // Components and the /install + /guide pages read from this.
 
 // The app/release version this build prepares (shown wherever a current version is
-// referenced). The PUBLISHED install one-liner still points at the last shipped
-// release (`installTag`) until go-live — see RELEASE.md. Go-live flips installTag
-// to `v${version}`.
-export const version = "0.3.0";
+// referenced). At go-live `installTag` is flipped to `v${version}` so the published
+// one-liner points at this release — see RELEASE.md.
+export const version = "0.4.0";
 
-// The release tag the installer downloads from. Kept at the last shipped release so
-// the one-liner on the live site keeps working; bumped to `v${version}` at go-live.
-export const installTag = "v0.3.0";
+// The release tag the installer downloads from. In sync with `v${version}` post
+// go-live; the live one-liner fetches the verified artifacts from this release.
+export const installTag = "v0.4.0";
 
 export const site = {
   name: "Houdini",
