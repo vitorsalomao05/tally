@@ -1,58 +1,44 @@
 ---
 import Logo from "./Logo.astro";
-import Button from "./Button.astro";
-import { links } from "../config";
+import { links, version } from "../config";
 ---
 
-<footer class="border-t border-border/60">
-  <!-- Repeated CTA -->
-  <div class="relative mx-auto max-w-6xl overflow-hidden px-5 py-20 sm:px-8 sm:py-28">
-    <div
-      class="spotlight pointer-events-none absolute inset-x-0 -bottom-32 -z-10 mx-auto h-72 w-72 opacity-60"
-      aria-hidden="true"
-    >
-    </div>
-    <div class="reveal mx-auto flex max-w-2xl flex-col items-center gap-6 text-center">
-      <h2 class="font-display text-3xl font-semibold tracking-tight sm:text-[2.6rem]">
-        Make your limits disappear.
-      </h2>
-      <p class="text-muted">
-        Put your AI usage and spend in your menu bar and on your desktop —
-        refreshed every 60 seconds, kept entirely on your Mac.
-      </p>
-      <div class="flex flex-wrap items-center justify-center gap-3">
-        <Button href={links.install} variant="primary" size="lg">Install Houdini</Button>
-        <Button href={links.github} variant="secondary" size="lg" external>
-          View on GitHub
-        </Button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer bar -->
-  <div class="border-t border-border/60">
-    <div
-      class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-5 py-8 sm:flex-row sm:px-8"
-    >
+<footer
+  transition:persist="site-footer"
+  class="border-t border-border/60"
+>
+  <div
+    class="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-4 text-xs sm:flex-row sm:px-8"
+  >
+    <a href="/" class="rounded-lg" aria-label="Houdini — home">
       <Logo />
-      <nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted" aria-label="Footer">
-        <a href={links.install} class="transition-colors hover:text-text">Install</a>
-        <a href={links.guide} class="transition-colors hover:text-text">Guide</a>
-        <a
-          href={links.github}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="transition-colors hover:text-text">GitHub</a
-        >
-        <a href="/#privacy" class="transition-colors hover:text-text">Privacy</a>
-        <a
-          href={links.changelog}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="transition-colors hover:text-text">Changelog</a
-        >
-      </nav>
-      <p class="font-mono text-xs text-muted/80">Local-first. Open-source. No trapdoors.</p>
-    </div>
+    </a>
+
+    <nav
+      class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 text-muted"
+      aria-label="Footer"
+    >
+      <a href={links.install} class="transition-colors hover:text-text">Install</a>
+      <a href="/guide" class="transition-colors hover:text-text">Guide</a>
+      <a href="/privacy" class="transition-colors hover:text-text">Privacy</a>
+      <a
+        href={links.github}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="transition-colors hover:text-text">GitHub</a
+      >
+      <a
+        href={links.changelog}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/50 px-2.5 py-0.5 font-mono transition-colors hover:border-accent/60 hover:text-text"
+        aria-label={`Version ${version} — changelog`}
+      >
+        <span class="h-1.5 w-1.5 rounded-full bg-spark" aria-hidden="true"></span>
+        v{version}
+      </a>
+    </nav>
+
+    <p class="font-mono text-muted/70">Local-first · No trapdoors</p>
   </div>
 </footer>

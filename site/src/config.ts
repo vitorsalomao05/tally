@@ -47,19 +47,15 @@ export const installFromSource = [
   "./build.sh",
 ].join("\n");
 
-// Root-anchored so they resolve from /install and /guide too.
+// One route per screen. Install is the primary CTA (rendered as a button), and
+// Home is the logo — so neither appears as a text link here.
 export const nav = [
-  { label: "How it works", href: "/#how" },
-  { label: "Reveals", href: "/#reveals" },
-  { label: "Install", href: "/install" },
+  { label: "Reveals", href: "/reveals" },
+  { label: "Surfaces", href: "/surfaces" },
+  { label: "Privacy", href: "/privacy" },
+  { label: "FAQ", href: "/faq" },
   { label: "Guide", href: "/guide" },
-  { label: "FAQ", href: "/#faq" },
 ];
-
-// One honest line about capability — Claude-first, no provider grid, no roadmap
-// badges, no metric we can't actually fill. Multi-provider stays a soft direction.
-export const providerLine =
-  "The clearest way to see your Claude usage and spend — more providers as they open up.";
 
 // ── What Houdini reveals (compact icon strip) ────────────────────────────────
 // The four dimensions Houdini pulls into the open. `icon` maps to an inline SVG

@@ -1,7 +1,5 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Nav from "../components/Nav.astro";
-import Footer from "../components/Footer.astro";
 import Button from "../components/Button.astro";
 import CopyBlock from "../components/CopyBlock.astro";
 import Stepper from "../components/Stepper.astro";
@@ -37,17 +35,18 @@ const thresholds = [
   title="Guide — Houdini"
   description="How Houdini reveals your AI usage and spend on macOS: what it tracks, how to connect a provider, how to read the gauges, and what stays on your Mac."
 >
-  <Nav />
-  <main id="main" tabindex="-1">
+  <main id="main" tabindex="-1" class="flex-1 pt-28 md:pt-24">
     <!-- Header -->
-    <header class="relative overflow-hidden pt-28 sm:pt-36">
+    <header class="relative overflow-hidden">
       <div
-        class="spotlight pointer-events-none absolute -top-40 right-[-10%] -z-10 h-[440px] w-[440px] opacity-60"
+        class="screen-glow pointer-events-none absolute -top-40 right-[-10%] -z-10 h-[440px] w-[440px] opacity-70"
         aria-hidden="true"
       >
       </div>
       <div class="mx-auto max-w-3xl px-5 sm:px-8">
         <span
+          data-enter
+          style="--enter-i: 0"
           class="inline-flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.18em] text-accent"
         >
           <span
@@ -56,11 +55,13 @@ const thresholds = [
           The guide
         </span>
         <h1
+          data-enter
+          style="--enter-i: 1"
           class="mt-4 font-display text-[2.4rem] font-semibold leading-[1.06] sm:text-5xl"
         >
           Get started in minutes.
         </h1>
-        <p class="mt-4 text-lg leading-relaxed text-muted">
+        <p data-enter style="--enter-i: 2" class="mt-4 text-lg leading-relaxed text-muted">
           Houdini reveals what your AI is really using and costing you — without
           an account, a server, or your secrets ever leaving your Mac. Here's the
           whole act, one card at a time. Step through it, or jump to any part.
@@ -428,12 +429,11 @@ const thresholds = [
           <Button href={links.install} variant="primary" size="lg">
             Install Houdini
           </Button>
-          <Button href="/#reveals" variant="secondary" size="lg">
+          <Button href="/reveals" variant="secondary" size="lg">
             See what it reveals
           </Button>
         </div>
       </StepCard>
     </Stepper>
   </main>
-  <Footer />
 </Layout>

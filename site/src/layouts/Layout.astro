@@ -2,6 +2,9 @@
 import "@fontsource-variable/inter";
 import "@fontsource-variable/fraunces";
 import "../styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
 import { site } from "../config";
 
 interface Props {
@@ -47,29 +50,44 @@ const ogImageUrl = Astro.site
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
-    <!-- Mark JS on before paint, so the reveal hidden-state only applies when JS
-         is available (page stays fully visible if JS is off or fails). -->
+    <!-- Mark JS on before paint, so JS-only states (entrance, tab/accordion
+         enhancement) only apply when JS is available. The <html> element persists
+         across view transitions, so this runs once and stays set. -->
     <script is:inline>
       document.documentElement.classList.add("js");
     </script>
+
+    <!-- View Transitions: cross-fade between routes; nav + footer persist. -->
+    <ClientRouter />
   </head>
-  <body class="min-h-screen antialiased">
+  <body class="antialiased">
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-lg focus:border focus:border-border focus:bg-surface focus:px-4 focus:py-2 focus:text-sm focus:font-medium"
       >Skip to content</a
     >
+
+    <Nav />
     <slot />
+    <Footer />
 
     <script>
-      // On-scroll reveal. Honors prefers-reduced-motion and degrades gracefully.
-      const reduce = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-      const els = document.querySelectorAll<HTMLElement>(".reveal");
-      if (reduce || !("IntersectionObserver" in window)) {
-        els.forEach((el) => el.classList.add("is-visible"));
-      } else {
+      // ── Progressive-enhancement behaviours ───────────────────────────────────
+      // All of these run on first paint AND after every view transition, because
+      // `astro:page-load` fires on initial load and after each ClientRouter swap.
+      // Bundled module scripts execute only once, so re-init lives in the listener.
+
+      function initReveal() {
+        const reduce = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+        const els = document.querySelectorAll<HTMLElement>(
+          ".reveal:not(.is-visible)",
+        );
+        if (reduce || !("IntersectionObserver" in window)) {
+          els.forEach((el) => el.classList.add("is-visible"));
+          return;
+        }
         const io = new IntersectionObserver(
           (entries) => {
             for (const e of entries) {
@@ -83,6 +101,130 @@ const ogImageUrl = Astro.site
         );
         els.forEach((el) => io.observe(el));
       }
+
+      // Keep the persisted nav's active link in sync with the current route.
+      function syncNav() {
+        const path = location.pathname.replace(/\/+$/, "") || "/";
+        document
+          .querySelectorAll<HTMLAnchorElement>(".nav-link[href]")
+          .forEach((a) => {
+            const href =
+              (a.getAttribute("href") || "").replace(/\/+$/, "") || "/";
+            if (href === path) a.setAttribute("aria-current", "page");
+            else a.removeAttribute("aria-current");
+          });
+      }
+
+      // ── APG tabs (reveals, surfaces) ──────────────────────────────────────────
+      // Reposition every live tab indicator (font reflow, orientation, zoom). This
+      // is registered ONCE at module scope (see bottom), so it never accumulates
+      // across view transitions — unlike a per-init listener would.
+      function repositionTabIndicators() {
+        document
+          .querySelectorAll<HTMLElement>("[data-tabs]")
+          .forEach((root) => {
+            const indicator =
+              root.querySelector<HTMLElement>("[data-tab-indicator]");
+            if (!indicator) return;
+            const tab = root.querySelectorAll<HTMLElement>('[role="tab"]')[
+              Number(root.dataset.active || 0)
+            ];
+            if (!tab) return;
+            indicator.style.width = tab.offsetWidth + "px";
+            indicator.style.transform = `translateX(${tab.offsetLeft}px)`;
+          });
+      }
+
+      function initTabs() {
+        // The :not([data-ready]) guard skips any group already enhanced (defensive;
+        // <main> is replaced on each navigation, so groups are normally fresh).
+        document
+          .querySelectorAll<HTMLElement>("[data-tabs]:not([data-ready])")
+          .forEach((root) => {
+            const tabs = Array.from(
+              root.querySelectorAll<HTMLElement>('[role="tab"]'),
+            );
+            if (!tabs.length) return;
+            const panels = tabs.map((t) =>
+              document.getElementById(t.getAttribute("aria-controls") || ""),
+            );
+            const indicator =
+              root.querySelector<HTMLElement>("[data-tab-indicator]");
+
+            function moveIndicator(i: number) {
+              if (!indicator) return;
+              const tab = tabs[i];
+              indicator.style.width = tab.offsetWidth + "px";
+              indicator.style.transform = `translateX(${tab.offsetLeft}px)`;
+            }
+            function select(i: number, focus: boolean) {
+              i = (i + tabs.length) % tabs.length;
+              tabs.forEach((t, j) => {
+                const on = j === i;
+                t.setAttribute("aria-selected", String(on));
+                t.tabIndex = on ? 0 : -1;
+                const p = panels[j];
+                if (p) p.hidden = !on;
+              });
+              if (focus) tabs[i].focus();
+              moveIndicator(i);
+              root.dataset.active = String(i);
+            }
+
+            tabs.forEach((t, i) =>
+              t.addEventListener("click", () => select(i, false)),
+            );
+            root.addEventListener("keydown", (e) => {
+              const cur = tabs.indexOf(document.activeElement as HTMLElement);
+              if (cur < 0) return;
+              let next: number | undefined;
+              if (e.key === "ArrowRight" || e.key === "ArrowDown") next = cur + 1;
+              else if (e.key === "ArrowLeft" || e.key === "ArrowUp")
+                next = cur - 1;
+              else if (e.key === "Home") next = 0;
+              else if (e.key === "End") next = tabs.length - 1;
+              if (next === undefined) return;
+              e.preventDefault();
+              select(next, true);
+            });
+
+            let start = tabs.findIndex(
+              (t) => t.getAttribute("aria-selected") === "true",
+            );
+            if (start < 0) start = 0;
+            select(start, false);
+            // Mark enhanced so the pre-enhancement collapse rule yields to [hidden].
+            root.setAttribute("data-ready", "");
+
+            // Run once more after fonts settle so the indicator lands precisely.
+            requestAnimationFrame(() =>
+              moveIndicator(Number(root.dataset.active || 0)),
+            );
+          });
+      }
+
+      // ── Accordion: one panel open at a time (faq) ─────────────────────────────
+      function initFaq() {
+        const items = Array.from(
+          document.querySelectorAll<HTMLDetailsElement>("details.faq-item"),
+        );
+        items.forEach((d) => {
+          d.addEventListener("toggle", () => {
+            if (d.open) items.forEach((o) => o !== d && (o.open = false));
+          });
+        });
+      }
+
+      function onReady() {
+        initReveal();
+        syncNav();
+        initTabs();
+        initFaq();
+      }
+
+      document.addEventListener("astro:page-load", onReady);
+      // Registered once for the whole session (not per navigation): no leak.
+      window.addEventListener("resize", repositionTabIndicators);
     </script>
   </body>
 </html>

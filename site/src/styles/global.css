@@ -53,6 +53,13 @@
     scroll-padding-top: 5rem; /* fixed nav offset for anchor jumps */
     -webkit-text-size-adjust: 100%;
   }
+  /* The routed site is a flex column: a fixed nav, a flex-1 screen that centers
+     its content, and a thin footer pinned to the bottom of the viewport. */
+  body {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+  }
   body {
     background-color: var(--color-bg);
     color: var(--color-text);
@@ -239,5 +246,176 @@
       var(--color-accent),
       var(--color-magenta)
     );
+  }
+}
+
+/* ── Routed screens: viewport-first frame + orchestrated motion ────────────────
+   The site is split into separate routes, each one ~1 viewport tall and resolved
+   by interaction (tabs / toggle / accordion) instead of a long scroll. A safety
+   scroll always remains: `.screen-inner` centres with auto margins, which — unlike
+   justify-content:center — never clip on overflow or at high zoom; the body simply
+   grows past 100dvh and scrolls. View Transitions (ClientRouter) cross-fade routes
+   while the nav and footer persist; [data-enter] children stage in on arrival. */
+@layer utilities {
+  /* Each route's <main>. Fills the space between the fixed nav and the footer. */
+  .screen {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  /* Centred vertically when it fits; auto margins push-and-scroll when it doesn't,
+     so nothing is ever clipped at the top edge (the classic flex-centering trap). */
+  .screen-inner {
+    margin-block: auto;
+    width: 100%;
+  }
+
+  /* Orchestrated entrance. Gated on html.js so the page is fully visible with no
+     JS, and re-fires on every view transition because ClientRouter reinserts the
+     DOM. The reduced-motion block (below) collapses it to an instant appearance. */
+  .js [data-enter] {
+    opacity: 0;
+    animation: enter-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--enter-i, 0) * 70ms + var(--enter-base, 0ms));
+  }
+  @keyframes enter-rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Hide scrollbar chrome on horizontally-scrollable strips (tablists, the mobile
+     nav). overflow-x:auto forces overflow-y to auto, so focus rings and the 1px
+     tab indicator would otherwise summon a stray vertical scrollbar. */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* A calmer, centred stage spotlight that sits behind a screen's centrepiece. */
+  .screen-glow {
+    background:
+      radial-gradient(
+        50% 50% at 50% 32%,
+        color-mix(in oklab, var(--color-accent) 24%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        46% 46% at 72% 78%,
+        color-mix(in oklab, var(--color-magenta) 16%, transparent),
+        transparent 72%
+      );
+    filter: blur(52px);
+  }
+}
+
+/* ── Nav: route-aware active state ─────────────────────────────────────────────
+   aria-current is set server-side (works with no JS) and kept in sync by the
+   page-load handler while the nav persists across view transitions. */
+@layer components {
+  .nav-link[aria-current="page"] {
+    color: var(--color-text);
+  }
+  .nav-link[aria-current="page"]::after {
+    content: "";
+    position: absolute;
+    left: 0.7rem;
+    right: 0.7rem;
+    bottom: 0.1rem;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-magenta));
+  }
+}
+
+/* ── Tabs / toggle (reveals, surfaces) ─────────────────────────────────────────
+   APG tabs, enhanced by the page-load engine in Layout: roving tabindex, arrow-key
+   navigation, automatic activation, and a sliding indicator. Progressive
+   enhancement: with no JS the tablist is hidden and every panel renders stacked
+   (each carries its own heading), so the content stays complete and navigable. */
+/* These display toggles live OUTSIDE @layer on purpose: unlayered declarations
+   win over every cascade layer, so they reliably override Tailwind's flex/grid
+   display utilities (which sit in the later `utilities` layer). With no JS the
+   tablist + indicator are hidden and every panel renders stacked; with JS the
+   engine shows one panel via [hidden] and marks the group [data-ready]. */
+html:not(.js) [data-tabs] [role="tablist"],
+html:not(.js) [data-tabs] .tab-indicator {
+  display: none;
+}
+.js [data-tabs]:not([data-ready]) [role="tabpanel"]:not(:first-of-type),
+.js [data-tabs] [role="tabpanel"][hidden] {
+  display: none;
+}
+
+@layer components {
+  .js [data-tabs] [role="tabpanel"]:not([hidden]) {
+    animation: panel-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Sliding active-tab indicator, positioned by the engine (offsetLeft/width). */
+  .tab-indicator {
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    width: 0;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--color-accent), var(--color-magenta));
+    transition:
+      transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+      width 0.36s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, width;
+  }
+}
+
+/* ── Accordion (faq) ───────────────────────────────────────────────────────────
+   Native <details> (works with no JS, first item open). The page-load handler
+   enforces one-open-at-a-time and fades each answer in. */
+@layer components {
+  .faq-item > summary::-webkit-details-marker {
+    display: none;
+  }
+  .faq-item[open] .faq-answer {
+    animation: answer-in 0.34s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes answer-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-enter],
+  .js [data-tabs] [role="tabpanel"]:not([hidden]),
+  .faq-item[open] .faq-answer {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+  }
+  .tab-indicator {
+    transition: none !important;
   }
 }

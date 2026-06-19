@@ -43,7 +43,11 @@ const { code, label = "terminal" } = Astro.props;
 </div>
 
 <script>
-  document.querySelectorAll<HTMLElement>("[data-copyblock]").forEach((block) => {
+  // Re-runs after every view transition (astro:page-load). The [data-ready] guard
+  // keeps blocks already wired on the current page from being double-bound.
+  function initCopyBlocks() {
+  document.querySelectorAll<HTMLElement>("[data-copyblock]:not([data-ready])").forEach((block) => {
+    block.setAttribute("data-ready", "");
     const btn = block.querySelector<HTMLButtonElement>(".copy-btn");
     const code = block.querySelector("code")?.textContent ?? "";
     const label = block.querySelector<HTMLElement>(".copy-label");
@@ -80,4 +84,7 @@ const { code, label = "terminal" } = Astro.props;
       }, 2000);
     });
   });
+  }
+
+  document.addEventListener("astro:page-load", initCopyBlocks);
 </script>

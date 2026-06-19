@@ -152,6 +152,11 @@ const storeKey = store ? `houdini.${id}` : undefined;
 <script>
   type El = HTMLElement;
 
+  // Window-scoped hashchange handlers, tracked so they can be removed before each
+  // view transition — otherwise each visit to /install or /guide would leave a
+  // stale listener bound to detached stepper DOM.
+  const hashHandlers: Array<() => void> = [];
+
   function initStepper(root: El) {
     const cardsWrap = root.querySelector<El>("[data-stepper-cards]");
     if (!cardsWrap) return;
@@ -364,7 +369,9 @@ const storeKey = store ? `houdini.${id}` : undefined;
       }
     });
 
-    window.addEventListener("hashchange", () => render(indexForHash(), true));
+    const onHashChange = () => render(indexForHash(), true);
+    window.addEventListener("hashchange", onHashChange);
+    hashHandlers.push(onHashChange);
 
     // ── Start ───────────────────────────────────────────────────────────────
     const start = indexForHash();
@@ -376,13 +383,31 @@ const storeKey = store ? `houdini.${id}` : undefined;
     }
   }
 
-  document.querySelectorAll<HTMLElement>("[data-stepper]").forEach((root) => {
-    try {
-      initStepper(root);
-    } catch (err) {
-      // Never trap the reader: revert to the full stacked content.
-      root.classList.add("stepper-failed");
-      console.error("Stepper failed to initialise:", err);
+  // Re-runs after every view transition. The :not([data-enhanced]) guard skips
+  // any stepper already initialised on the current page.
+  function initSteppers() {
+    document
+      .querySelectorAll<HTMLElement>(
+        "[data-stepper]:not([data-enhanced]):not(.stepper-failed)",
+      )
+      .forEach((root) => {
+        try {
+          initStepper(root);
+        } catch (err) {
+          // Never trap the reader: revert to the full stacked content.
+          root.classList.add("stepper-failed");
+          console.error("Stepper failed to initialise:", err);
+        }
+      });
+  }
+
+  document.addEventListener("astro:page-load", initSteppers);
+
+  // Tear down stale hashchange listeners before ClientRouter swaps the page.
+  document.addEventListener("astro:before-swap", () => {
+    while (hashHandlers.length) {
+      const h = hashHandlers.pop();
+      if (h) window.removeEventListener("hashchange", h);
     }
   });
 </script>

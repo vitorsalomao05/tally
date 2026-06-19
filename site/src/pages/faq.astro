@@ -1,0 +1,64 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SectionHeader from "../components/SectionHeader.astro";
+import { faqs } from "../config";
+---
+
+<Layout
+  title="FAQ — Houdini"
+  description="Answers about Houdini: is it installable today, do credentials leave your Mac, which providers it works with, how it reads your Claude usage, the 60-second refresh, cost, and macOS requirements."
+>
+  <main id="main" tabindex="-1" class="screen relative overflow-hidden px-5 pt-24 sm:px-8 md:pt-20">
+    <div
+      class="screen-glow pointer-events-none absolute -top-16 left-1/2 -z-10 h-[440px] w-[600px] -translate-x-1/2 opacity-60"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div class="screen-inner mx-auto max-w-3xl py-8">
+      <div data-enter style="--enter-i: 0">
+        <SectionHeader
+          eyebrow="FAQ"
+          title="No trapdoors. Just answers."
+          subtitle="One open at a time — the rest stay tucked away."
+          align="left"
+        />
+      </div>
+
+      <div
+        data-enter
+        style="--enter-i: 1"
+        class="mt-8 divide-y divide-border overflow-hidden rounded-frame border border-border bg-surface/40"
+      >
+        {
+          faqs.map((f, i) => (
+            <details class="faq-item group" open={i === 0}>
+              <summary
+                class="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 font-medium text-text transition-colors hover:text-white"
+              >
+                <span>{f.q}</span>
+                <svg
+                  class="shrink-0 text-muted transition-transform duration-200 group-open:rotate-180"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </summary>
+              <div class="faq-answer px-5 pb-5">
+                <p class="text-sm leading-relaxed text-muted">{f.a}</p>
+              </div>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </main>
+</Layout>

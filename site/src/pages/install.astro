@@ -1,7 +1,5 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Nav from "../components/Nav.astro";
-import Footer from "../components/Footer.astro";
 import Button from "../components/Button.astro";
 import CopyBlock from "../components/CopyBlock.astro";
 import Stepper from "../components/Stepper.astro";
@@ -29,17 +27,18 @@ const panelClass =
   title="Install — Houdini"
   description="A guided setup for Houdini: run one command, connect Claude, choose your surfaces. macOS 14+, Apple Silicon. Nothing leaves your Mac."
 >
-  <Nav />
-  <main id="main" tabindex="-1">
+  <main id="main" tabindex="-1" class="flex-1 pt-28 md:pt-24">
     <!-- Header -->
-    <header class="relative overflow-hidden pt-28 sm:pt-36">
+    <header class="relative overflow-hidden">
       <div
-        class="spotlight pointer-events-none absolute -top-40 right-[-10%] -z-10 h-[440px] w-[440px] opacity-60"
+        class="screen-glow pointer-events-none absolute -top-40 right-[-10%] -z-10 h-[440px] w-[440px] opacity-70"
         aria-hidden="true"
       >
       </div>
       <div class="mx-auto max-w-3xl px-5 sm:px-8">
         <span
+          data-enter
+          style="--enter-i: 0"
           class="inline-flex items-center gap-2.5 font-mono text-xs uppercase tracking-[0.18em] text-accent"
         >
           <span
@@ -48,23 +47,25 @@ const panelClass =
           Install
         </span>
         <h1
+          data-enter
+          style="--enter-i: 1"
           class="mt-4 font-display text-[2.4rem] font-semibold leading-[1.06] sm:text-5xl"
         >
           A guided setup, start to finish.
         </h1>
-        <p class="mt-4 text-lg leading-relaxed text-muted">
+        <p data-enter style="--enter-i: 2" class="mt-4 text-lg leading-relaxed text-muted">
           One command installs Houdini, it reuses a login you already have, and
           your limits appear in the menu bar. No account, no server — nothing
           leaves your Mac. Step through it below, or read it as one page.
         </p>
-        <p class="mt-3 font-mono text-xs text-muted/80">
+        <p data-enter style="--enter-i: 3" class="mt-3 font-mono text-xs text-muted/80">
           macOS 14 (Sonoma)+ · Apple Silicon · free &amp; open source
         </p>
       </div>
     </header>
 
     <!-- Wizard -->
-    <Stepper id="install" label="Install Houdini, step by step" steps={steps} store>
+    <Stepper id="install-wizard" label="Install Houdini, step by step" steps={steps} store>
       <!-- 1 · Run the command (same for everyone) -->
       <StepCard
         slug="install"
@@ -348,5 +349,4 @@ const panelClass =
       </div>
     </section>
   </main>
-  <Footer />
 </Layout>

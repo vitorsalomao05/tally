@@ -2,26 +2,34 @@
 import Logo from "./Logo.astro";
 import Button from "./Button.astro";
 import { nav, links } from "../config";
+
+// Active route, set server-side so it's correct with no JS; the page-load handler
+// keeps it in sync while the nav persists across view transitions.
+const path = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const isActive = (href: string) =>
+  (href.replace(/\/+$/, "") || "/") === path ? "page" : undefined;
 ---
 
 <header
+  transition:persist="site-nav"
   class="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-bg/70 backdrop-blur-xl"
 >
   <nav
-    class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8"
+    class="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-5 sm:px-8"
     aria-label="Primary"
   >
-    <a href="/#top" class="rounded-lg" aria-label="Houdini — top of page">
+    <a href="/" class="shrink-0 rounded-lg" aria-label="Houdini — home">
       <Logo />
     </a>
 
-    <ul class="hidden items-center gap-7 md:flex">
+    <ul class="hidden items-center gap-0.5 md:flex">
       {
         nav.map((item) => (
           <li>
             <a
               href={item.href}
-              class="text-sm text-muted transition-colors hover:text-text"
+              aria-current={isActive(item.href)}
+              class="nav-link relative rounded-lg px-2.5 py-1.5 text-sm text-muted transition-colors hover:text-text"
             >
               {item.label}
             </a>
@@ -44,7 +52,29 @@ import { nav, links } from "../config";
           ></path>
         </svg>
       </a>
-      <Button href={links.install} variant="primary">Install Houdini</Button>
+      <Button href={links.install} variant="primary">Install</Button>
     </div>
+  </nav>
+
+  <!-- Mobile: the same routes as a single scrollable strip (no JS menu needed). -->
+  <nav
+    class="border-t border-border/50 md:hidden"
+    aria-label="Sections"
+  >
+    <ul class="no-scrollbar flex items-center gap-1 overflow-x-auto px-4 py-2">
+      {
+        nav.map((item) => (
+          <li class="shrink-0">
+            <a
+              href={item.href}
+              aria-current={isActive(item.href)}
+              class="nav-link relative rounded-lg px-2.5 py-1 text-sm text-muted transition-colors hover:text-text"
+            >
+              {item.label}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
   </nav>
 </header>

@@ -1,28 +1,226 @@
 ---
+import { Image } from "astro:assets";
 import Layout from "../layouts/Layout.astro";
-import Nav from "../components/Nav.astro";
-import Hero from "../components/Hero.astro";
-import TrustStrip from "../components/TrustStrip.astro";
-import HowItWorks from "../components/HowItWorks.astro";
-import Reveals from "../components/Reveals.astro";
-import Surfaces from "../components/Surfaces.astro";
-import Providers from "../components/Providers.astro";
-import Privacy from "../components/Privacy.astro";
-import FAQ from "../components/FAQ.astro";
-import Footer from "../components/Footer.astro";
+import Button from "../components/Button.astro";
+import CopyBlock from "../components/CopyBlock.astro";
+import WindowFrame from "../components/WindowFrame.astro";
+import { installOneLiner, links, version } from "../config";
+import popoverDark from "../assets/popover-dark.png";
+
+// Trust microline — the three promises, reused from the old trust strip.
+const trust = [
+  { label: "Runs on your Mac", path: "M12 2 4 5v6c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V5l-8-3Z" },
+  {
+    label: "Keychain-kept credentials",
+    path: "M7 11V8a5 5 0 0 1 10 0v3m-11 0h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z",
+  },
+  { label: "Open source", path: "m9 18-6-6 6-6m6 0 6 6-6 6" },
+];
 ---
 
 <Layout>
-  <Nav />
-  <main id="main" tabindex="-1">
-    <Hero />
-    <TrustStrip />
-    <HowItWorks />
-    <Reveals />
-    <Surfaces />
-    <Providers />
-    <Privacy />
-    <FAQ />
+  <main id="main" tabindex="-1" class="screen relative overflow-hidden px-5 pt-24 sm:px-8 md:pt-20">
+    <!-- Stage spotlight + faint floor grid, behind everything. -->
+    <div
+      class="screen-glow pointer-events-none absolute -top-24 right-[-10%] -z-10 h-[620px] w-[620px] opacity-80"
+      aria-hidden="true"
+    >
+    </div>
+    <div class="stage-grid pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
+
+    <div
+      class="screen-inner mx-auto grid max-w-6xl items-center gap-12 py-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12"
+    >
+      <!-- ── Left: the install thesis ─────────────────────────────────────────── -->
+      <div class="flex min-w-0 flex-col items-start gap-5">
+        <!-- The reveal: the top-hat mark settles, then a gold spark escapes. -->
+        <div class="hero-logo" data-enter style="--enter-i: 0" aria-hidden="true">
+          <svg width="56" height="56" viewBox="0 0 32 32" fill="none">
+            <defs>
+              <linearGradient id="hm-hat" x1="6" y1="26" x2="26" y2="6" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#7C3AED"></stop>
+                <stop offset="0.55" stop-color="#8B5CF6"></stop>
+                <stop offset="1" stop-color="#C026D3"></stop>
+              </linearGradient>
+              <linearGradient id="hm-shimmer" x1="0" y1="0" x2="6" y2="0" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stop-color="#FFFFFF" stop-opacity="0"></stop>
+                <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0.55"></stop>
+                <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"></stop>
+              </linearGradient>
+              <clipPath id="hm-crown">
+                <path d="M11 22.6 L9.7 11 Q9.6 8.6 12.1 8.6 L19.9 8.6 Q22.4 8.6 22.3 11 L21 22.6 Z"></path>
+              </clipPath>
+            </defs>
+            <g class="hm-hat">
+              <ellipse cx="16" cy="23.2" rx="12.4" ry="3" fill="url(#hm-hat)"></ellipse>
+              <ellipse cx="16" cy="22.5" rx="12.4" ry="2.4" fill="#000000" opacity="0.12"></ellipse>
+              <path d="M11 22.6 L9.7 11 Q9.6 8.6 12.1 8.6 L19.9 8.6 Q22.4 8.6 22.3 11 L21 22.6 Z" fill="url(#hm-hat)"></path>
+              <g clip-path="url(#hm-crown)">
+                <path d="M11 16 L9.7 11 Q9.6 8.6 12.1 8.6 L19.9 8.6 Q22.4 8.6 22.3 11 L21.6 16 Z" fill="#FFFFFF" opacity="0.10"></path>
+                <rect x="8" y="17.6" width="16" height="2.9" fill="#F5C451"></rect>
+                <rect x="8" y="17.6" width="16" height="0.9" fill="#FFFFFF" opacity="0.25"></rect>
+                <rect class="hm-shimmer" x="0" y="6" width="6" height="20" fill="url(#hm-shimmer)"></rect>
+              </g>
+            </g>
+            <g transform="translate(25 6.6)"><g class="hm-spark">
+              <path d="M0 -4.4 C0.7 -1.3 1.3 -0.7 4.4 0 C1.3 0.7 0.7 1.3 0 4.4 C-0.7 1.3 -1.3 0.7 -4.4 0 C-1.3 -0.7 -0.7 -1.3 0 -4.4 Z" fill="#F5C451"></path>
+            </g></g>
+            <g transform="translate(21.2 3)"><g class="hm-spark hm-spark--sm">
+              <path d="M0 -1.9 C0.3 -0.57 0.57 -0.3 1.9 0 C0.57 0.3 0.3 0.57 0 1.9 C-0.3 0.57 -0.57 0.3 -1.9 0 C-0.57 -0.3 -0.3 -0.57 0 -1.9 Z" fill="#F5C451" opacity="0.85"></path>
+            </g></g>
+          </svg>
+        </div>
+
+        <span
+          data-enter
+          style="--enter-i: 1"
+          class="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 font-mono text-xs text-muted"
+        >
+          <span class="relative flex h-2 w-2" aria-hidden="true">
+            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-ok opacity-60"></span>
+            <span class="relative inline-flex h-2 w-2 rounded-full bg-ok"></span>
+          </span>
+          Live for Claude Pro · Max
+        </span>
+
+        <h1
+          data-enter
+          style="--enter-i: 2"
+          class="font-display text-[2.5rem] font-semibold leading-[1.04] sm:text-6xl"
+        >
+          See your AI usage<br class="hidden sm:block" /> and spend,
+          <span class="text-reveal">revealed</span>.
+        </h1>
+
+        <p data-enter style="--enter-i: 3" class="max-w-xl text-lg leading-relaxed text-muted">
+          Your Claude limits, reset timers, and extra-usage dollars — in your menu
+          bar and on your desktop, refreshed every 60 seconds. No account, no
+          server. Nothing leaves your Mac.
+        </p>
+
+        <!-- The dominant CTA: the install one-liner, copy-ready. -->
+        <div data-enter style="--enter-i: 4" class="w-full min-w-0 max-w-xl">
+          <p class="mb-2 font-mono text-xs uppercase tracking-[0.16em] text-accent">
+            Get Houdini — paste into Terminal
+          </p>
+          <CopyBlock code={installOneLiner} label="install · macOS 14+ · Apple Silicon" />
+          <p class="mt-2.5 font-mono text-xs text-muted/80">
+            No Gatekeeper prompt · checksum-verified · nothing leaves your Mac
+          </p>
+          <div class="mt-4 flex flex-wrap items-center gap-3">
+            <Button href={links.install} variant="primary" size="lg">Guided install</Button>
+            <Button href={links.guide} variant="secondary" size="lg">Read the guide</Button>
+          </div>
+        </div>
+
+        <!-- Meta: requirements + version chip + the honest provider line. -->
+        <div data-enter style="--enter-i: 5" class="flex flex-col gap-3">
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span class="font-mono text-xs text-muted/80">
+              macOS 14+ · Apple Silicon · free &amp; open source
+            </span>
+            <a
+              href={links.changelog}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface/50 px-2.5 py-0.5 font-mono text-xs text-muted transition-colors hover:border-accent/60 hover:text-text"
+            >
+              <span class="h-1.5 w-1.5 rounded-full bg-spark" aria-hidden="true"></span>
+              v{version}
+            </a>
+          </div>
+          <p class="text-sm text-muted">
+            Built for <span class="text-reveal">Claude</span> — more providers as they open up.
+          </p>
+          <ul class="flex flex-wrap items-center gap-x-5 gap-y-2">
+            {
+              trust.map((t) => (
+                <li class="flex items-center gap-2 text-xs text-muted">
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="text-accent"
+                    aria-hidden="true"
+                  >
+                    <path d={t.path} />
+                  </svg>
+                  {t.label}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+      </div>
+
+      <!-- ── Right: the product shot ──────────────────────────────────────────── -->
+      <div data-enter style="--enter-i: 3; --enter-base: 120ms" class="hidden lg:block">
+        <WindowFrame title="Houdini" glow class="mx-auto max-w-[380px]">
+          <Image
+            src={popoverDark}
+            alt="Houdini's menu bar popover showing Claude usage: a 5-hour session window, weekly and Sonnet-weekly caps, and extra-usage spend, each with a color-coded gauge and reset time."
+            widths={[320, 380, 760]}
+            sizes="(max-width: 1024px) 0px, 380px"
+            class="block w-full"
+            loading="eager"
+          />
+        </WindowFrame>
+      </div>
+    </div>
   </main>
-  <Footer />
 </Layout>
+
+<style>
+  /* Hero logo reveal: the hat settles, a gold spark pops, a shimmer sweeps once. */
+  .hero-logo .hm-hat {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: hatSettle 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+  }
+  .hero-logo .hm-spark {
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+    animation: sparkPop 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.55s both;
+  }
+  .hero-logo .hm-spark--sm {
+    animation-delay: 0.72s;
+  }
+  .hero-logo .hm-shimmer {
+    transform-box: fill-box;
+    opacity: 0;
+    animation: shimmerSweep 1s ease 0.85s 1 both;
+  }
+
+  @keyframes hatSettle {
+    0% { opacity: 0; transform: translateY(3px) scale(0.92); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes sparkPop {
+    0% { opacity: 0; transform: scale(0) rotate(-30deg); }
+    55% { opacity: 1; transform: scale(1.25) rotate(10deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0deg); }
+  }
+  @keyframes shimmerSweep {
+    0% { opacity: 0; transform: translateX(-2px); }
+    12% { opacity: 1; }
+    88% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(22px); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-logo .hm-hat,
+    .hero-logo .hm-spark,
+    .hero-logo .hm-shimmer {
+      animation: none;
+    }
+    .hero-logo .hm-hat,
+    .hero-logo .hm-spark { opacity: 1; transform: none; }
+    .hero-logo .hm-shimmer { opacity: 0; }
+  }
+</style>

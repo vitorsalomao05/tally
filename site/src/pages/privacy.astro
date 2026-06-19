@@ -1,0 +1,111 @@
+---
+import Layout from "../layouts/Layout.astro";
+import SectionHeader from "../components/SectionHeader.astro";
+import { links } from "../config";
+
+// The four pillars, verbatim from the original Privacy section.
+const points = [
+  {
+    title: "Everything runs on your Mac",
+    body: "There is no Houdini server — none exists to receive your data. The app polls usage locally and renders it. Nothing about your account leaves the device.",
+    path: "M12 2 4 5v6c0 5 3.4 8.3 8 10 4.6-1.7 8-5 8-10V5l-8-3Z",
+  },
+  {
+    title: "Credentials stay in your Keychain",
+    body: "Houdini reuses the Claude Code OAuth token already in your Keychain, or — if you sign in to Claude.ai — stores that session there too. Read locally, never copied out, never logged.",
+    path: "M7 11V8a5 5 0 0 1 10 0v3m-11 0h12a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-7a1 1 0 0 1 1-1Z",
+  },
+  {
+    title: "It talks only to your providers",
+    body: "Requests go straight from your Mac to each provider's own endpoint, signed with your own credential. No proxy, no middleman, no telemetry on your numbers.",
+    path: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 0c2.5 2.5 4 6 4 10s-1.5 7.5-4 10m0-20c-2.5 2.5-4 6-4 10s1.5 7.5 4 10M2.5 9h19M2.5 15h19",
+  },
+  {
+    title: "Open source, end to end",
+    body: "The data layer, the app, and this page are all readable. Verify exactly what Houdini does — don't take our word for it.",
+    path: "m9 18-6-6 6-6m6 0 6 6-6 6",
+  },
+];
+---
+
+<Layout
+  title="Privacy & trust — Houdini"
+  description="An app that touches your logins should earn it. Houdini runs entirely on your Mac, keeps credentials in your Keychain, talks only to your providers, and is open source end to end."
+>
+  <main id="main" tabindex="-1" class="screen relative overflow-hidden px-5 pt-24 sm:px-8 md:pt-20">
+    <div
+      class="screen-glow pointer-events-none absolute -top-20 left-1/2 -z-10 h-[460px] w-[640px] -translate-x-1/2 opacity-65"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div class="screen-inner mx-auto max-w-5xl py-8">
+      <div data-enter style="--enter-i: 0">
+        <SectionHeader
+          eyebrow="Privacy & trust"
+          title="An app that touches your logins should earn it."
+          subtitle="Houdini only works if you trust it with a credential. So the design rule is simple: your secrets never leave your Mac."
+          align="left"
+        />
+      </div>
+
+      <div class="mt-10 grid gap-4 sm:grid-cols-2">
+        {
+          points.map((p, i) => (
+            <article
+              data-enter
+              style={`--enter-i: ${i + 1}`}
+              class="privacy-card group relative flex gap-4 rounded-card border border-border bg-surface/60 p-5 transition-all duration-300 hover:-translate-y-1 hover:border-accent/60 focus-within:-translate-y-1 focus-within:border-accent/60"
+            >
+              <span class="privacy-icon mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/12 text-accent transition-transform duration-300">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d={p.path} />
+                </svg>
+              </span>
+              <div>
+                <h2 class="font-semibold leading-tight">{p.title}</h2>
+                <p class="mt-1.5 text-sm leading-relaxed text-muted">{p.body}</p>
+                <a
+                  href={links.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-3 inline-flex items-center gap-1 text-xs font-medium text-accent opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100 focus-visible:opacity-100"
+                >
+                  Read it in the source
+                  <span aria-hidden="true">→</span>
+                </a>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+
+      <p data-enter style="--enter-i: 5" class="mt-6 max-w-2xl text-sm leading-relaxed text-muted">
+        No telemetry, no analytics, no account. The whole project is open-source, so
+        you can read exactly what it does before you run it.
+      </p>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  /* Hover/focus expand: the card lifts and its icon leans into the light. */
+  .privacy-card:hover .privacy-icon,
+  .privacy-card:focus-within .privacy-icon {
+    transform: scale(1.08) rotate(-3deg);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .privacy-card,
+    .privacy-icon {
+      transition: none !important;
+    }
+    .privacy-card:hover,
+    .privacy-card:focus-within {
+      transform: none !important;
+    }
+    .privacy-card:hover .privacy-icon,
+    .privacy-card:focus-within .privacy-icon {
+      transform: none !important;
+    }
+  }
+</style>
