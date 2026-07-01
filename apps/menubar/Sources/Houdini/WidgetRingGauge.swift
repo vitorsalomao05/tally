@@ -27,12 +27,12 @@ struct WidgetRingGauge: View {
     private var fillColor: Color { isPlaceholder ? .clear : Thresholds.barColor(pct) }
 
     var body: some View {
-        VStack(spacing: 6) {
+        VStack(spacing: Theme.Spacing.tight) {
             ZStack {
                 // Track
                 Circle()
                     .trim(from: 0, to: sweep)
-                    .stroke(Color.white.opacity(0.08),
+                    .stroke(Theme.Colors.track,
                             style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                     .rotationEffect(.degrees(135))
 
@@ -43,7 +43,7 @@ struct WidgetRingGauge: View {
                         .stroke(fillColor,
                                 style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
                         .rotationEffect(.degrees(135))
-                        .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: fraction)
+                        .animation(reduceMotion ? nil : .easeOut(duration: Theme.Motion.value), value: fraction)
                 }
 
                 // Center: hero numeral + window label
@@ -60,11 +60,11 @@ struct WidgetRingGauge: View {
                             .lineLimit(1)
                             .minimumScaleFactor(0.7) // never clip "100%" in a small ring
                             .contentTransition(reduceMotion ? .identity : .numericText())
-                            .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: pct)
+                            .animation(reduceMotion ? nil : .easeOut(duration: Theme.Motion.value), value: pct)
                     }
                     Text(title.uppercased())
                         .font(.system(size: max(8, diameter * 0.095), weight: .semibold))
-                        .tracking(0.5)
+                        .tracking(Theme.Typography.microTracking)
                         .glassSecondaryText()
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)

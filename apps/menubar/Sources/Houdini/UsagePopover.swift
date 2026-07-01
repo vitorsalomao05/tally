@@ -28,7 +28,8 @@ struct UsagePopover: View {
     /// the populated layout.
     private let ringDiameter: CGFloat = 84
     private let width: CGFloat = 344
-    private let corner: CGFloat = 14
+    /// Joins the widget's rounded-card family (previously a squarer 14).
+    private let corner: CGFloat = Theme.Radius.card
 
     /// Which footer control holds keyboard focus, so `.plain` icon buttons can show a
     /// visible focus ring (see `FooterHover`).
@@ -36,15 +37,15 @@ struct UsagePopover: View {
     @FocusState private var focusedControl: FooterControl?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Theme.Spacing.section) {
             header
             content
             // A faint hairline divides the data from the actions, echoing the glass edge.
-            Rectangle().fill(Color.white.opacity(0.07)).frame(height: 1)
+            Rectangle().fill(Theme.Colors.hairline).frame(height: Theme.Spacing.hairline)
                 .accessibilityHidden(true) // decorative separator
             footer
         }
-        .padding(14)
+        .padding(Theme.Spacing.cardPadding)
         .frame(width: width)
         .background(GlassCardBackground(cornerRadius: corner,
                                         forceSolid: forceReduceTransparency,
@@ -61,7 +62,7 @@ struct UsagePopover: View {
     // MARK: - Header
 
     private var header: some View {
-        HStack(spacing: 7) {
+        HStack(spacing: Theme.Spacing.header) {
             BrandWordmark(size: 15)
             Spacer()
             StatusDot(state: model.state)
@@ -77,12 +78,12 @@ struct UsagePopover: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 18)
         } else {
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: Theme.Spacing.section) {
                 if case .error(let message) = model.state {
                     staleBanner(message) // stale data: show last-good + reason
                 }
                 if !heroRings.isEmpty {
-                    HStack(alignment: .top, spacing: 16) {
+                    HStack(alignment: .top, spacing: Theme.Spacing.ringGap) {
                         ForEach(Array(heroRings.enumerated()), id: \.offset) { _, m in
                             WidgetRingGauge(title: Format.shortLabel(m.label), pct: m.pct,
                                             resetText: Format.resetString(m.resetAt),
@@ -94,7 +95,7 @@ struct UsagePopover: View {
                     .frame(maxWidth: .infinity)
                 }
                 if !rowMetrics.isEmpty {
-                    VStack(spacing: 10) {
+                    VStack(spacing: Theme.Spacing.sectionCompact) {
                         ForEach(Array(rowMetrics.enumerated()), id: \.offset) { _, m in
                             MetricRow(metric: m)
                         }
@@ -125,23 +126,23 @@ struct UsagePopover: View {
     /// Stale banner: a restyled glass chip kept when an error lands on top of a
     /// last-good reading (the rings/rows still show the previous value).
     private func staleBanner(_ message: String) -> some View {
-        HStack(alignment: .top, spacing: 6) {
+        HStack(alignment: .top, spacing: Theme.Spacing.tight) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 11)).foregroundStyle(.orange)
+                .font(.system(size: 11)).foregroundStyle(Theme.Colors.warning)
                 .accessibilityHidden(true) // decorative — the message text carries it
             Text("Showing last value — \(message)")
                 .scaledFont(11, relativeTo: .caption).glassSecondaryText()
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(8)
+        .padding(Theme.Spacing.state)
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .background(
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(Color.orange.opacity(0.12))
+            RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous)
+                .fill(Theme.Colors.warning.opacity(0.12))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .strokeBorder(Color.orange.opacity(0.25), lineWidth: 1)
+                    RoundedRectangle(cornerRadius: Theme.Radius.chip, style: .continuous)
+                        .strokeBorder(Theme.Colors.warning.opacity(0.25), lineWidth: 1)
                 )
         )
     }
@@ -149,7 +150,7 @@ struct UsagePopover: View {
     // MARK: - Footer
 
     private var footer: some View {
-        HStack(spacing: 4) {
+        HStack(spacing: Theme.Spacing.footer) {
             Group {
                 if let updated = model.lastUpdated {
                     (Text("Updated ") + Text(updated, style: .relative))

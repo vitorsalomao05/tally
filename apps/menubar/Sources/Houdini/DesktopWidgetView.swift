@@ -33,7 +33,7 @@ struct DesktopWidgetView: View {
         GeometryReader { geo in
             let cardWidth = max(0, geo.size.width - shadowInset * 2)
             let compact = cardWidth < 260
-            let corner: CGFloat = compact ? 20 : 24
+            let corner: CGFloat = compact ? Theme.Radius.card : Theme.Radius.cardLarge
 
             card(compact: compact, size: CGSize(width: cardWidth,
                                                 height: max(0, geo.size.height - shadowInset * 2)),
@@ -48,13 +48,13 @@ struct DesktopWidgetView: View {
     private func card(compact: Bool, size: CGSize, corner: CGFloat) -> some View {
         let shape = RoundedRectangle(cornerRadius: corner, style: .continuous)
         return content(compact: compact, size: size)
-            .padding(compact ? 14 : 18)
+            .padding(compact ? Theme.Spacing.cardPadding : Theme.Spacing.cardPaddingLarge)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .background(GlassCardBackground(cornerRadius: corner, forceSolid: forceReduceTransparency))
             .overlay {
                 // Subtle hover lift — a faint top highlight, never animating shadow.
                 if hovering {
-                    shape.fill(Color.white.opacity(0.05))
+                    shape.fill(Theme.Colors.hover)
                 }
             }
             .clipShape(shape)
@@ -66,7 +66,7 @@ struct DesktopWidgetView: View {
             .contentShape(Rectangle())
             .onHover { h in
                 if reduceMotion { hovering = h }
-                else { withAnimation(.easeOut(duration: 0.15)) { hovering = h } }
+                else { withAnimation(.easeOut(duration: Theme.Motion.hover)) { hovering = h } }
             }
             // The glass card is dark in both appearances, so its content is always
             // light — this keeps text at AA contrast even over a light wallpaper.
@@ -77,7 +77,7 @@ struct DesktopWidgetView: View {
 
     @ViewBuilder
     private func content(compact: Bool, size: CGSize) -> some View {
-        VStack(alignment: .leading, spacing: compact ? 10 : 12) {
+        VStack(alignment: .leading, spacing: compact ? Theme.Spacing.sectionCompact : Theme.Spacing.section) {
             header
             if model.metrics.isEmpty {
                 emptyState
@@ -97,7 +97,7 @@ struct DesktopWidgetView: View {
     // MARK: - Header
 
     private var header: some View {
-        HStack(spacing: 7) {
+        HStack(spacing: Theme.Spacing.header) {
             BrandWordmark(size: 13)
             Spacer()
             StatusDot(state: model.state)
@@ -111,8 +111,8 @@ struct DesktopWidgetView: View {
         let ringD = min((size.width - 36 - 16) / max(1, CGFloat(rings.count)),
                         size.height * 0.46)
             .clamped(to: 60...150)
-        return VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 16) {
+        return VStack(alignment: .leading, spacing: Theme.Spacing.ringStack) {
+            HStack(spacing: Theme.Spacing.ringGap) {
                 ForEach(Array(rings.enumerated()), id: \.offset) { _, m in
                     WidgetRingGauge(title: Format.shortLabel(m.label), pct: m.pct,
                                     resetText: Format.resetString(m.resetAt), diameter: ringD,
@@ -150,12 +150,12 @@ struct DesktopWidgetView: View {
     private func spendBlock(_ m: UsageMetric, compact: Bool) -> some View {
         let amount = m.used ?? m.dollars
         let label = Format.shortLabel(m.label) == "Extra" ? "Extra usage" : m.label
-        return VStack(alignment: .leading, spacing: 5) {
+        return VStack(alignment: .leading, spacing: Theme.Spacing.rowInternal) {
             if compact {
                 // Compact: label as a tiny caption above; the hero on its own line so
                 // the dollar figure is never clipped.
                 Text(label.uppercased())
-                    .scaledFont(9, weight: .semibold, relativeTo: .caption2).tracking(0.4)
+                    .scaledFont(9, weight: .semibold, relativeTo: .caption2).tracking(Theme.Typography.microTracking)
                     .glassSecondaryText()
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     spendHero(amount, m: m, size: 22)
@@ -202,7 +202,7 @@ struct DesktopWidgetView: View {
             .foregroundStyle(Thresholds.labelColor(m.pct))
             .lineLimit(1).fixedSize()
             .contentTransition(reduceMotion ? .identity : .numericText())
-            .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: amount)
+            .animation(reduceMotion ? nil : .easeOut(duration: Theme.Motion.value), value: amount)
     }
 
     // MARK: - Footer (last-updated)

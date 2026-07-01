@@ -93,7 +93,7 @@ security posture.
 
 **Sub-tasks.**
 - [x] Accessibility pass (labels, focus, Dynamic Type, contrast, reduced-motion). *(P2 slice 1 — **DONE, commit `19d3ed0`:** VoiceOver labels/values on gauges·rows·spend·status·footer, keyboard focus ring on footer buttons, `@ScaledMetric` Dynamic Type, AA contrast lift + Increase-Contrast now raises text; reduced-motion already gated.)*
-- [~] Visual polish pass on both surfaces; define shared visual tokens. *(Slice 2 — **in progress next.**)*
+- [x] Visual polish pass on both surfaces; define shared visual tokens. *(P2 slice 2 — **DONE:** one shared `Theme` token layer — colors · spacing · radii · type · motion — consumed by both the popover and desktop widget; deduped the `#8B5CF6` brand hex, pulled the glass wash/border/ink hexes into one place, unified the popover card radius into the widget's rounded-card family (14→20), unified the gauge/progress tracks + the two state-view rhythms + micro-label tracking + hover/value motion. Slice-1 a11y values (Dynamic Type, AA secondary tone, Increase-Contrast lifts, focus ring) folded into tokens intact; verified via adversarial review.)*
 - [ ] Verify against real Claude Pro/Max data (limits, timers, overage). *(Slice 3 — remains.)*
 
 ## P3 · Site — Polish to zero-clutter + ongoing features  `[~]`

@@ -18,8 +18,9 @@ extension Color {
         )
     }
 
-    /// Brand violet (matches `Color.brand`, #8B5CF6).
-    static let brandViolet = Color(hex: 0x8B5CF6)
+    /// Brand violet — the SAME hue as `Color.brand` (#8B5CF6); aliased here so the
+    /// hex lives in exactly one place (`Brand.swift`) rather than being duplicated.
+    static let brandViolet = brand
     /// Brand magenta — the warm end of the identity gradient.
     static let brandMagenta = Color(hex: 0xD946EF)
     /// Solid card color used when Reduce Transparency is on (spec: #15101F).
@@ -80,7 +81,10 @@ enum SurfaceBase {
 /// 2. macOS 26+               → system `.glassEffect()` (Liquid Glass) + violet wash.
 /// 3. macOS 14/15            → `NSVisualEffectView(.hudWindow, .behindWindow)` + wash.
 struct GlassCardBackground: View {
-    var cornerRadius: CGFloat = 22
+    /// Fallback only — both call sites (popover, widget) always pass an explicit
+    /// radius, so this default is never exercised; it tracks the shared card radius
+    /// rather than an orphan constant.
+    var cornerRadius: CGFloat = Theme.Radius.card
     /// Force the opaque fallback. The system Reduce-Transparency flag is a get-only
     /// environment value (can't be injected), so the snapshotter sets this to render
     /// the accessible variant.
@@ -101,19 +105,17 @@ struct GlassCardBackground: View {
 
     /// Violet→magenta dark wash — ~20% so it tints the glass without going flat gray.
     private var violetWash: LinearGradient {
-        LinearGradient(
-            colors: [Color(hex: 0x2A1B4A, alpha: 0.24), Color(hex: 0x3A1340, alpha: 0.18)],
-            startPoint: .topLeading, endPoint: .bottomTrailing
-        )
+        LinearGradient(colors: [Theme.Colors.washTop, Theme.Colors.washBottom],
+                       startPoint: .topLeading, endPoint: .bottomTrailing)
     }
 
-    /// 1px gradient border: lighter at the top (white@14%) fading to white@4% at the
-    /// base. Increase Contrast lifts both stops so the edge stays legible.
+    /// 1px gradient border: lighter at the top fading toward the base. Increase
+    /// Contrast lifts both stops so the edge stays legible (values in `Theme.Colors`).
     private var borderGradient: LinearGradient {
-        let top = contrast == .increased ? 0.40 : 0.14
-        let bottom = contrast == .increased ? 0.16 : 0.04
+        let increased = contrast == .increased
         return LinearGradient(
-            colors: [Color.white.opacity(top), Color.white.opacity(bottom)],
+            colors: [Theme.Colors.borderTop(increasedContrast: increased),
+                     Theme.Colors.borderBottom(increasedContrast: increased)],
             startPoint: .top, endPoint: .bottom
         )
     }
@@ -122,7 +124,7 @@ struct GlassCardBackground: View {
         Group {
             if solid {
                 // Accessible fallback: flat, opaque #15101F — no blur, no wash.
-                shape.fill(Color.widgetInk)
+                shape.fill(Theme.Colors.ink)
             } else {
                 ZStack {
                     base
@@ -138,12 +140,12 @@ struct GlassCardBackground: View {
     private var base: some View {
         if renderMode == .snapshot {
             // Headless render approximation of the blurred glass.
-            Color(hex: 0x1A1426, alpha: 0.92)
+            Theme.Colors.snapshotBase
         } else if surface == .hostMaterial {
             // Popover: the MenuBarExtra window already supplies a system material, so
             // we add only a translucent dark scrim (not a second blur) under the wash
             // — keeping the card a consistent dark glass over either appearance.
-            Color.widgetInk.opacity(0.6)
+            Theme.Colors.hostScrim
         } else if #available(macOS 26, *) {
             // Liquid Glass (system). Clear so the system effect shows through.
             Color.clear.glassEffect(in: shape)

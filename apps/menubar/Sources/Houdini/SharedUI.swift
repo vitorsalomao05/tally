@@ -39,7 +39,7 @@ private struct GlassSecondaryText: ViewModifier {
     @Environment(\.colorSchemeContrast) private var contrast
 
     func body(content: Content) -> some View {
-        content.foregroundStyle(Color.white.opacity(contrast == .increased ? 0.9 : 0.66))
+        content.foregroundStyle(Theme.Colors.secondaryText(increasedContrast: contrast == .increased))
     }
 }
 
@@ -66,7 +66,7 @@ struct BrandWordmark: View {
         Text("Houdini")
             .scaledFont(size, weight: .semibold, design: .rounded, relativeTo: .headline)
             .foregroundStyle(
-                LinearGradient(colors: [.brandViolet, .brandMagenta],
+                LinearGradient(colors: [Theme.Colors.accent, Theme.Colors.accentMagenta],
                                startPoint: .leading, endPoint: .trailing)
             )
             // A heading, not a control: gives VoiceOver a clear card title in the
@@ -99,13 +99,13 @@ struct StatusDot: View {
         case .loading:
             // Lifted off `.secondary`@0.6 (near-invisible on the dark card) to a
             // legible calm gray dot.
-            Circle().fill(Color.white.opacity(0.55)).frame(width: 7, height: 7)
+            Circle().fill(Theme.Colors.statusLoading).frame(width: 7, height: 7)
         case .error:
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 10)).foregroundStyle(.orange)
+                .font(.system(size: 10)).foregroundStyle(Theme.Colors.warning)
         case .signedOut:
             Image(systemName: "person.crop.circle.badge.questionmark")
-                .font(.system(size: 11)).foregroundStyle(Color.white.opacity(0.7))
+                .font(.system(size: 11)).foregroundStyle(Theme.Colors.statusMutedIcon)
         }
     }
 
@@ -128,10 +128,10 @@ struct NeedsAuthView: View {
     var session: ClaudeSession?
 
     var body: some View {
-        VStack(spacing: 9) {
+        VStack(spacing: Theme.Spacing.state) {
             Image(systemName: "wand.and.stars")
                 .font(.system(size: 26))
-                .foregroundStyle(LinearGradient(colors: [.brandViolet, .brandMagenta],
+                .foregroundStyle(LinearGradient(colors: [Theme.Colors.accent, Theme.Colors.accentMagenta],
                                                 startPoint: .top, endPoint: .bottom))
                 .accessibilityHidden(true) // decorative — the copy + button carry the meaning
             Text("Connect Claude")
@@ -146,10 +146,10 @@ struct NeedsAuthView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
-                .tint(.brandViolet)
+                .tint(Theme.Colors.accent)
             }
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, Theme.Spacing.state)
         .frame(maxWidth: .infinity)
     }
 }
@@ -162,9 +162,9 @@ struct ErrorStateView: View {
     let message: String
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: Theme.Spacing.state) {
             Image(systemName: "exclamationmark.triangle.fill")
-                .font(.system(size: 22)).foregroundStyle(.orange)
+                .font(.system(size: 22)).foregroundStyle(Theme.Colors.warning)
                 .accessibilityHidden(true) // decorative — the heading + message speak the error
             Text("Can't read usage")
                 .scaledFont(13, weight: .medium, relativeTo: .body)
@@ -173,7 +173,7 @@ struct ErrorStateView: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.horizontal, 8)
+        .padding(.horizontal, Theme.Spacing.state)
         .frame(maxWidth: .infinity)
         // Read the whole state as one phrase: "Can't read usage, <reason>".
         .accessibilityElement(children: .combine)
@@ -191,15 +191,15 @@ struct RingPairSkeleton: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
-        VStack(spacing: 14) {
-            HStack(spacing: 16) {
+        VStack(spacing: Theme.Spacing.ringStack) {
+            HStack(spacing: Theme.Spacing.ringGap) {
                 WidgetRingGauge(title: "5h", pct: nil, resetText: nil,
                                 diameter: diameter, isPlaceholder: true)
                 WidgetRingGauge(title: "Weekly", pct: nil, resetText: nil,
                                 diameter: diameter, isPlaceholder: true)
             }
-            RoundedRectangle(cornerRadius: 5)
-                .fill(Color.white.opacity(0.06))
+            RoundedRectangle(cornerRadius: Theme.Radius.bar)
+                .fill(Theme.Colors.skeleton)
                 .frame(height: 22)
         }
         .frame(maxWidth: .infinity)
@@ -220,7 +220,7 @@ struct SkeletonPulse: ViewModifier {
     func body(content: Content) -> some View {
         content
             .opacity(enabled ? (dim ? 0.55 : 1.0) : 1.0)
-            .animation(enabled ? .easeInOut(duration: 1.0).repeatForever(autoreverses: true) : nil,
+            .animation(enabled ? .easeInOut(duration: Theme.Motion.pulse).repeatForever(autoreverses: true) : nil,
                        value: dim)
             .onAppear { if enabled { dim = true } }
     }
@@ -257,7 +257,7 @@ struct MetricRow: View {
             return metric.pct
         }()
 
-        return VStack(alignment: .leading, spacing: 5) {
+        return VStack(alignment: .leading, spacing: Theme.Spacing.rowInternal) {
             HStack(alignment: .firstTextBaseline) {
                 Text(label)
                     .scaledFont(12, weight: .medium, relativeTo: .callout)
@@ -268,7 +268,7 @@ struct MetricRow: View {
                     .monospacedDigit()
                     .foregroundStyle(Thresholds.labelColor(metric.pct))
                     .contentTransition(reduceMotion ? .identity : .numericText())
-                    .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: value)
+                    .animation(reduceMotion ? nil : .easeOut(duration: Theme.Motion.value), value: value)
             }
             if let barPct {
                 ProgressBar(pct: barPct, color: Thresholds.barColor(metric.pct))
@@ -300,7 +300,7 @@ struct ProgressBar: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.secondary.opacity(0.2))
+                Capsule().fill(Theme.Colors.track)
                 Capsule()
                     .fill(color)
                     .frame(width: max(0, min(1, pct / 100)) * geo.size.width)
@@ -335,17 +335,17 @@ struct FooterHover: ViewModifier {
             .opacity(active ? 1.0 : 0.6)
             .padding(5)
             .background(
-                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .fill(Color.white.opacity(active ? 0.10 : 0))
+                RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
+                    .fill(active ? Theme.Colors.highlight : .clear)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous)
                     .strokeBorder(Color.accentColor, lineWidth: focused ? 2 : 0)
             )
-            .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: Theme.Radius.control, style: .continuous))
             .onHover { h in
                 if reduceMotion { hovering = h }
-                else { withAnimation(.easeOut(duration: 0.12)) { hovering = h } }
+                else { withAnimation(.easeOut(duration: Theme.Motion.hover)) { hovering = h } }
             }
     }
 }
