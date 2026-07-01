@@ -5,7 +5,7 @@ Each phase = one or more prompts handed to Claude Code. We build the data layer 
 ## Phase 0 — Repo foundation ✅ (done by the Brain)
 Docs (README, ARCHITECTURE, DECISIONS, PROVIDERS, WORKFLOW), directory skeleton, ADRs. Git init + first commit handled in Phase 1 prompt.
 
-## Phase 1 — FetcherCore + Claude adapter (data layer)  ← WE ARE HERE
+## Phase 1 — FetcherCore + Claude adapter (data layer) ✅ (shipped in v0.4.0 — Claude live)
 - SwiftPM workspace: `FetcherCore` library + `houdini` executable.
 - `UsageProvider` protocol, `CredentialStore` (Keychain), models.
 - **Claude `.keychainOAuth` adapter**: read Claude Code OAuth token, call `api.anthropic.com/api/oauth/usage` with mandatory `claude-code/<ver>` UA, parse 5h/weekly/Opus.
@@ -36,8 +36,8 @@ Docs (README, ARCHITECTURE, DECISIONS, PROVIDERS, WORKFLOW), directory skeleton,
 - Sign + notarize + staple script; `install.sh` if used; release automation.
 
 ## Phase 7 — Landing site
-- Astro + Tailwind, dark Linear-style, Cloudflare Pages, DMG on GitHub Releases.
-- Hero + demo, install CTA, how-it-works, providers grid, privacy/trust, FAQ.
+- Astro + Tailwind, dark Linear-style, deployed on **Vercel** (project `houdini`; manual prebuilt `vercel --prod` from `site/`, no site CI — the only workflow, `.github/workflows/release.yml`, publishes the macOS app on `v*.*.*` tags). Install artifact distributed via `install.sh` from the pinned GitHub Release.
+- Hero + demo, install CTA, how-it-works, one honest capability line (no provider grid — ADR-010/011), privacy/trust, FAQ.
 
 ## Phase 8 — Polish & launch
 - Icon/branding, accessibility pass, auto-update (Sparkle) for mature release, README badges, screenshots/video.
