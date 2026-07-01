@@ -100,11 +100,11 @@ const trust = [
 
         <!-- The dominant CTA: the install one-liner, copy-ready. -->
         <div data-enter style="--enter-i: 4" class="w-full min-w-0 max-w-xl">
-          <p class="mb-2 font-mono text-xs uppercase tracking-[0.16em] text-accent">
+          <p class="mb-2 font-mono text-xs uppercase tracking-[0.16em] text-[#9d7bf7]">
             Get Houdini — paste into Terminal
           </p>
           <CopyBlock code={installOneLiner} label="install · macOS 14+ · Apple Silicon" />
-          <p class="mt-2.5 font-mono text-xs text-muted/80">
+          <p class="mt-2.5 font-mono text-xs text-muted/90">
             No Gatekeeper prompt · checksum-verified · nothing leaves your Mac
           </p>
           <div class="mt-4 flex flex-wrap items-center gap-3">
@@ -159,13 +159,13 @@ const trust = [
       </div>
 
       <!-- ── Right: the product shot ──────────────────────────────────────────── -->
-      <div data-enter style="--enter-i: 3; --enter-base: 120ms" class="hidden lg:block">
-        <WindowFrame title="Houdini" glow class="mx-auto max-w-[380px]">
+      <div data-enter style="--enter-i: 3; --enter-base: 120ms" class="mt-4 lg:mt-0">
+        <WindowFrame title="Houdini" glow class="mx-auto w-full max-w-[300px] sm:max-w-[340px] lg:max-w-[380px]">
           <Image
             src={popoverDark}
             alt="Houdini's menu bar popover showing Claude usage: a 5-hour session window, weekly and Sonnet-weekly caps, and extra-usage spend, each with a color-coded gauge and reset time."
             widths={[320, 380, 760]}
-            sizes="(max-width: 1024px) 0px, 380px"
+            sizes="(max-width: 640px) 300px, (max-width: 1024px) 340px, 380px"
             class="block w-full"
             loading="eager"
           />
