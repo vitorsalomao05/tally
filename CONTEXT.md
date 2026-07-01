@@ -1,7 +1,7 @@
 # CONTEXT.md — Houdini (product & current state)
 
 > The *why* and *what* behind Houdini. Pairs with [`CLAUDE.md`](CLAUDE.md) (how we work)
-> and [`BACKLOG.md`](BACKLOG.md) (what's next). Last framed: 2026-06-30.
+> and [`BACKLOG.md`](BACKLOG.md) (what's next). Last framed: 2026-07-01.
 
 ## Product overview
 
@@ -48,23 +48,31 @@ browser, no scraping (a browser-scrape adapter survives only as a last-resort fa
 - Principle for the future: any elevated permission (e.g. the browser-scrape fallback)
   must be provably secure and least-privilege before it ships.
 
-## Current state (2026-06-30)
+## Current state (2026-07-01)
 
 **App**
 - Claude provider is **live** (v0.4.0). It reads the **Claude Code OAuth token in
   Keychain** *or* a **claude.ai session cookie**.
-- **Top problem:** the login/credential path is clean for **Claude Code CLI users** (who
-  have the OAuth token in Keychain) but **buggy/unclean for non-CLI users** — they don't
-  get a smooth way to connect. This is priority #1.
+- **Claude auth is deliberately KEPT READ-ONLY and its subscription-auth expansion is FROZEN**
+  (see **ADR-012**, decided 2026-07-01). Both paths use the user's *existing* on-device
+  credential; Anthropic's Consumer Terms restrict third-party use of subscription OAuth/cookies,
+  so Houdini stays read-only and adds **no** refresh, first-run PKCE, or cookie-hardening. P1
+  shipped only slice (a) (broadened discovery of an existing credential); a user with **no**
+  Claude Code credential anywhere is **out of scope by decision**.
 - Menu bar + native desktop widget ship inside one app. A Notification Center WidgetKit
   widget exists in `apps/widget` but is intentionally **not advertised** (ADR-002).
 
 **Site** (`site/`, Astro + Tailwind, live at houdini.salomao.org)
 - Live but **not fully polished**. Target is a **100% clean site with zero visual
   clutter/pollution** and strong accessibility.
-- **Live visual + accessibility audit is REQUESTED but PENDING** — the Claude in Chrome
-  extension was not connected at framing time. The audit subagent is queued to run and
-  will populate the site's concrete current-state findings and feed `BACKLOG.md`.
+- **Live visual + accessibility audit DONE 2026-07-01** (Claude in Chrome; full report at
+  `conductor/audits/2026-07-01-site-audit.md`). It found the site already calm/low-clutter and
+  mostly WCAG-AA clean. The four ToS-independent quick-wins have **shipped** (commit `78e2bf3`):
+  the product screenshot now shows on mobile, the curl one-liner is fully readable, footer +
+  terminal-label contrast pass AA, and decorative SVGs are confirmed `aria-hidden` — so the site
+  now passes AA on the audited items and shows the product shot on mobile. Two findings were
+  ToS-gated and intentionally deferred (see **ADR-012**): the hero H1 is kept generic, and an
+  explicit trust sentence is left optional.
 
 ## Design direction
 
@@ -74,10 +82,12 @@ real product screenshot/demo, and a distinct trust/privacy section. Accessible b
 
 ## Priorities (app-first) & why
 
-1. **Login refactor** — the app's value is gated behind connecting an account; if non-CLI
-   users can't get in cleanly, nothing else matters. Fix the front door first.
-2. **Widget accessibility + polish** — once anyone can get in, make the core surfaces
-   (menu bar + desktop widget) genuinely polished and accessible end to end.
+1. **Login refactor — DECIDED / CAPPED (ADR-012).** The Claude integration stays **read-only**
+   on the user's existing credential and its subscription-auth expansion is **frozen**; slice (a)
+   (broadened discovery) shipped, and a user with no Claude Code credential anywhere is out of
+   scope by decision. Active focus has moved to #2.
+2. **Widget accessibility + polish** — make the core surfaces (menu bar + desktop widget)
+   genuinely polished and accessible end to end.
 3. **Site polish + ongoing features** — with the app solid, drive the site to zero clutter
    and keep it evolving with new features and ideas.
 

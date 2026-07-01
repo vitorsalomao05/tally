@@ -53,30 +53,36 @@ security posture.
         **✅ IMPLEMENTED (P1 slice a)** behind one shared `ClaudeOAuthCredentialSource` seam
         (ordered Keychain discovery + read-only file fallback + in-memory `refreshToken` refresh).
         The refresh mechanism is built + tested via an injected refresher; the live refresh
-        **endpoint is NOT wired** pending sign-off (see the "Newly surfaced" note below), so an
-        expired token still degrades exactly as today until then.
+        **endpoint stays unwired — FROZEN by ADR-012** (the `refresher` stays `nil`), so an
+        expired token degrades exactly as today **by decision**, not merely pending sign-off.
       - **(b) Harden the claude.ai cookie flow** — persistent/shared WebView store or paste-session,
         proactive expiry re-auth. *Weaker (needs ADR-005 revision); interim bridge only.*
+        **FROZEN (ADR-012) — not pursued.**
       - **(c) First-run OAuth PKCE "Connect"** — Houdini gets its own refreshable, revocable,
         Keychain-only Anthropic token, independent of the CLI. *Durable; higher effort; depends on a
-        usable public OAuth client.*
-      - **Recommendation:** ship **(a)** now (cheapest correctness win, no ADR touch) — **done**;
-        pursue **(c) first-run OAuth PKCE** as the durable answer for true non-CLI Pro/Max users;
-        use **(b) cookie-flow hardening** only if **(c)** is blocked.
+        usable public OAuth client.* **FROZEN (ADR-012) — not pursued.**
+      - **Decision (ADR-012, 2026-07-01):** slice **(a)** shipped is the **cap** for P1 — keep the
+        Claude integration read-only on the user's existing credential and **freeze** expansion.
+        **(b)** cookie-hardening and **(c)** OAuth PKCE are **not pursued** (they'd escalate the
+        signal that Houdini's traffic mimics the Claude Code client), and token refresh stays off.
+        A true non-CLI user with **no** Claude Code credential anywhere is **out of scope by
+        decision**. Options (i)/(iv) (Anthropic Admin Usage & Cost API / lead with API-key
+        providers) are retained as the future fallback if enforcement tightens.
 - [~] Implement behind a clean, testable seam in `core/` (the `CredentialStore` /
       `ClaudeAuthResolver` boundary already isolates this well). **slice (a): ordered Keychain
       discovery + `~/.claude/.credentials.json` fallback + in-memory `refreshToken` refresh**,
       all in one `ClaudeOAuthCredentialSource` unit (collapsed the two old private blob structs
-      + two read call-sites). Live refresh endpoint deferred to sign-off; cookie hardening (b)
-      and OAuth PKCE (c) remain separate.
+      + two read call-sites). Live refresh endpoint **frozen (ADR-012)**; cookie hardening (b)
+      and OAuth PKCE (c) are frozen too — **P1 is capped at slice (a).**
 - [~] Test both user types end to end; add regression tests (extend `FetcherCoreTests`).
       **slice (a): added `ClaudeAuthResolverTests` (ordered discovery, first-item-wins, file
       fallback, refresh, absent) + a `houdini-selftest` mirror (29 checks PASS here).** Still
       open: end-to-end coverage for the non-CLI **cookie** user (part of (b)/(c)).
-- [ ] Security review + update `PROVIDERS.md` / relevant ADR. *(Not done this pass; needed
-      before the live refresh endpoint is wired — proposed refresh contract is in the report.)*
+- [~] Update `PROVIDERS.md` / relevant ADR — **ADR-012 decided** (read-only + frozen); `PROVIDERS.md`
+      gets a one-line ToS-stance note this pass. A full security review is only needed if refresh /
+      PKCE is ever unfrozen — **out of scope now by decision.**
 
-## P2 · App — Widget accessibility + visual polish  `[ ]`
+## P2 · App — Widget accessibility + visual polish  `[~]`
 
 **Goal.** The menu bar and desktop widget are accessible and visually polished end to end.
 
@@ -86,24 +92,31 @@ security posture.
 - No rough edges (alignment, spacing, states, empty/error/loading).
 
 **Sub-tasks.**
-- [x] Accessibility pass (labels, focus, Dynamic Type, contrast, reduced-motion). *(P2 slice 1: VoiceOver labels/values on gauges·rows·spend·status·footer, keyboard focus ring on footer buttons, `@ScaledMetric` Dynamic Type, AA contrast lift + Increase-Contrast now raises text; reduced-motion already gated.)*
-- [ ] Visual polish pass on both surfaces; define shared visual tokens.
-- [ ] Verify against real Claude Pro/Max data (limits, timers, overage).
+- [x] Accessibility pass (labels, focus, Dynamic Type, contrast, reduced-motion). *(P2 slice 1 — **DONE, commit `19d3ed0`:** VoiceOver labels/values on gauges·rows·spend·status·footer, keyboard focus ring on footer buttons, `@ScaledMetric` Dynamic Type, AA contrast lift + Increase-Contrast now raises text; reduced-motion already gated.)*
+- [~] Visual polish pass on both surfaces; define shared visual tokens. *(Slice 2 — **in progress next.**)*
+- [ ] Verify against real Claude Pro/Max data (limits, timers, overage). *(Slice 3 — remains.)*
 
-## P3 · Site — Polish to zero-clutter + ongoing features  `[ ]`
+## P3 · Site — Polish to zero-clutter + ongoing features  `[~]`
 
 **Goal.** A 100% clean site (zero visual clutter/pollution), strongly accessible, with one
 clear install CTA — then a continuous stream of features and ideas.
 
-**Blocked by:** the live visual + accessibility audit (pending Chrome-extension connection).
+**Audit:** DONE 2026-07-01 (live Claude-in-Chrome visual + a11y pass; full report at
+`conductor/audits/2026-07-01-site-audit.md`). The site was already calm/low-clutter and mostly
+WCAG-AA clean; concrete gaps captured below.
 
 **Sub-tasks.**
-- [ ] Run the Claude-in-Chrome visual + a11y audit; fold findings in here as P1/P2/P3.
-- [ ] Tighten hero so the lead pitch + install CTA are unmistakable above the fold.
-- [ ] Ensure a real product screenshot/demo is present and high quality.
-- [ ] Make the trust/privacy section clearly communicate the Keychain-only, no-server story.
-- [ ] Bring the site to WCAG 2.1 AA; remove any clutter that doesn't earn its place.
-- [ ] Then: ongoing feature/idea stream (tracked in the Parking lot below).
+- [x] Run the Claude-in-Chrome visual + a11y audit; fold findings in. **Done** — report in
+      `conductor/audits/`.
+- [x] Ship the four ToS-independent quick-wins **(commit `78e2bf3`):** product screenshot now
+      shows on mobile; curl one-liner made fully readable; footer + terminal-label contrast lifted
+      to **AA**; decorative hat SVGs confirmed `aria-hidden`.
+- [x] Hero H1 — **decided: KEEP GENERIC** ("AI usage", per ADR-012's low-profile posture); the
+      audit's "sharpen toward Claude/menu-bar" is ToS-gated and intentionally **not** actioned
+      (no change for now).
+- [x] Explicit "Mac → Anthropic, no Houdini server" trust line — **decided: DEFERRED** (optional
+      per ADR-012; owner may adopt anytime). No change for now.
+- [ ] Ongoing site polish + feature/idea stream (tracked in the Parking lot below).
 
 ---
 
@@ -117,8 +130,9 @@ clear install CTA — then a continuous stream of features and ideas.
 
 ## Discovery / open questions — resolved by the FRAME survey (2026-07-01)
 
-- [~] Cleanest unified-login design — **candidates + recommendation captured in P1 above**
-      (decision still needed before building).
+- [x] Cleanest unified-login design — **DECIDED in ADR-012** (2026-07-01): keep Claude read-only
+      on the user's existing credential and freeze expansion; **P1 capped at slice (a)**, already
+      shipped. (The "user with no Claude Code credential at all" case is out of scope by decision.)
 - [x] Site deploy target + CI — **Vercel**, project `houdini`, manual prebuilt CLI (`vercel --prod`
       from `site/`); **no site CI** in `.github/workflows/`. `ROADMAP.md` Phase 7 ("Cloudflare Pages")
       is stale and should be corrected.
@@ -129,20 +143,26 @@ clear install CTA — then a continuous stream of features and ideas.
 
 ### Newly surfaced (flag for the user)
 
-- [ ] **ADR-006 vs reality:** production ships ad-hoc-signed via `install.sh`/`curl|bash`, which
-      ADR-006 demotes to a "developer-tester stopgap." Revise ADR-006 (or add an ADR) openly.
-- [ ] **ROADMAP.md refresh:** Phase 7 "Cloudflare Pages" → Vercel; drop the ADR-010/011-forbidden
-      "providers grid"; update stale ✅ markers / "← WE ARE HERE" now that v0.4.0 is live.
-- [ ] **Gemini gap:** advertised in `README.md`/`CONTEXT.md` but absent from `PROVIDERS.md`/
-      `ROADMAP.md` — spec it or drop the claim.
-- [ ] **README/CLAUDE repo-layout:** `apps/ios/` was missing from the layout maps (added to
-      `CLAUDE.md`; README updated). `apps/widget/` is a README-only placeholder, not a built target.
+- [x] **ADR-006 vs reality — RESOLVED 2026-07-01:** ADR-006 revised in place to record that the
+      ad-hoc-signed `install.sh`/`curl|bash` path is the shipping reality (notarized DMG deferred).
+- [x] **ROADMAP.md refresh — RESOLVED 2026-07-01:** Phase 7 corrected to Vercel, the
+      ADR-010/011-forbidden "providers grid" dropped, and stale ✅ / "← WE ARE HERE" markers
+      updated now that v0.4.0 is live.
+- [ ] **Gemini gap (still open):** advertised in `README.md`/`CONTEXT.md` but absent from
+      `PROVIDERS.md`/`ROADMAP.md` — spec it or drop the claim.
+- [x] **README/CLAUDE repo-layout — done:** `apps/ios/` added to the layout maps (`CLAUDE.md` +
+      README); `apps/widget/` documented as a README-only placeholder, not a built target.
 
 ## Immediate next steps
 
-1. [ ] Get **scope sign-off** on this doc set + these flags → then pull **P1 (login refactor)**
-       into the build loop, starting from the confirmed root cause above.
-2. [ ] Connect the **Claude in Chrome** extension → resume the queued site audit (feeds P3).
+*Framing + scope sign-off are long done. The login decision (**ADR-012**), the site audit +
+its ToS-independent quick-wins (commit `78e2bf3`), and the P2 accessibility slice (commit
+`19d3ed0`) have all shipped. Current focus:*
+
+1. [~] **P2 slice 2** — visual polish + shared visual tokens across the menu bar and desktop widget.
+2. [ ] **P2 slice 3** — verify gauges / reset timers / overage against real Claude Pro/Max data.
+3. [ ] **P3 ongoing** — continue site polish + the feature/idea stream (Parking lot); the Gemini
+       provider claim still needs to be specced or dropped (see flags above).
 
 ## Parking lot / ideas (ongoing)
 

@@ -48,6 +48,7 @@ Cross-cutting services in `FetcherCore`: `CredentialStore` (Keychain), `Schedule
   - `GET https://claude.ai/api/organizations` → read `org_id`.
   - `GET https://claude.ai/api/organizations/{org_id}/usage` → fields: `five_hour.utilization_pct`, `five_hour.reset_at`, `seven_day.utilization_pct`, `seven_day_opus.utilization_pct`, `extra_usage.current_spending`, `extra_usage.budget_limit`.
 - **Fragility:** medium (undocumented). **Risk:** low (own account, low-frequency).
+- **ToS / stance (ADR-012):** subscription OAuth token / claude.ai cookie use in a third-party app is **restricted by Anthropic's Consumer Terms**; Houdini's stance is **read-only + frozen** — it reads the user's existing on-device credential and adds no refresh / PKCE / cookie-hardening.
 - **Reference:** `github.com/ttar-p/claude-usage-widget`, `github.com/hamed-elfayome/Claude-Usage-Tracker`.
 
 ## anthropic-console (API usage/cost) — secondary

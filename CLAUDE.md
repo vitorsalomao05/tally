@@ -52,7 +52,9 @@ repo map + real commands + the top BACKLOG item.
 ## Current priorities (app-first — see BACKLOG for detail)
 
 1. **P1 · Login/credential refactor** — simpler, works for *any* Claude Code user, not
-   just those with the CLI OAuth token in Keychain.
+   just those with the CLI OAuth token in Keychain. *(Capped at slice (a) — broadened
+   discovery of an existing credential — per ADR-012; further subscription-auth expansion is
+   frozen, and a user with no Claude Code credential anywhere is out of scope by decision.)*
 2. **P2 · Widget accessibility + visual polish** — menu bar + desktop widget, end to end.
 3. **P3 · Site polish + ongoing features** — get the site to *zero visual clutter*, then
    keep shipping features/ideas as requested. The site is an evolving surface, not a
@@ -111,12 +113,17 @@ repo map + real commands + the top BACKLOG item.
 
 ## Open questions / proposed doc fixes (flagged, not silently changed)
 
-- **ADR-006 vs reality:** production ships an **ad-hoc-signed app via `install.sh` / `curl|bash`**,
-  which ADR-006 demotes to a "developer-tester stopgap" in favour of a notarized DMG. Reality has
-  diverged from the ADR — **revise ADR-006 (or add an ADR) openly** rather than leave the drift.
-- **ROADMAP.md is stale:** Phase 7 says "Cloudflare Pages" (→ Vercel) and lists a "providers grid"
-  that ADR-010/011 forbid; phase ✅ markers and "← WE ARE HERE" (Phase 1) predate the live v0.4.0 app.
-- **Google Gemini** is advertised in `README.md`/`CONTEXT.md` as a planned provider but has **no
-  entry in `PROVIDERS.md` or `ROADMAP.md`** — either spec it or drop the claim.
-- **Übersicht** is referenced as a live surface in ADR-002/ADR-003 but was removed — historical ADR
-  text, flag on next ADR revision.
+- **Claude subscription-auth posture — DECIDED 2026-07-01 (ADR-012):** keep the Claude integration
+  **read-only** on the user's existing credential and **freeze** expansion (no refresh / PKCE /
+  cookie-hardening); a user with no Claude Code credential anywhere is out of scope by decision.
+  P1 is capped at slice (a). See ADR-012.
+- **ADR-006 vs reality — RESOLVED 2026-07-01:** ADR-006 was **revised in place** to record that the
+  ad-hoc-signed `install.sh` / `curl|bash` path is the shipping reality (notarized DMG deferred),
+  ending the drift.
+- **ROADMAP.md staleness — RESOLVED 2026-07-01:** ROADMAP **refreshed** — Phase 7 corrected to
+  Vercel, the ADR-010/011-forbidden "providers grid" dropped, and the stale ✅ / "← WE ARE HERE"
+  markers updated now that v0.4.0 is live.
+- **Google Gemini (still open):** advertised in `README.md`/`CONTEXT.md` as a planned provider but
+  has **no entry in `PROVIDERS.md` or `ROADMAP.md`** — either spec it or drop the claim.
+- **Übersicht (still open):** referenced as a live surface in ADR-002/ADR-003 but was removed —
+  historical ADR text, flag on next ADR revision.
