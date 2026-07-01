@@ -22,3 +22,6 @@ build/
 
 # Playwright MCP scratch
 .playwright-mcp/
+
+# Build Conductor prompt scratch (local only)
+conductor/prompts/
