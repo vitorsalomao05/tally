@@ -8,7 +8,7 @@
 
 ---
 
-## P1 · App — Login / credential refactor  `[ ]`
+## P1 · App — Login / credential refactor  `[~]`
 
 **Problem.** The Claude provider connects cleanly for **Claude Code CLI users** (OAuth
 token in Keychain) but is **buggy/unclean for non-CLI users**, who have no smooth way to
@@ -44,21 +44,35 @@ security posture.
         session; the captured cookie is short-lived and **non-refreshable** → re-login loop on expiry.
       - **Root cause C:** even real CLI users silently lose OAuth when the access token expires
         (`expiresAt` past → unusable; `refreshToken` never used).
-- [ ] Design the unified login — **candidates identified (decide before building):**
+- [~] Design the unified login — **(a) IMPLEMENTED this pass; (c) remains the durable follow-on:**
       - **(a) Broaden OAuth/token discovery** — ordered item list (`"Claude Code-credentials"` +
         `"Claude Code"`), `~/.claude/.credentials.json` read fallback, use `refreshToken` to refresh
         a stale access token. *No ADR change; low risk; fixes A+C but not true non-CLI users.*
+        **✅ IMPLEMENTED (P1 slice a)** behind one shared `ClaudeOAuthCredentialSource` seam
+        (ordered Keychain discovery + read-only file fallback + in-memory `refreshToken` refresh).
+        The refresh mechanism is built + tested via an injected refresher; the live refresh
+        **endpoint is NOT wired** pending sign-off (see the "Newly surfaced" note below), so an
+        expired token still degrades exactly as today until then.
       - **(b) Harden the claude.ai cookie flow** — persistent/shared WebView store or paste-session,
         proactive expiry re-auth. *Weaker (needs ADR-005 revision); interim bridge only.*
       - **(c) First-run OAuth PKCE "Connect"** — Houdini gets its own refreshable, revocable,
         Keychain-only Anthropic token, independent of the CLI. *Durable; higher effort; depends on a
         usable public OAuth client.*
-      - **Recommendation:** ship **(a)** now (cheapest correctness win, no ADR touch), pursue **(c)**
-        as the durable answer for true non-CLI Pro/Max users; use **(b)** only if **(c)** is blocked.
-- [ ] Implement behind a clean, testable seam in `core/` (the `CredentialStore` /
-      `ClaudeAuthResolver` boundary already isolates this well).
-- [ ] Test both user types end to end; add regression tests (extend `FetcherCoreTests`).
-- [ ] Security review + update `PROVIDERS.md` / relevant ADR.
+      - **Recommendation:** ship **(a)** now (cheapest correctness win, no ADR touch) — **done**;
+        pursue **(c) first-run OAuth PKCE** as the durable answer for true non-CLI Pro/Max users;
+        use **(b) cookie-flow hardening** only if **(c)** is blocked.
+- [~] Implement behind a clean, testable seam in `core/` (the `CredentialStore` /
+      `ClaudeAuthResolver` boundary already isolates this well). **slice (a): ordered Keychain
+      discovery + `~/.claude/.credentials.json` fallback + in-memory `refreshToken` refresh**,
+      all in one `ClaudeOAuthCredentialSource` unit (collapsed the two old private blob structs
+      + two read call-sites). Live refresh endpoint deferred to sign-off; cookie hardening (b)
+      and OAuth PKCE (c) remain separate.
+- [~] Test both user types end to end; add regression tests (extend `FetcherCoreTests`).
+      **slice (a): added `ClaudeAuthResolverTests` (ordered discovery, first-item-wins, file
+      fallback, refresh, absent) + a `houdini-selftest` mirror (29 checks PASS here).** Still
+      open: end-to-end coverage for the non-CLI **cookie** user (part of (b)/(c)).
+- [ ] Security review + update `PROVIDERS.md` / relevant ADR. *(Not done this pass; needed
+      before the live refresh endpoint is wired — proposed refresh contract is in the report.)*
 
 ## P2 · App — Widget accessibility + visual polish  `[ ]`
 

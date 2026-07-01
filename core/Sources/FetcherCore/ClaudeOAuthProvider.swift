@@ -40,24 +40,53 @@ public struct ClaudeOAuthProvider: UsageProvider {
     public let capabilities: Capabilities = [.usagePct, .resetTimer, .dollarBalance]
     public let refreshInterval: TimeInterval = 60
 
-    /// Keychain service name Claude Code writes its OAuth credentials under on
-    /// this machine. (The classic `Claude Code` item is absent here.)
+    /// Primary Keychain service name Claude Code writes its OAuth credentials under, and the
+    /// head of ``ClaudeOAuthCredentialSource/candidateKeychainServices`` (the classic
+    /// `Claude Code` item is tried next). Kept as a public constant so the ordered list re-uses it.
     public static let keychainService = "Claude Code-credentials"
 
     private static let usageURL = URL(string: "https://api.anthropic.com/api/oauth/usage")!
     private static let fallbackVersion = "2.1.178"
 
-    private let store: CredentialStore
+    private let source: ClaudeOAuthCredentialSource
     private let explicitVersion: String?
 
     public init(store: CredentialStore = CredentialStore(), clientVersion: String? = nil) {
-        self.store = store
+        self.source = ClaudeOAuthCredentialSource(store: store)
+        self.explicitVersion = clientVersion
+    }
+
+    /// Injection seam (tests): supply a preconfigured credential source — e.g. one with an
+    /// injected refresher — instead of the default Keychain-backed one.
+    init(source: ClaudeOAuthCredentialSource, clientVersion: String? = nil) {
+        self.source = source
         self.explicitVersion = clientVersion
     }
 
     public func fetch() async throws -> [UsageMetric] {
-        let token = try readAccessToken()
+        // Discovery (ordered Keychain items → on-disk fallback) + in-memory refresh of a
+        // stale token all live in `source`. The token value is never logged.
+        let resolved = try await source.resolveForFetch()
+        do {
+            return try await fetchUsage(token: resolved.accessToken)
+        } catch ProviderError.authExpired {
+            // A live 401/403: try one in-memory refresh with the stored refresh token and
+            // retry once. No-op today (no refresher wired) → preserves `.authExpired`.
+            guard let refreshToken = resolved.refreshToken,
+                  let fresh = try await source.refreshedTokenAfterAuthFailure(refreshToken: refreshToken)
+            else {
+                throw ProviderError.authExpired
+            }
+            return try await fetchUsage(token: fresh)
+        }
+    }
 
+    // MARK: - Usage request
+
+    /// One authenticated GET against the OAuth usage endpoint with the given bearer token.
+    /// The token is sent only in the `Authorization` header (never logged) and never
+    /// follows a cross-host redirect (``CredentialRedirectGuard``). Maps status → typed error.
+    private func fetchUsage(token: String) async throws -> [UsageMetric] {
         var request = URLRequest(url: Self.usageURL)
         request.httpMethod = "GET"
         // MANDATORY headers. Per ARCHITECTURE.md/PROVIDERS.md the endpoint throttles
@@ -94,31 +123,6 @@ public struct ClaudeOAuthProvider: UsageProvider {
         }
 
         return try Self.parse(data, providerId: id)
-    }
-
-    // MARK: - Token
-
-    /// Read & decode the access token from the Keychain blob. Never logs it.
-    private func readAccessToken() throws -> String {
-        let blob: Data
-        do {
-            blob = try store.readGenericPassword(service: Self.keychainService)
-        } catch {
-            throw ProviderError.credential("\(error)")
-        }
-
-        let creds: KeychainBlob
-        do {
-            // The blob's keys are already camelCase ("claudeAiOauth", "accessToken"),
-            // so no snake_case conversion here.
-            creds = try JSONDecoder().decode(KeychainBlob.self, from: blob)
-        } catch {
-            throw ProviderError.credential("could not decode Claude Code OAuth blob")
-        }
-
-        let token = creds.claudeAiOauth.accessToken
-        guard !token.isEmpty else { throw ProviderError.authExpired }
-        return token
     }
 
     /// `claude-code/<version>` UA. Resolve the live Claude Code version when the
@@ -164,15 +168,5 @@ public struct ClaudeOAuthProvider: UsageProvider {
     /// (`FetcherCoreTests` proves the two map identically). `internal` for testing.
     static func parse(_ data: Data, providerId: String) throws -> [UsageMetric] {
         try ClaudeUsageParser.parse(data, providerId: providerId)
-    }
-}
-
-// MARK: - Wire format (GET /api/oauth/usage)
-
-/// Shape of the Keychain credential blob written by Claude Code.
-private struct KeychainBlob: Decodable {
-    let claudeAiOauth: OAuth
-    struct OAuth: Decodable {
-        let accessToken: String
     }
 }

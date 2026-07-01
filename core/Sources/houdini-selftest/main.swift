@@ -125,6 +125,110 @@ print("=== error surface ===")
 check("needsLogin has a clear description",
       ProviderError.needsLogin.description.contains("Claude.ai"))
 
+// === P1 slice (a): Claude OAuth credential source — discovery + file fallback + refresh ===
+// Mirrors ClaudeAuthResolverTests.swift. All secrets here are OBVIOUSLY-FAKE placeholders,
+// and no check prints a token value (only booleans / lengths), so grepping this output for
+// a token-shaped string finds nothing.
+print("=== oauth credential source (slice a) ===")
+
+/// Build a Claude Code OAuth blob `{ "claudeAiOauth": { ... } }` with only the given keys.
+func oauthBlobData(access: String?, expiresAt: Double? = nil, refresh: String? = nil) -> Data {
+    var inner: [String: Any] = [:]
+    if let access { inner["accessToken"] = access }
+    if let expiresAt { inner["expiresAt"] = expiresAt }
+    if let refresh { inner["refreshToken"] = refresh }
+    return try! JSONSerialization.data(withJSONObject: ["claudeAiOauth": inner])
+}
+
+let fixedNow = Date(timeIntervalSince1970: 1_750_000_000) // deterministic clock for expiry
+let pastMs = (fixedNow.timeIntervalSince1970 - 3600) * 1000
+let futureMs = (fixedNow.timeIntervalSince1970 + 3600) * 1000
+let clock: @Sendable () -> Date = { fixedNow }
+
+/// Injected Keychain reader: yields data for `present` services, else `.notFound` (skip).
+func keychainReader(_ present: [String: Data]) -> @Sendable (String) throws -> Data {
+    { service in
+        guard let d = present[service] else { throw CredentialError.notFound(service: service) }
+        return d
+    }
+}
+
+let FRESH = "sk-ant-oat01-FRESH-FOR-TESTS"
+let fakeRefresher: ClaudeOAuthCredentialSource.Refresher = { rt in
+    ClaudeOAuthCredentialSource.Blob(accessToken: FRESH, expiresAt: futureMs, refreshToken: rt)
+}
+
+@MainActor
+func expectNoThrow(_ name: String, _ body: @MainActor () async throws -> Void) async {
+    do { try await body() } catch { check(name, false, "threw \(error)") }
+}
+
+await expectNoThrow("ordered discovery + file fallback") {
+    // 1) falls through to the classic "Claude Code" item when the primary is absent
+    let a = ClaudeOAuthCredentialSource(
+        services: ["Claude Code-credentials", "Claude Code"],
+        keychainRead: keychainReader(["Claude Code": oauthBlobData(access: "sk-ant-oat01-FAKE-CLASSIC", expiresAt: futureMs)]),
+        now: clock)
+    check("discovery falls through to classic \"Claude Code\" item",
+          try await a.resolveForFetch().accessToken == "sk-ant-oat01-FAKE-CLASSIC")
+
+    // 2) primary "Claude Code-credentials" still wins when BOTH are present (no regression)
+    let b = ClaudeOAuthCredentialSource(
+        services: ["Claude Code-credentials", "Claude Code"],
+        keychainRead: keychainReader([
+            "Claude Code-credentials": oauthBlobData(access: "sk-ant-oat01-FAKE-PRIMARY", expiresAt: futureMs),
+            "Claude Code": oauthBlobData(access: "sk-ant-oat01-FAKE-CLASSIC", expiresAt: futureMs),
+        ]), now: clock)
+    check("primary item wins when both present",
+          try await b.resolveForFetch().accessToken == "sk-ant-oat01-FAKE-PRIMARY")
+
+    // 3) ~/.claude/.credentials.json fallback when NO keychain item exists
+    let c = ClaudeOAuthCredentialSource(
+        services: ["Claude Code-credentials", "Claude Code"],
+        keychainRead: keychainReader([:]),
+        fileRead: { oauthBlobData(access: "sk-ant-oat01-FAKE-FILE", expiresAt: futureMs, refresh: "sk-ant-ort01-FAKE") },
+        now: clock)
+    check("file fallback used when no keychain item",
+          try await c.resolveForFetch().accessToken == "sk-ant-oat01-FAKE-FILE")
+}
+
+// 4) usability semantics
+func usabilitySrc(_ blob: Data?, refresher: ClaudeOAuthCredentialSource.Refresher? = nil) -> ClaudeOAuthCredentialSource {
+    ClaudeOAuthCredentialSource(services: ["only"],
+                                keychainRead: keychainReader(blob.map { ["only": $0] } ?? [:]),
+                                refresher: refresher, now: clock)
+}
+check("unexpired token is usable",
+      usabilitySrc(oauthBlobData(access: "sk-ant-oat01-FAKE", expiresAt: futureMs)).hasUsableToken())
+check("expired + refreshToken + refresher wired ⇒ usable",
+      usabilitySrc(oauthBlobData(access: "sk-ant-oat01-FAKE", expiresAt: pastMs, refresh: "sk-ant-ort01-FAKE"), refresher: fakeRefresher).hasUsableToken())
+check("expired + refreshToken + NO refresher ⇒ unusable",
+      usabilitySrc(oauthBlobData(access: "sk-ant-oat01-FAKE", expiresAt: pastMs, refresh: "sk-ant-ort01-FAKE")).hasUsableToken() == false)
+check("expired + NO refreshToken ⇒ unusable",
+      usabilitySrc(oauthBlobData(access: "sk-ant-oat01-FAKE", expiresAt: pastMs)).hasUsableToken() == false)
+check("absent credential ⇒ unusable", usabilitySrc(nil).hasUsableToken() == false)
+
+// 5) in-memory refresh yields the fresh token; unexpired is used as-is
+await expectNoThrow("in-memory refresh of an expired token") {
+    let stale = usabilitySrc(oauthBlobData(access: "sk-ant-oat01-FAKE-STALE", expiresAt: pastMs, refresh: "sk-ant-ort01-FAKE"), refresher: fakeRefresher)
+    check("expired token refreshes in memory to a fresh token", try await stale.resolveForFetch().accessToken == FRESH)
+    let live = usabilitySrc(oauthBlobData(access: "sk-ant-oat01-FAKE-LIVE", expiresAt: futureMs, refresh: "sk-ant-ort01-FAKE"), refresher: fakeRefresher)
+    check("unexpired token used as-is (refresher NOT invoked)", try await live.resolveForFetch().accessToken == "sk-ant-oat01-FAKE-LIVE")
+}
+
+// 6) resolver preference (OAuth vs cookie) with injected source + cookie presence
+func testResolver(oauthBlob: Data?, refresher: ClaudeOAuthCredentialSource.Refresher? = nil, cookie: Bool) -> ClaudeAuthResolver {
+    ClaudeAuthResolver(oauthSource: usabilitySrc(oauthBlob, refresher: refresher), cookiePresent: { cookie })
+}
+let absent = testResolver(oauthBlob: nil, cookie: false)
+check("absent credential ⇒ resolver reports OAuth absent", absent.hasUsableOAuthToken() == false)
+check("absent credential ⇒ resolve() == .none (never throws)", absent.resolve() == .none)
+check("cookie only ⇒ resolve() == .cookie", testResolver(oauthBlob: nil, cookie: true).resolve() == .cookie)
+check("stale-but-refreshable OAuth preferred over cookie ⇒ .oauth",
+      testResolver(oauthBlob: oauthBlobData(access: "sk-ant-oat01-FAKE", expiresAt: pastMs, refresh: "sk-ant-ort01-FAKE"), refresher: fakeRefresher, cookie: true).resolve() == .oauth)
+check("expired + no refresh, cookie present ⇒ demote to cookie",
+      testResolver(oauthBlob: oauthBlobData(access: "sk-ant-oat01-FAKE", expiresAt: pastMs), cookie: true).resolve() == .cookie)
+
 print("---")
 if failures == 0 {
     print("PASS — \(checks) checks")

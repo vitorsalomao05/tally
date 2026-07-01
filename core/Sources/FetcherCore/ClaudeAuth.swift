@@ -25,38 +25,38 @@ public enum ClaudeAuthKind: String, Sendable {
 /// order, so a Claude Code user never triggers a read of the cookie item.
 public struct ClaudeAuthResolver: Sendable {
     private let store: CredentialStore
+    private let oauthSource: ClaudeOAuthCredentialSource
+    private let cookiePresent: @Sendable () -> Bool
 
     public init(store: CredentialStore = CredentialStore()) {
         self.store = store
+        self.oauthSource = ClaudeOAuthCredentialSource(store: store)
+        self.cookiePresent = { Self.readCookiePresence(store: store) }
     }
 
-    /// True when a Claude Code OAuth token is present, non-empty, and (if the blob
-    /// carries an `expiresAt`) not past its expiry. Unknown/unparseable expiry is
-    /// treated as still-valid so we never wrongly demote a working token.
-    public func hasUsableOAuthToken() -> Bool {
-        guard let blob = try? store.readGenericPassword(service: ClaudeOAuthProvider.keychainService),
-              let creds = try? JSONDecoder().decode(OAuthBlob.self, from: blob) else {
-            return false
-        }
-        guard let token = creds.claudeAiOauth.accessToken, !token.isEmpty else { return false }
+    /// Injection seam (tests / `houdini-selftest`): supply the OAuth source and a
+    /// cookie-presence check directly, so resolution can be exercised without touching
+    /// the Keychain. `store` still backs `makeProvider`'s concrete providers.
+    public init(oauthSource: ClaudeOAuthCredentialSource,
+                cookiePresent: @escaping @Sendable () -> Bool,
+                store: CredentialStore = CredentialStore()) {
+        self.store = store
+        self.oauthSource = oauthSource
+        self.cookiePresent = cookiePresent
+    }
 
-        if let raw = creds.claudeAiOauth.expiresAt {
-            // Claude Code stores epoch milliseconds; tolerate seconds too.
-            let seconds = raw > 1_000_000_000_000 ? raw / 1000 : raw
-            if Date(timeIntervalSince1970: seconds) < Date() { return false }
-        }
-        return true
+    /// True when a usable Claude Code OAuth token exists — present and either unexpired,
+    /// or expired-but-refreshable (a `refreshToken` is available *and* a refresher is
+    /// wired). Discovery spans the ordered Keychain items plus the on-disk fallback (see
+    /// ``ClaudeOAuthCredentialSource``). Unknown/unparseable expiry is treated as
+    /// still-valid so we never wrongly demote a working token.
+    public func hasUsableOAuthToken() -> Bool {
+        oauthSource.hasUsableToken()
     }
 
     /// True when Houdini has a non-empty captured `sessionKey` cookie in its Keychain.
     public func hasSessionCookie() -> Bool {
-        guard let data = try? store.nativeReadGenericPassword(
-            service: ClaudeCookieProvider.keychainService,
-            account: ClaudeCookieProvider.keychainAccount
-        ) else { return false }
-        let value = (String(data: data, encoding: .utf8) ?? "")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        return !value.isEmpty
+        cookiePresent()
     }
 
     /// The active auth kind under the current preference.
@@ -72,18 +72,23 @@ public struct ClaudeAuthResolver: Sendable {
     /// The concrete provider to poll, or `nil` when signed out.
     public func makeProvider(preferCookie: Bool = false) -> (any UsageProvider)? {
         switch resolve(preferCookie: preferCookie) {
-        case .oauth:  return ClaudeOAuthProvider(store: store)
+        // Hand the OAuth provider the *same* source this resolver gated on, so its discovery
+        // + refresh config always matches the `.oauth` verdict (identical to `store`-built in
+        // production where no refresher is wired; keeps them consistent once slice (c) wires one).
+        case .oauth:  return ClaudeOAuthProvider(source: oauthSource)
         case .cookie: return ClaudeCookieProvider(store: store)
         case .none:   return nil
         }
     }
 
-    /// Claude Code's Keychain blob (camelCase keys, no snake-case conversion).
-    private struct OAuthBlob: Decodable {
-        let claudeAiOauth: OAuth
-        struct OAuth: Decodable {
-            let accessToken: String?
-            let expiresAt: Double?
-        }
+    /// Non-empty captured `sessionKey` cookie in Houdini's own Keychain item? Best-effort.
+    private static func readCookiePresence(store: CredentialStore) -> Bool {
+        guard let data = try? store.nativeReadGenericPassword(
+            service: ClaudeCookieProvider.keychainService,
+            account: ClaudeCookieProvider.keychainAccount
+        ) else { return false }
+        let value = (String(data: data, encoding: .utf8) ?? "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        return !value.isEmpty
     }
 }
