@@ -7,6 +7,54 @@ import FetcherCore
 // threshold-colored progress bar. Glass/material styling lives in `WidgetGlass`;
 // gauges in `WidgetRingGauge`; threshold colors + formatting in `Formatting`.
 
+// MARK: - Accessibility helpers (Dynamic Type + contrast)
+
+/// A fixed-point system font that STILL scales with the user's text-size setting.
+/// The widget/popover are tuned to specific point sizes, but a bare
+/// `.font(.system(size:))` traps them at that size; wrapping through `@ScaledMetric`
+/// keeps the exact resting size (scale factor 1.0 at the default) while letting the
+/// text grow with Dynamic Type. Diameter-derived hero numerals stay fixed by design.
+private struct ScaledSystemFont: ViewModifier {
+    private let weight: Font.Weight
+    private let design: Font.Design
+    @ScaledMetric private var scaled: CGFloat
+
+    init(size: CGFloat, weight: Font.Weight, design: Font.Design, relativeTo: Font.TextStyle) {
+        self.weight = weight
+        self.design = design
+        _scaled = ScaledMetric(wrappedValue: size, relativeTo: relativeTo)
+    }
+
+    func body(content: Content) -> some View {
+        content.font(.system(size: scaled, weight: weight, design: design))
+    }
+}
+
+/// Secondary caption / reset / label text on the dark glass cards. Brighter than the
+/// system `.secondary` (~55% white) so small 9–12pt type clears WCAG AA over the
+/// `#15101F` glass, and lifts further under Increase Contrast — the contrast path
+/// now raises TEXT, not just the card border. Both surfaces force `colorScheme:.dark`
+/// so a fixed white opacity is always the correct "secondary on dark" tone.
+private struct GlassSecondaryText: ViewModifier {
+    @Environment(\.colorSchemeContrast) private var contrast
+
+    func body(content: Content) -> some View {
+        content.foregroundStyle(Color.white.opacity(contrast == .increased ? 0.9 : 0.66))
+    }
+}
+
+extension View {
+    /// System font at a tuned point size that scales with Dynamic Type (see `ScaledSystemFont`).
+    func scaledFont(_ size: CGFloat, weight: Font.Weight = .regular,
+                    design: Font.Design = .default,
+                    relativeTo textStyle: Font.TextStyle = .body) -> some View {
+        modifier(ScaledSystemFont(size: size, weight: weight, design: design, relativeTo: textStyle))
+    }
+
+    /// AA-legible secondary text on the dark glass (see `GlassSecondaryText`).
+    func glassSecondaryText() -> some View { modifier(GlassSecondaryText()) }
+}
+
 // MARK: - Brand wordmark
 
 /// The "Houdini" wordmark in the violet→magenta brand gradient. Sized by the host
@@ -16,11 +64,14 @@ struct BrandWordmark: View {
 
     var body: some View {
         Text("Houdini")
-            .font(.system(size: size, weight: .semibold, design: .rounded))
+            .scaledFont(size, weight: .semibold, design: .rounded, relativeTo: .headline)
             .foregroundStyle(
                 LinearGradient(colors: [.brandViolet, .brandMagenta],
                                startPoint: .leading, endPoint: .trailing)
             )
+            // A heading, not a control: gives VoiceOver a clear card title in the
+            // rotor and stops the gradient text reading as an ambiguous element.
+            .accessibilityAddTraits(.isHeader)
     }
 }
 
@@ -32,19 +83,38 @@ struct BrandWordmark: View {
 struct StatusDot: View {
     let state: UsageModel.State
 
-    @ViewBuilder
     var body: some View {
+        indicator
+            // A silent colored glyph is meaningless to VoiceOver — announce the state.
+            .accessibilityElement()
+            .accessibilityLabel("Status")
+            .accessibilityValue(statusText)
+    }
+
+    @ViewBuilder
+    private var indicator: some View {
         switch state {
         case .ok:
             Circle().fill(.green).frame(width: 7, height: 7)
         case .loading:
-            Circle().fill(Color.secondary.opacity(0.6)).frame(width: 7, height: 7)
+            // Lifted off `.secondary`@0.6 (near-invisible on the dark card) to a
+            // legible calm gray dot.
+            Circle().fill(Color.white.opacity(0.55)).frame(width: 7, height: 7)
         case .error:
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 10)).foregroundStyle(.orange)
         case .signedOut:
             Image(systemName: "person.crop.circle.badge.questionmark")
-                .font(.system(size: 11)).foregroundStyle(.secondary)
+                .font(.system(size: 11)).foregroundStyle(Color.white.opacity(0.7))
+        }
+    }
+
+    private var statusText: String {
+        switch state {
+        case .ok:        return "Up to date"
+        case .loading:   return "Loading"
+        case .error:     return "Error"
+        case .signedOut: return "Signed out"
         }
     }
 }
@@ -63,10 +133,11 @@ struct NeedsAuthView: View {
                 .font(.system(size: 26))
                 .foregroundStyle(LinearGradient(colors: [.brandViolet, .brandMagenta],
                                                 startPoint: .top, endPoint: .bottom))
+                .accessibilityHidden(true) // decorative — the copy + button carry the meaning
             Text("Connect Claude")
-                .font(.system(size: 14, weight: .semibold))
+                .scaledFont(14, weight: .semibold, relativeTo: .headline)
             Text("Sign in to see your Claude usage and spend.")
-                .font(.system(size: 11)).foregroundStyle(.secondary)
+                .scaledFont(11, relativeTo: .caption).glassSecondaryText()
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             if let session {
@@ -94,15 +165,18 @@ struct ErrorStateView: View {
         VStack(spacing: 8) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 22)).foregroundStyle(.orange)
+                .accessibilityHidden(true) // decorative — the heading + message speak the error
             Text("Can't read usage")
-                .font(.system(size: 13, weight: .medium))
+                .scaledFont(13, weight: .medium, relativeTo: .body)
             Text(message)
-                .font(.system(size: 11)).foregroundStyle(.secondary)
+                .scaledFont(11, relativeTo: .caption).glassSecondaryText()
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.horizontal, 8)
         .frame(maxWidth: .infinity)
+        // Read the whole state as one phrase: "Can't read usage, <reason>".
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -130,6 +204,10 @@ struct RingPairSkeleton: View {
         }
         .frame(maxWidth: .infinity)
         .modifier(SkeletonPulse(enabled: !reduceMotion))
+        // One calm "Loading" announcement instead of two placeholder gauges reading
+        // "no reading" apiece.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("Loading usage")
     }
 }
 
@@ -182,11 +260,11 @@ struct MetricRow: View {
         return VStack(alignment: .leading, spacing: 5) {
             HStack(alignment: .firstTextBaseline) {
                 Text(label)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(.secondary)
+                    .scaledFont(12, weight: .medium, relativeTo: .callout)
+                    .glassSecondaryText()
                 Spacer(minLength: 8)
                 Text(value)
-                    .font(.system(size: 12, weight: .semibold))
+                    .scaledFont(12, weight: .semibold, relativeTo: .callout)
                     .monospacedDigit()
                     .foregroundStyle(Thresholds.labelColor(metric.pct))
                     .contentTransition(reduceMotion ? .identity : .numericText())
@@ -197,9 +275,17 @@ struct MetricRow: View {
                     .frame(height: 4)
             }
             if let reset = Format.resetString(metric.resetAt) {
-                Text(reset).font(.system(size: 10)).foregroundStyle(.secondary)
+                Text(reset).scaledFont(10, relativeTo: .caption2).glassSecondaryText()
             }
         }
+        // One phrase per limit — "Sonnet weekly usage, 61 percent, resets in 5d 3h"
+        // or "Extra usage, 93 dollars of 100 dollars" — not label/number as separate
+        // swipes with a naked bar in between.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(isDollar ? "Extra usage" : A11y.percentLabel(metric.label))
+        .accessibilityValue(isDollar
+            ? A11y.dollarValue(used: amount, limit: metric.limit)
+            : A11y.percentValue(pct: metric.pct, resetAt: metric.resetAt))
     }
 }
 
@@ -221,26 +307,40 @@ struct ProgressBar: View {
             }
         }
         .frame(height: 6)
+        // Decorative: the percentage/dollars are always announced by the enclosing
+        // row/spend element, so the bar is noise to VoiceOver.
+        .accessibilityHidden(true)
     }
 }
 
 // MARK: - Footer hover
 
-/// Subtle hover affordance for the popover footer icons: the glyph brightens from
-/// secondary to full and a faint rounded highlight fades in. Motion is gated by
-/// Reduce Motion (the state still flips, just without the transition).
+/// Subtle affordance for the popover footer icons: the glyph brightens from
+/// secondary to full and a faint rounded highlight fades in on pointer HOVER or
+/// keyboard FOCUS, and a visible focus ring is drawn while focused. `.buttonStyle(.plain)`
+/// otherwise suppresses the system ring, leaving keyboard users no visible focus —
+/// so the enclosing control passes its `.focused` state in and this reuses the same
+/// hover look. Motion is gated by Reduce Motion (the state still flips, without the
+/// transition); the focus ring appears instantly, which is motion-safe.
 struct FooterHover: ViewModifier {
+    /// Keyboard focus, owned by the enclosing button's `.focused` binding.
+    var focused: Bool = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var hovering = false
 
     func body(content: Content) -> some View {
-        content
+        let active = hovering || focused
+        return content
             .foregroundStyle(.primary)
-            .opacity(hovering ? 1.0 : 0.6)
+            .opacity(active ? 1.0 : 0.6)
             .padding(5)
             .background(
                 RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .fill(Color.white.opacity(hovering ? 0.10 : 0))
+                    .fill(Color.white.opacity(active ? 0.10 : 0))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                    .strokeBorder(Color.accentColor, lineWidth: focused ? 2 : 0)
             )
             .contentShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
             .onHover { h in
@@ -251,6 +351,7 @@ struct FooterHover: ViewModifier {
 }
 
 extension View {
-    /// Apply the shared popover-footer hover affordance to an icon button's label.
-    func footerHover() -> some View { modifier(FooterHover()) }
+    /// Apply the shared popover-footer affordance to an icon button's label. Pass the
+    /// enclosing control's keyboard-focus state so focus shows a visible ring.
+    func footerHover(focused: Bool = false) -> some View { modifier(FooterHover(focused: focused)) }
 }

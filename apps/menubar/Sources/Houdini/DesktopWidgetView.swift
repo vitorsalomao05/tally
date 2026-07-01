@@ -115,7 +115,8 @@ struct DesktopWidgetView: View {
             HStack(spacing: 16) {
                 ForEach(Array(rings.enumerated()), id: \.offset) { _, m in
                     WidgetRingGauge(title: Format.shortLabel(m.label), pct: m.pct,
-                                    resetText: Format.resetString(m.resetAt), diameter: ringD)
+                                    resetText: Format.resetString(m.resetAt), diameter: ringD,
+                                    accessibilityTitle: m.label)
                         .frame(maxWidth: .infinity)
                 }
             }
@@ -132,12 +133,13 @@ struct DesktopWidgetView: View {
         return VStack(alignment: .leading, spacing: 8) {
             if let primary {
                 WidgetRingGauge(title: Format.shortLabel(primary.label), pct: primary.pct,
-                                resetText: Format.resetString(primary.resetAt), diameter: ringD)
+                                resetText: Format.resetString(primary.resetAt), diameter: ringD,
+                                accessibilityTitle: primary.label)
                     .frame(maxWidth: .infinity)
             }
             if let dollar = dollarMetric { spendBlock(dollar, compact: true) }
             if let secondary = secondaryLine {
-                Text(secondary).font(.system(size: 10)).foregroundStyle(.secondary)
+                Text(secondary).scaledFont(10, relativeTo: .caption2).glassSecondaryText()
                     .lineLimit(1).minimumScaleFactor(0.8)
             }
         }
@@ -153,13 +155,13 @@ struct DesktopWidgetView: View {
                 // Compact: label as a tiny caption above; the hero on its own line so
                 // the dollar figure is never clipped.
                 Text(label.uppercased())
-                    .font(.system(size: 9, weight: .semibold)).tracking(0.4)
-                    .foregroundStyle(.secondary)
+                    .scaledFont(9, weight: .semibold, relativeTo: .caption2).tracking(0.4)
+                    .glassSecondaryText()
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     spendHero(amount, m: m, size: 22)
                     if let limit = m.limit {
                         Text("/ \(Format.dollars(limit))")
-                            .font(.system(size: 11)).foregroundStyle(.secondary)
+                            .scaledFont(11, relativeTo: .caption).glassSecondaryText()
                             .monospacedDigit().fixedSize()
                     }
                     Spacer(minLength: 0)
@@ -169,12 +171,12 @@ struct DesktopWidgetView: View {
                     spendHero(amount, m: m, size: 26)
                     if let limit = m.limit {
                         Text("/ \(Format.dollars(limit))")
-                            .font(.system(size: 12)).foregroundStyle(.secondary)
+                            .scaledFont(12, relativeTo: .callout).glassSecondaryText()
                             .monospacedDigit().fixedSize()
                     }
                     Spacer(minLength: 8)
                     Text(label)
-                        .font(.system(size: 10, weight: .medium)).foregroundStyle(.secondary)
+                        .scaledFont(10, weight: .medium, relativeTo: .caption2).glassSecondaryText()
                         .lineLimit(1).minimumScaleFactor(0.6)
                 }
             }
@@ -184,6 +186,11 @@ struct DesktopWidgetView: View {
                     .frame(height: 4)
             }
         }
+        // One phrase — "Extra usage, 93 dollars of 100 dollars" — not a scattered
+        // label, hero, "/ $100" and a naked bar.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(A11y.window(m.label))
+        .accessibilityValue(A11y.dollarValue(used: amount, limit: m.limit))
     }
 
     /// The spend hero numeral — `fixedSize` so it is never truncated, whatever the
@@ -206,17 +213,19 @@ struct DesktopWidgetView: View {
             staleChip
         } else if let updated = model.lastUpdated {
             (Text("Updated ") + Text(updated, style: .relative))
-                .font(.system(size: 9))
-                .foregroundStyle(.secondary)
+                .scaledFont(9, relativeTo: .caption2)
+                .glassSecondaryText()
         }
     }
 
     private var staleChip: some View {
         HStack(spacing: 4) {
             Image(systemName: "arrow.triangle.2.circlepath").font(.system(size: 9))
-            Text("Showing last value").font(.system(size: 9))
+                .accessibilityHidden(true) // decorative — the text carries it
+            Text("Showing last value").scaledFont(9, relativeTo: .caption2)
         }
-        .foregroundStyle(.secondary)
+        .glassSecondaryText()
+        .accessibilityElement(children: .combine)
     }
 
     // MARK: - Empty states (loading / needs-auth / error)
@@ -240,7 +249,7 @@ struct DesktopWidgetView: View {
             }
         case .ok:
             Text("No usage metrics available.")
-                .font(.system(size: 12)).foregroundStyle(.secondary)
+                .scaledFont(12, relativeTo: .callout).glassSecondaryText()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
     }

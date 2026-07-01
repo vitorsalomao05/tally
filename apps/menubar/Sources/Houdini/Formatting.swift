@@ -145,3 +145,45 @@ enum Format {
         return "resets in \(minutes)m"
     }
 }
+
+/// Spoken (VoiceOver) strings for the usage surfaces. Centralized in one place so
+/// the ring gauge, the popover metric row, and the desktop spend block all announce
+/// a limit as ONE meaningful phrase — e.g. "5-hour usage, 42 percent, resets in
+/// 2h 10m" or "Extra usage, 93 dollars of 100 dollars" — instead of the visible,
+/// abbreviated glyphs ("5h", "$93 / $100") that read as scattered fragments.
+enum A11y {
+    /// The window name spelled out for speech; visible labels abbreviate ("5h").
+    /// The dollar overage's raw label ("Extra usage ($)") drops the "($)".
+    static func window(_ label: String) -> String {
+        label == "Extra usage ($)" ? "Extra usage" : label
+    }
+
+    /// The a11y LABEL for a percentage window — "<window> usage" (e.g. "Weekly usage").
+    static func percentLabel(_ label: String) -> String { "\(window(label)) usage" }
+
+    /// The a11y VALUE for a percentage window — "42 percent, resets in 2h 10m"
+    /// (or "no reading" when the percentage is absent).
+    static func percentValue(pct: Double?, resetAt: Date?, now: Date = Date()) -> String {
+        guard let pct else { return "no reading" }
+        let base = "\(Int(pct.rounded())) percent"
+        if let reset = Format.resetString(resetAt, now: now) { return "\(base), \(reset)" }
+        return base
+    }
+
+    /// The a11y VALUE for the dollar overage — "93 dollars of 100 dollars"
+    /// (or "93 dollars" with no known budget).
+    static func dollarValue(used: Double?, limit: Double?) -> String {
+        let u = spoken(dollars: used)
+        if let limit { return "\(u) of \(spoken(dollars: limit))" }
+        return u
+    }
+
+    /// "$93.00" → "93 dollars"; keeps cents only when non-zero so VoiceOver doesn't
+    /// spell out ".00" on every figure.
+    private static func spoken(dollars: Double?) -> String {
+        guard let d = dollars else { return "no reading" }
+        let cents = Int((d * 100).rounded())
+        if cents % 100 == 0 { return "\(cents / 100) dollars" }
+        return String(format: "%.2f dollars", d)
+    }
+}

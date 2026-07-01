@@ -86,7 +86,7 @@ security posture.
 - No rough edges (alignment, spacing, states, empty/error/loading).
 
 **Sub-tasks.**
-- [ ] Accessibility pass (labels, focus, Dynamic Type, contrast, reduced-motion).
+- [x] Accessibility pass (labels, focus, Dynamic Type, contrast, reduced-motion). *(P2 slice 1: VoiceOver labels/values on gauges·rows·spend·status·footer, keyboard focus ring on footer buttons, `@ScaledMetric` Dynamic Type, AA contrast lift + Increase-Contrast now raises text; reduced-motion already gated.)*
 - [ ] Visual polish pass on both surfaces; define shared visual tokens.
 - [ ] Verify against real Claude Pro/Max data (limits, timers, overage).
 

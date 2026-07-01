@@ -30,12 +30,18 @@ struct UsagePopover: View {
     private let width: CGFloat = 344
     private let corner: CGFloat = 14
 
+    /// Which footer control holds keyboard focus, so `.plain` icon buttons can show a
+    /// visible focus ring (see `FooterHover`).
+    private enum FooterControl: Hashable { case refresh, settings, quit }
+    @FocusState private var focusedControl: FooterControl?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             header
             content
             // A faint hairline divides the data from the actions, echoing the glass edge.
             Rectangle().fill(Color.white.opacity(0.07)).frame(height: 1)
+                .accessibilityHidden(true) // decorative separator
             footer
         }
         .padding(14)
@@ -45,6 +51,11 @@ struct UsagePopover: View {
                                         surface: .hostMaterial))
         // The card reads as dark glass in either system appearance, like the widget.
         .environment(\.colorScheme, .dark)
+        // Group the card under one container so VoiceOver announces "Claude usage"
+        // and traverses the figures in reading order; children stay individually
+        // navigable (nothing hidden).
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Claude usage")
     }
 
     // MARK: - Header
@@ -75,7 +86,8 @@ struct UsagePopover: View {
                         ForEach(Array(heroRings.enumerated()), id: \.offset) { _, m in
                             WidgetRingGauge(title: Format.shortLabel(m.label), pct: m.pct,
                                             resetText: Format.resetString(m.resetAt),
-                                            diameter: ringDiameter)
+                                            diameter: ringDiameter,
+                                            accessibilityTitle: m.label)
                                 .frame(maxWidth: .infinity)
                         }
                     }
@@ -105,7 +117,7 @@ struct UsagePopover: View {
             else { ErrorStateView(message: message) }
         case .ok:
             Text("No usage metrics available.")
-                .font(.system(size: 12)).foregroundStyle(.secondary)
+                .scaledFont(12, relativeTo: .callout).glassSecondaryText()
                 .frame(maxWidth: .infinity)
         }
     }
@@ -116,12 +128,14 @@ struct UsagePopover: View {
         HStack(alignment: .top, spacing: 6) {
             Image(systemName: "exclamationmark.triangle.fill")
                 .font(.system(size: 11)).foregroundStyle(.orange)
+                .accessibilityHidden(true) // decorative — the message text carries it
             Text("Showing last value — \(message)")
-                .font(.system(size: 11)).foregroundStyle(.secondary)
+                .scaledFont(11, relativeTo: .caption).glassSecondaryText()
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(8)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityElement(children: .combine)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(Color.orange.opacity(0.12))
@@ -143,7 +157,7 @@ struct UsagePopover: View {
                     Text("Never updated")
                 }
             }
-            .font(.system(size: 11)).foregroundStyle(.secondary)
+            .scaledFont(11, relativeTo: .caption).glassSecondaryText()
 
             Spacer()
 
@@ -151,8 +165,10 @@ struct UsagePopover: View {
                 Image(systemName: "arrow.clockwise")
             }
             .buttonStyle(.plain)
-            .footerHover()
+            .focused($focusedControl, equals: .refresh)
+            .footerHover(focused: focusedControl == .refresh)
             .help("Refresh now")
+            .accessibilityLabel("Refresh now") // .plain image button announces nothing otherwise
 
             // Opens the standard Settings scene (also reachable via ⌘,). Bring the app
             // forward since we're an .accessory (no Dock) agent.
@@ -160,8 +176,10 @@ struct UsagePopover: View {
                 Image(systemName: "gearshape")
             }
             .buttonStyle(.plain)
-            .footerHover()
+            .focused($focusedControl, equals: .settings)
+            .footerHover(focused: focusedControl == .settings)
             .help("Settings…")
+            .accessibilityLabel("Settings")
             .simultaneousGesture(TapGesture().onEnded {
                 NSApp.activate(ignoringOtherApps: true)
             })
@@ -170,8 +188,10 @@ struct UsagePopover: View {
                 Image(systemName: "power")
             }
             .buttonStyle(.plain)
-            .footerHover()
+            .focused($focusedControl, equals: .quit)
+            .footerHover(focused: focusedControl == .quit)
             .help("Quit Houdini")
+            .accessibilityLabel("Quit Houdini")
         }
     }
 

@@ -8,12 +8,15 @@ import FetcherCore
 /// popover. A hero numeral sits in the center with a tiny window label beneath it,
 /// and the relative reset ("resets in 2h 14m") prints below the ring.
 struct WidgetRingGauge: View {
-    let title: String          // short window label, e.g. "5-hour", "Weekly"
+    let title: String          // short, VISIBLE window label, e.g. "5h", "Weekly"
     let pct: Double?           // 0–100; nil → dashes
     let resetText: String?     // "resets in 2h 14m"
     var diameter: CGFloat = 96
     /// Loading skeleton: track only, no numeral/fill.
     var isPlaceholder: Bool = false
+    /// Spoken window name for VoiceOver — the FULL label ("5-hour", "Sonnet weekly")
+    /// even where `title` abbreviates it ("5h"). Falls back to `title` when nil.
+    var accessibilityTitle: String?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -54,13 +57,15 @@ struct WidgetRingGauge: View {
                             .font(.system(size: diameter * 0.27, weight: .bold, design: .rounded))
                             .monospacedDigit()
                             .foregroundStyle(.primary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7) // never clip "100%" in a small ring
                             .contentTransition(reduceMotion ? .identity : .numericText())
                             .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: pct)
                     }
                     Text(title.uppercased())
                         .font(.system(size: max(8, diameter * 0.095), weight: .semibold))
                         .tracking(0.5)
-                        .foregroundStyle(.secondary)
+                        .glassSecondaryText()
                         .lineLimit(1)
                         .minimumScaleFactor(0.7)
                 }
@@ -70,14 +75,16 @@ struct WidgetRingGauge: View {
 
             if let resetText {
                 Text(resetText)
-                    .font(.system(size: 10))
-                    .foregroundStyle(.secondary)
+                    .scaledFont(10, relativeTo: .caption2)
+                    .glassSecondaryText()
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
             }
         }
+        // The ring, track, numeral and labels are one read-only figure — combine into
+        // a single phrase, e.g. "Weekly usage, 42 percent, resets in 2h 10m".
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(title))
+        .accessibilityLabel(Text(accessibilityLabelText))
         .accessibilityValue(Text(accessibilityValue))
     }
 
@@ -86,9 +93,15 @@ struct WidgetRingGauge: View {
         return "\(Int(pct.rounded()))%"
     }
 
+    /// Spell out the window and add "usage" context; the visible `title` abbreviates.
+    private var accessibilityLabelText: String {
+        guard let accessibilityTitle else { return title }
+        return "\(accessibilityTitle) usage"
+    }
+
     private var accessibilityValue: String {
         guard let pct else { return "no reading" }
-        let base = "\(Int(pct.rounded())) percent used"
+        let base = "\(Int(pct.rounded())) percent"
         return resetText.map { "\(base), \($0)" } ?? base
     }
 }
