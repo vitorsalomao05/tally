@@ -10,7 +10,7 @@
 
 ## P1 · App — Login / credential refactor  `[~]`
 
-> **⚠ ToS risk — logged 2026-07-01 (see ADR-012).** Houdini's current Claude auth — the Claude Code OAuth token AND the claude.ai cookie — appears to violate Anthropic's Consumer Terms (subscription OAuth is not permitted in third-party tools; §3.7 bars automated access except via API key). Enforcement is active (account bans), so this can put **users' own Anthropic accounts** at risk. **Interim:** token refresh stays unwired; expansion of the OAuth/cookie path (candidates b/c) is **frozen**; a direction decision (ADR-012 options i–iv) is required before P2. No sanctioned API exists for Pro/Max subscription limits.
+> **⚠ ToS note — decided 2026-07-01 (see ADR-012).** Houdini's Claude auth (Claude Code OAuth token + claude.ai cookie) is prohibited third-party use under Anthropic's Consumer Terms; enforcement is active (account bans land on the *user's* own account). **Decision:** keep it **read-only** using the user's existing credential; **freeze** expansion (no refresh / PKCE / cookie-hardening); do not seek permission; do not pivot now (options i/iv are the future fallback). This **caps P1 at slice (a)** — a user with no Claude Code credential at all is out of scope by decision. A short user-facing transparency line is recommended but optional (deferred).
 
 **Problem.** The Claude provider connects cleanly for **Claude Code CLI users** (OAuth
 token in Keychain) but is **buggy/unclean for non-CLI users**, who have no smooth way to
