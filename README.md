@@ -50,7 +50,7 @@ The background-browser scrape survives only as a **last-resort fallback adapter*
 | **Google Gemini** (API usage/cost) | API usage endpoints | JSON (API key) | Planned |
 | **Anthropic Console** (API usage/cost) | Admin API `usage_report` / `cost_report` | JSON (admin key) | Planned |
 
-See `PROVIDERS.md` for the full adapter contract and per-provider specs (including the experimental ChatGPT-Plus path), and `ARCHITECTURE.md` for the system design.
+See [`PROVIDERS.md`](PROVIDERS.md) for the full adapter contract and per-provider specs (including the experimental ChatGPT-Plus path), [`ARCHITECTURE.md`](ARCHITECTURE.md) for the system design, [`DECISIONS.md`](DECISIONS.md) for the ADRs, and [`ROADMAP.md`](ROADMAP.md) for the phased plan.
 
 ## Repo layout
 
@@ -63,12 +63,16 @@ houdini/
 ├── ROADMAP.md           ← phased plan
 ├── core/                ← FetcherCore Swift package (shared data layer) + `houdini` CLI
 ├── apps/
-│   ├── menubar/         ← SwiftUI MenuBarExtra app + native desktop widget (flagship)
-│   └── widget/          ← WidgetKit extension (glanceable Notification Center)
-├── site/                ← Astro + Tailwind landing page
+│   ├── menubar/         ← SwiftUI menu bar app + native desktop widget (flagship)
+│   ├── widget/          ← WidgetKit Notification Center widget (placeholder today; unadvertised)
+│   └── ios/             ← native iOS app + widget scaffold (cookie auth; not yet built — ADR-008)
+├── site/                ← Astro + Tailwind landing page (deploys via Vercel)
 ├── install.sh           ← one-liner installer (verified download from Releases)
-└── scripts/             ← release automation
+└── scripts/             ← release helpers + `init.sh` (developer bootstrap)
 ```
+
+New here? Run [`scripts/init.sh`](scripts/init.sh) to verify your toolchain and print the
+repo map, the real build/test/run commands, and the current top backlog item.
 
 ## Privacy posture
 
